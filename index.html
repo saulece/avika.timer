@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Avika - Temporizador</title>
+    <link rel="stylesheet" href="avika-style.css">
+</head>
+<body>
+    <header>
+        <h1>Avika - Temporizador</h1>
+        <div class="header-controls">
+            <button id="toggle-theme" class="icon-btn">🌙</button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Notificaciones -->
+        <div id="notification"></div>
+        
+        <!-- Sección de categorías -->
+        <div id="categories-section">
+            <h2>Selecciona una categoría</h2>
+            <div class="category-container">
+                <button class="category-btn" id="btn-frio">Platillos Fríos</button>
+                <button class="category-btn" id="btn-entrada-fria">Entradas Frías</button>
+                <button class="category-btn" id="btn-caliente">Platillos Calientes</button>
+                <button class="category-btn" id="btn-entrada-caliente">Entradas Calientes</button>
+                <button class="category-btn" id="btn-combos">Combos</button>
+            </div>
+            
+            <!-- Órdenes pendientes -->
+            <div class="pending-orders-section">
+                <div class="section-title">
+                    <h2>Platillos en preparación</h2>
+                    <div class="count-badge" id="pending-count">0</div>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Platillo</th>
+                                <th>Inicio</th>
+                                <th>Tiempo</th>
+                                <th>Detalles</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pending-body">
+                            <!-- Se llenará con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Órdenes completadas -->
+            <div class="pending-orders-section">
+                <h2>Platillos completados</h2>
+                <div class="filter-controls">
+                    <button id="btn-show-all-history" class="filter-btn">Ver historial</button>
+                    <button id="btn-show-recent" class="filter-btn active">Ver recientes</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Platillo</th>
+                                <th>Inicio</th>
+                                <th>Fin</th>
+                                <th>Total</th>
+                                <th>Detalles</th>
+                            </tr>
+                        </thead>
+                        <tbody id="completed-body">
+                            <!-- Se llenará con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="button-group">
+                    <button class="back-btn" id="btn-promedios" style="background-color: #3498db;">Ver Promedios</button>
+                    <button class="back-btn" id="btn-export">Exportar a Excel</button>
+                    <button class="back-btn" id="btn-clear" style="background-color: #e74c3c;">Limpiar</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sección de platillos -->
+        <div id="dishes-section">
+            <h2 id="selected-category-title">Categoría</h2>
+            <div id="dishes-container" class="dishes-container">
+                <!-- Se llenará con JavaScript -->
+            </div>
+            
+            <button class="back-btn" id="btn-back-to-categories">Volver a Categorías</button>
+        </div>
+        
+        <!-- Sección de preparación -->
+        <div id="preparation-section" class="preparation-section">
+            <h2 id="selected-dish-title">Platillo</h2>
+            
+            <div id="personalization-section">
+                <div class="option-group">
+                    <div class="option-title">Personalización</div>
+                    <div class="option-btns" id="personalization-options">
+                        <!-- Se llenará dinámicamente con JS -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="option-group">
+                <div class="option-title">Tipo de Servicio</div>
+                <div class="option-btns">
+                    <button class="option-btn selected" id="btn-comedor">Comedor</button>
+                    <button class="option-btn" id="btn-domicilio">Domicilio</button>
+                    <button class="option-btn" id="btn-para-llevar">Ordena y Espera</button>
+                </div>
+            </div>
+            
+            <div class="option-group">
+                <div class="option-title">Cantidad</div>
+                <div class="qty-control">
+                    <button class="qty-btn" id="btn-decrease">-</button>
+                    <span class="qty-display" id="quantity-display">1</span>
+                    <button class="qty-btn" id="btn-increase">+</button>
+                </div>
+            </div>
+            
+            <div class="option-group">
+                <div class="option-title">Notas Especiales</div>
+                <textarea class="notes-input" id="notes-input" placeholder="Ej: Cliente alérgico a mariscos" rows="3"></textarea>
+            </div>
+            
+            <div class="action-btns">
+                <button class="action-btn cancel-btn" id="btn-cancel">Cancelar</button>
+                <button class="action-btn start-btn" id="btn-start">Iniciar Preparación</button>
+            </div>
+            <button class="back-btn" id="btn-back-to-dishes" style="width: 100%; margin-top: 10px;">Atrás</button>
+        </div>
+    </div>
+    
+    <!-- Modal para promedios -->
+    <div id="promedios-modal" class="modal">
+        <div class="modal-content">
+            <div id="promedios-contenido">
+                <!-- Se llenará con JavaScript -->
+            </div>
+            <button class="back-btn" id="modal-close" style="width: 100%; margin-top: 15px;">Cerrar</button>
+        </div>
+    </div>
+    
+    <!-- Guía de instalación -->
+    <div class="install-guide" id="install-guide">
+        <p>Para una mejor experiencia, añade esta app a tu pantalla de inicio</p>
+        <p>1. Toca el icono <strong>compartir</strong> <span style="font-size: 18px">⬆️</span> abajo</p>
+        <p>2. Desplázate y selecciona <strong>"Añadir a pantalla de inicio"</strong></p>
+        <button id="hide-guide">Entendido</button>
+    </div>
+
+    <script src="avika-script.js"></script>
+</body>
+</html>
