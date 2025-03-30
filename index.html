@@ -5,8 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#e74c3c">
     <title>Avika - Temporizador</title>
     <link rel="stylesheet" href="avika-style.css">
+    <script>
+        // Código rápido para solucionar problemas de toque
+        document.addEventListener('touchstart', function() {}, {passive: true});
+        
+        // Prevenir zoom al tocar
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+    </script>
+    <script src="avika-script.js" defer></script>
 </head>
 <body>
     <header>
@@ -157,7 +170,5 @@
         <p>2. Desplázate y selecciona <strong>"Añadir a pantalla de inicio"</strong></p>
         <button id="hide-guide">Entendido</button>
     </div>
-
-    <script src="avika-script.js"></script>
 </body>
 </html>

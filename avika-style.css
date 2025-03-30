@@ -1,3 +1,66 @@
+/* Fixes para eventos táctiles en iOS - Añadir al inicio de avika-style.css */
+
+/* Deshabilitar efectos de toque y selección por defecto */
+* {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    touch-action: manipulation !important;
+    cursor: pointer !important;
+}
+
+/* Hacer explícitamente seleccionable el campo de texto */
+textarea, input[type="text"] {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    touch-action: auto !important;
+}
+
+/* Aumentar el tamaño de todos los botones para una mejor área táctil */
+button, 
+.category-btn, 
+.dish-btn, 
+.option-btn, 
+.finish-btn, 
+.action-btn, 
+.back-btn,
+.filter-btn {
+    min-height: 44px !important; /* Tamaño mínimo recomendado por Apple */
+    font-size: 16px !important; /* Evita el zoom automático */
+    padding: 12px !important;
+    margin-bottom: 10px !important;
+    position: relative;
+    z-index: 2; /* Asegurar que esté encima de otros elementos */
+}
+
+/* Agregar un estado activo más visible */
+button:active, 
+.category-btn:active, 
+.dish-btn:active, 
+.option-btn:active, 
+.finish-btn:active, 
+.action-btn:active, 
+.back-btn:active,
+.filter-btn:active {
+    opacity: 0.7 !important;
+    transform: scale(0.97) !important;
+}
+
+/* Asegurar que el contenedor principal tenga suficiente espacio */
+.container {
+    padding-bottom: 100px !important;
+}
+
+/* Eliminar delay de 300ms en iOS Safari */
+html {
+    touch-action: manipulation !important;
+}
+
+/* Mejorar visibilidad de los botones seleccionados */
+.selected {
+    box-shadow: 0px 0px 0px 2px white inset !important;
+}
 /* Estilos base optimizados para iPhone */
 :root {
     --bg-color: #f0f0f0;
