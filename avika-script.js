@@ -64,6 +64,81 @@
         });
     });
 })();
+// Añade este código al principio de tu archivo avika-script.js
+
+// Crear un elemento para mostrar errores en la pantalla
+var errorDisplay = document.createElement('div');
+errorDisplay.style.position = 'fixed';
+errorDisplay.style.bottom = '0';
+errorDisplay.style.left = '0';
+errorDisplay.style.right = '0';
+errorDisplay.style.backgroundColor = 'rgba(255, 0, 0, 0.8)';
+errorDisplay.style.color = 'white';
+errorDisplay.style.padding = '10px';
+errorDisplay.style.fontFamily = 'monospace';
+errorDisplay.style.fontSize = '12px';
+errorDisplay.style.maxHeight = '30%';
+errorDisplay.style.overflow = 'auto';
+errorDisplay.style.zIndex = '9999';
+errorDisplay.style.display = 'none';
+
+// Función para registrar errores
+function logError(message) {
+    errorDisplay.style.display = 'block';
+    var errorMsg = document.createElement('div');
+    errorMsg.textContent = new Date().toISOString() + ': ' + message;
+    errorDisplay.appendChild(errorMsg);
+    
+    // Limitar a 10 mensajes
+    if (errorDisplay.children.length > 10) {
+        errorDisplay.removeChild(errorDisplay.children[0]);
+    }
+}
+
+// Capturar errores globales
+window.onerror = function(message, source, lineno, colno, error) {
+    logError('ERROR: ' + message + ' at line ' + lineno);
+    return false;
+};
+
+// Agregar el display de errores al documento cuando esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    document.body.appendChild(errorDisplay);
+    
+    // Agregar botón para limpiar errores
+    var clearButton = document.createElement('button');
+    clearButton.textContent = 'Limpiar';
+    clearButton.style.backgroundColor = 'white';
+    clearButton.style.color = 'black';
+    clearButton.style.border = 'none';
+    clearButton.style.padding = '5px 10px';
+    clearButton.style.margin = '5px';
+    clearButton.style.borderRadius = '3px';
+    clearButton.onclick = function() {
+        errorDisplay.innerHTML = '';
+        errorDisplay.style.display = 'none';
+    };
+    errorDisplay.appendChild(clearButton);
+    
+    // Verificar si los botones están siendo registrados correctamente
+    try {
+        var buttons = document.querySelectorAll('button, .category-btn, .dish-btn, .option-btn');
+        logError('Botones encontrados: ' + buttons.length);
+        
+        // Verificar el primer botón como ejemplo
+        if (buttons.length > 0) {
+            var firstButton = buttons[0];
+            logError('Primer botón: ' + firstButton.textContent + ' | ID: ' + firstButton.id);
+        }
+    } catch(e) {
+        logError('Error al verificar botones: ' + e.message);
+    }
+});
+
+// Agregar logging para eventos táctiles
+document.addEventListener('touchstart', function(e) {
+    logError('Touchstart en ' + e.target.tagName + (e.target.className ? ' class=' + e.target.className : ''));
+}, {passive: true});
 // Variables globales (estado)
 var currentCategory = '';
 var currentDish = '';
