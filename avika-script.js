@@ -846,71 +846,182 @@ function calcularPromedios() {
     $('#promedios-modal').addClass('active');
 }
 
-// Función para exportar a Excel (CSV)
 function exportarDatos() {
     if (completedOrders.length === 0) {
         showNotification('No hay datos para exportar');
         return;
     }
     
-    // Crear encabezados CSV
-    var csv = 'Platillo,Categoría,Cantidad,Tipo de Servicio,Inicio,Fin,Tiempo Total,Salida Repartidor,Llegada Repartidor,Tiempo de Entrega\n';
+    // Crear datos para Excel con todas las columnas importantes
+    var ws_data = [
+        ['Platillo', 'Categoría', 'Cantidad', 'Tipo de Servicio', 
+         'Inicio Preparación', 'Fin Preparación', 'Tiempo Total Preparación',
+         'Cocina Caliente', 'Cocina Fría', 'Salida Repartidor', 'Llegada Repartidor', 'Tiempo de Entrega']
+    ];
     
-    // Agregar cada orden completada
+    // Agregar cada orden completada con todos los tiempos
     completedOrders.forEach(function(order) {
-        var row = [
-            '"' + order.dish + '"',
-            '"' + categoryNames[order.category] + '"',
+        ws_data.push([
+            order.dish,
+            categoryNames[order.category],
             order.quantity,
-            '"' + getServiceName(order.serviceType) + '"',
-            '"' + order.startTimeFormatted + '"',
-            '"' + order.endTimeFormatted + '"',
-            '"' + order.prepTime + '"',
-            '"' + (order.deliveryDepartureTimeFormatted || '') + '"',
-            '"' + (order.deliveryArrivalTimeFormatted || '') + '"',
-            '"' + (order.deliveryTime || '') + '"'
-        ];
-        
-        csv += row.join(',') + '\n';
+            getServiceName(order.serviceType),
+            order.startTimeFormatted,
+            order.endTimeFormatted,
+            order.prepTime,
+            order.hotKitchenTimeFormatted || '',
+            order.coldKitchenTimeFormatted || '',
+            order.deliveryDepartureTimeFormatted || '',
+            order.deliveryArrivalTimeFormatted || '',
+            order.deliveryTime || ''
+        ]);
     });
     
-    // Crear link de descarga
-    var csvBlob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    var csvUrl = URL.createObjectURL(csvBlob);
+    // Crear libro y hoja
+    var wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.aoa_to_sheet(ws_data);
     
-    // En iOS el manejo es diferente
+    // Aplicar formato a la hoja (encabezados en negrita, ajustar ancho de columnas)
+    ws['!cols'] = [
+        {wch: 20}, // Platillo
+        {wch: 15}, // Categoría
+        {wch: 8},  // Cantidad
+        {wch: 12}, // Tipo de Servicio
+        {wch: 15}, // Inicio Preparación
+        {wch: 15}, // Fin Preparación
+        {wch: 15}, // Tiempo Total Preparación
+        {wch: 15}, // Cocina Caliente
+        {wch: 15}, // Cocina Fría
+        {wch: 15}, // Salida Repartidor
+        {wch: 15}, // Llegada Repartidor
+        {wch: 15}  // Tiempo de Entrega
+    ];
+    
+    // Añadir hoja al libro
+    XLSX.utils.book_append_sheet(wb, ws, "Reporte Avika");
+    
+    // Crear hoja de estadísticas de promedios
+    crearHojaPromedios(wb);
+    
+    // Generar archivo
+    var hoy = new Date();
+    var fecha = hoy.getFullYear() + '-' + padZero(hoy.getMonth() + 1) + '-' + padZero(hoy.getDate());
+    var fileName = 'avika_tiempos_' + fecha + '.xlsx';
+    
+    // Escribir archivo y descargar
     var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     
     if (isIOS) {
-        // Mostramos instrucciones al usuario
-        showNotification('El archivo CSV ha sido generado. Para guardar, utiliza la opción "Compartir" de tu navegador.');
+        // Mostrar instrucciones específicas para iOS
+        showNotification('Generando Excel. Utiliza la opción "Compartir" cuando aparezca.');
         
-        var hoy = new Date();
-        var fecha = hoy.getFullYear() + '-' + padZero(hoy.getMonth() + 1) + '-' + padZero(hoy.getDate());
+        // Usar método de escritura para iOS
+        var wbout = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+        var blob = new Blob([wbout], {type:'application/octet-stream'});
+        var url = URL.createObjectURL(blob);
         
-        var link = document.createElement('a');
-        link.href = csvUrl;
-        link.download = 'avika_tiempos_' + fecha + '.csv';
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Crear enlace temporal
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 0);
     } else {
-        // En otros dispositivos, descarga directa
-        var hoy = new Date();
-        var fecha = hoy.getFullYear() + '-' + padZero(hoy.getMonth() + 1) + '-' + padZero(hoy.getDate());
-        
-        var link = $('<a>')
-            .attr('href', csvUrl)
-            .attr('download', 'avika_tiempos_' + fecha + '.csv')
-            .css('display', 'none');
-        
-        $('body').append(link);
-        link[0].click();
-        link.remove();
-        
+        // Para otros dispositivos, usar método de descarga directa
+        XLSX.writeFile(wb, fileName);
         showNotification('Datos exportados correctamente');
     }
+}
+
+// Función para crear la hoja de promedios
+function crearHojaPromedios(wb) {
+    // Agrupar por categoría
+    var categoriasTiempos = {};
+    var totalPorCategoria = {};
+    
+    // Para tiempos de entrega
+    var tiempoTotalEntrega = 0;
+    var totalEntregas = 0;
+    
+    // Inicializar contadores para cada categoría
+    for (var key in categoryNames) {
+        categoriasTiempos[key] = 0;
+        totalPorCategoria[key] = 0;
+    }
+    
+    // Sumar tiempos por categoría
+    completedOrders.forEach(function(order) {
+        // Ignorar órdenes sin tiempo de preparación completo
+        if (!order.endTime) return;
+        
+        var categoria = order.category;
+        var tiempoEnSegundos = (new Date(order.endTime) - new Date(order.startTime)) / 1000;
+        
+        categoriasTiempos[categoria] += tiempoEnSegundos;
+        totalPorCategoria[categoria]++;
+        
+        // Calcular estadísticas de entrega si están disponibles
+        if (order.deliveryDepartureTime && order.deliveryArrivalTime) {
+            var tiempoEntregaSegundos = (new Date(order.deliveryArrivalTime) - new Date(order.deliveryDepartureTime)) / 1000;
+            tiempoTotalEntrega += tiempoEntregaSegundos;
+            totalEntregas++;
+        }
+    });
+    
+    // Crear datos para Excel
+    var promedios_data = [
+        ['Categoría', 'Tiempo Promedio (minutos)', 'Cantidad de Platillos']
+    ];
+    
+    for (var categoria in categoriasTiempos) {
+        if (totalPorCategoria[categoria] > 0) {
+            var tiempoPromedio = categoriasTiempos[categoria] / totalPorCategoria[categoria];
+            var minutos = Math.floor(tiempoPromedio / 60);
+            var segundos = Math.floor(tiempoPromedio % 60);
+            
+            promedios_data.push([
+                categoryNames[categoria],
+                minutos + ':' + padZero(segundos),
+                totalPorCategoria[categoria]
+            ]);
+        }
+    }
+    
+    // Agregar un espacio
+    promedios_data.push([]);
+    promedios_data.push([]);
+    
+    // Agregar estadísticas de entrega si hay datos
+    if (totalEntregas > 0) {
+        var tiempoPromedioEntrega = tiempoTotalEntrega / totalEntregas;
+        var minutosEntrega = Math.floor(tiempoPromedioEntrega / 60);
+        var segundosEntrega = Math.floor(tiempoPromedioEntrega % 60);
+        
+        promedios_data.push(['Estadísticas de Entregas a Domicilio']);
+        promedios_data.push(['Concepto', 'Tiempo Promedio (minutos)', 'Cantidad']);
+        promedios_data.push([
+            'Tiempo de Entrega (desde salida hasta llegada)',
+            minutosEntrega + ':' + padZero(segundosEntrega),
+            totalEntregas
+        ]);
+    }
+    
+    // Crear hoja
+    var ws_promedios = XLSX.utils.aoa_to_sheet(promedios_data);
+    
+    // Aplicar formato a la hoja
+    ws_promedios['!cols'] = [
+        {wch: 30}, // Categoría/Concepto
+        {wch: 25}, // Tiempo Promedio
+        {wch: 20}  // Cantidad
+    ];
+    
+    // Añadir hoja al libro
+    XLSX.utils.book_append_sheet(wb, ws_promedios, "Promedios");
 }
 
 // Función para guardar datos automáticamente en el almacenamiento local
