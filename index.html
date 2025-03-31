@@ -3,150 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Avika - Temporizador</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            padding: 15px;
-            background-color: #f0f0f0;
-            color: #333;
-        }
-        header {
-            background-color: #e74c3c;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            margin-bottom: 20px;
-            border-radius: 8px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .category-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .category-btn {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 15px;
-            font-size: 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-            height: 70px;
-        }
-        .dishes-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .dish-btn {
-            background-color: white;
-            color: #333;
-            border: 1px solid #3498db;
-            padding: 12px 10px;
-            font-size: 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-            height: 60px;
-        }
-        .option-btns {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .option-btn {
-            background-color: #f9f9f9;
-            color: #333;
-            border: 1px solid #ddd;
-            padding: 10px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            flex: 1;
-            min-width: 100px;
-            text-align: center;
-        }
-        .option-btn.selected {
-            background-color: #3498db;
-            color: white;
-        }
-        .back-btn {
-            background-color: #f0ad4e;
-            color: white;
-            padding: 12px 18px;
-            margin: 15px 0;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .action-btns {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-        }
-        .action-btn {
-            flex: 1;
-            padding: 14px;
-            font-size: 16px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .cancel-btn {
-            background-color: #e74c3c;
-            color: white;
-        }
-        .start-btn {
-            background-color: #2ecc71;
-            color: white;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #3498db;
-            color: white;
-        }
-        #notification {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #2ecc71;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            max-width: 350px;
-            z-index: 1000;
-            display: none;
-            text-align: center;
-            width: 85%;
-        }
-        #dishes-section, #preparation-section {
-            display: none;
-        }
-    </style>
+    <link rel="stylesheet" href="avika-style.css">
 </head>
 <body>
     <header>
         <h1>Avika - Temporizador</h1>
+        <div class="header-controls">
+            <button id="toggle-theme" class="icon-btn">🌙</button>
+        </div>
     </header>
     
     <div class="container">
@@ -165,8 +32,11 @@
             </div>
             
             <!-- Órdenes pendientes -->
-            <div>
-                <h2>Platillos en preparación</h2>
+            <div class="pending-orders-section">
+                <div class="section-title">
+                    <h2>Platillos en preparación</h2>
+                    <div class="count-badge" id="pending-count">0</div>
+                </div>
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -174,15 +44,44 @@
                                 <th>Platillo</th>
                                 <th>Inicio</th>
                                 <th>Tiempo</th>
+                                <th>Detalles</th>
                                 <th>Acción</th>
                             </tr>
                         </thead>
                         <tbody id="pending-body">
-                            <tr>
-                                <td colspan="4" style="text-align: center; font-style: italic;">No hay platillos en preparación</td>
-                            </tr>
+                            <!-- Se llenará con JavaScript -->
                         </tbody>
                     </table>
+                </div>
+            </div>
+            
+            <!-- Órdenes completadas -->
+            <div class="pending-orders-section">
+                <h2>Platillos completados</h2>
+                <div class="filter-controls">
+                    <button id="btn-show-all-history" class="filter-btn">Ver historial</button>
+                    <button id="btn-show-recent" class="filter-btn active">Ver recientes</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Platillo</th>
+                                <th>Inicio</th>
+                                <th>Fin</th>
+                                <th>Total</th>
+                                <th>Detalles</th>
+                            </tr>
+                        </thead>
+                        <tbody id="completed-body">
+                            <!-- Se llenará con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="button-group">
+                    <button class="back-btn" id="btn-promedios" style="background-color: #3498db;">Ver Promedios</button>
+                    <button class="back-btn" id="btn-export">Exportar a Excel</button>
+                    <button class="back-btn" id="btn-clear" style="background-color: #e74c3c;">Limpiar</button>
                 </div>
             </div>
         </div>
@@ -198,16 +97,39 @@
         </div>
         
         <!-- Sección de preparación -->
-        <div id="preparation-section">
+        <div id="preparation-section" class="preparation-section">
             <h2 id="selected-dish-title">Platillo</h2>
             
-            <div>
-                <div>
-                    <h3>Personalización</h3>
+            <div id="personalization-section">
+                <div class="option-group">
+                    <div class="option-title">Personalización</div>
                     <div class="option-btns" id="personalization-options">
                         <!-- Se llenará dinámicamente con JS -->
                     </div>
                 </div>
+            </div>
+            
+            <div class="option-group">
+                <div class="option-title">Tipo de Servicio</div>
+                <div class="option-btns">
+                    <button class="option-btn selected" id="btn-comedor">Comedor</button>
+                    <button class="option-btn" id="btn-domicilio">Domicilio</button>
+                    <button class="option-btn" id="btn-para-llevar">Ordena y Espera</button>
+                </div>
+            </div>
+            
+            <div class="option-group">
+                <div class="option-title">Cantidad</div>
+                <div class="qty-control">
+                    <button class="qty-btn" id="btn-decrease">-</button>
+                    <span class="qty-display" id="quantity-display">1</span>
+                    <button class="qty-btn" id="btn-increase">+</button>
+                </div>
+            </div>
+            
+            <div class="option-group">
+                <div class="option-title">Notas Especiales</div>
+                <textarea class="notes-input" id="notes-input" placeholder="Ej: Cliente alérgico a mariscos" rows="3"></textarea>
             </div>
             
             <div class="action-btns">
@@ -218,228 +140,24 @@
         </div>
     </div>
     
-    <script>
-        // Variables globales
-        var currentCategory = '';
-        var currentDish = '';
-        var currentCustomizations = [];
-        var pendingOrders = [];
-        
-        // Datos de platillos (simplificados)
-        var dishes = {
-            'frio': [
-                'Baby Squid', 'Tiradito de Atún', 'Tiradito de Camarón',
-                'Tostadita Nikkei', 'Ceviche Limeño', 'Sashimi Mixto'
-            ],
-            'entrada-fria': [
-                'Baby Squid', 'Tiradito de Atún', 'Tiradito de Camarón',
-                'Tostadita Nikkei', 'Cocktail Avika', 'Ceviche Limeño'
-            ],
-            'caliente': [
-                'Arroz Yakimeshi', 'Arroz Peruano', 'Teriyaki',
-                'Yakisoba', 'Pechuga Teriyaki', 'Rib Eye Grill'
-            ],
-            'entrada-caliente': [
-                'Kushiage', 'Rollitos Kani', 'Toritos Tempura',
-                'Miso Shiro', 'Sopa Udon', 'Sopa Ramen'
-            ],
-            'combos': [
-                'Combo Tokio', 'Combo Osaka', 'Combo Bagua', 
-                'Combo Pisco', 'Combo Lima'
-            ]
-        };
-        
-        // Opciones de personalización
-        var customizationOptions = {
-            'sin-alga': 'Sin Alga',
-            'extra-picante': 'Extra Picante',
-            'cambio-proteina': 'Cambiar Proteína'
-        };
-        
-        // Inicializar eventos
-        document.addEventListener('DOMContentLoaded', function() {
-            setupEventListeners();
-        });
-        
-        function setupEventListeners() {
-            // Botones de categoría
-            document.getElementById('btn-frio').addEventListener('click', function() {
-                currentCategory = 'frio';
-                mostrarPlatillos('frio', 'Platillos Fríos');
-            });
-            
-            document.getElementById('btn-entrada-fria').addEventListener('click', function() {
-                currentCategory = 'entrada-fria';
-                mostrarPlatillos('entrada-fria', 'Entradas Frías');
-            });
-            
-            document.getElementById('btn-caliente').addEventListener('click', function() {
-                currentCategory = 'caliente';
-                mostrarPlatillos('caliente', 'Platillos Calientes');
-            });
-            
-            document.getElementById('btn-entrada-caliente').addEventListener('click', function() {
-                currentCategory = 'entrada-caliente';
-                mostrarPlatillos('entrada-caliente', 'Entradas Calientes');
-            });
-            
-            document.getElementById('btn-combos').addEventListener('click', function() {
-                currentCategory = 'combos';
-                mostrarPlatillos('combos', 'Combos');
-            });
-            
-            // Botones de navegación
-            document.getElementById('btn-back-to-categories').addEventListener('click', function() {
-                document.getElementById('dishes-section').style.display = 'none';
-                document.getElementById('categories-section').style.display = 'block';
-            });
-            
-            document.getElementById('btn-back-to-dishes').addEventListener('click', function() {
-                document.getElementById('preparation-section').style.display = 'none';
-                document.getElementById('dishes-section').style.display = 'block';
-            });
-            
-            // Botones de acción
-            document.getElementById('btn-start').addEventListener('click', function() {
-                startPreparation();
-            });
-            
-            document.getElementById('btn-cancel').addEventListener('click', function() {
-                resetApp();
-            });
-        }
-        
-        // Mostrar platillos de categoría
-        function mostrarPlatillos(categoria, titulo) {
-            document.getElementById('categories-section').style.display = 'none';
-            document.getElementById('dishes-section').style.display = 'block';
-            document.getElementById('selected-category-title').textContent = titulo;
-            
-            const container = document.getElementById('dishes-container');
-            container.innerHTML = '';
-            
-            dishes[categoria].forEach(dish => {
-                const btn = document.createElement('button');
-                btn.className = 'dish-btn';
-                btn.textContent = dish;
-                
-                btn.addEventListener('click', function() {
-                    seleccionarPlatillo(dish);
-                });
-                
-                container.appendChild(btn);
-            });
-        }
-        
-        // Seleccionar platillo
-        function seleccionarPlatillo(platillo) {
-            currentDish = platillo;
-            document.getElementById('dishes-section').style.display = 'none';
-            document.getElementById('preparation-section').style.display = 'block';
-            document.getElementById('selected-dish-title').textContent = platillo;
-            
-            // Cargar opciones
-            const optionsContainer = document.getElementById('personalization-options');
-            optionsContainer.innerHTML = '';
-            
-            for (const id in customizationOptions) {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.textContent = customizationOptions[id];
-                btn.setAttribute('data-option', id);
-                
-                btn.addEventListener('click', function() {
-                    this.classList.toggle('selected');
-                    updateCustomizations();
-                });
-                
-                optionsContainer.appendChild(btn);
-            }
-        }
-        
-        // Actualizar personalizaciones
-        function updateCustomizations() {
-            currentCustomizations = [];
-            
-            document.querySelectorAll('.option-btn.selected').forEach(el => {
-                if (el.hasAttribute('data-option')) {
-                    currentCustomizations.push(customizationOptions[el.getAttribute('data-option')]);
-                }
-            });
-        }
-        
-        // Iniciar preparación
-        function startPreparation() {
-            const order = {
-                dish: currentDish,
-                category: currentCategory,
-                customizations: currentCustomizations,
-                startTime: new Date(),
-                startTimeFormatted: new Date().toLocaleTimeString()
-            };
-            
-            pendingOrders.push(order);
-            updatePendingTable();
-            showNotification(`Nuevo pedido: ${order.dish}`);
-            resetApp();
-        }
-        
-        // Actualizar tabla de pendientes
-        function updatePendingTable() {
-            const tableBody = document.getElementById('pending-body');
-            tableBody.innerHTML = '';
-            
-            if (pendingOrders.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = '<td colspan="4" style="text-align: center; font-style: italic;">No hay platillos en preparación</td>';
-                tableBody.appendChild(row);
-                return;
-            }
-            
-            pendingOrders.forEach((order, index) => {
-                const row = document.createElement('tr');
-                
-                row.innerHTML = `
-                    <td>${order.dish}</td>
-                    <td>${order.startTimeFormatted}</td>
-                    <td>00:00</td>
-                    <td>
-                        <button onclick="finishPreparation(${index})">Finalizar</button>
-                    </td>
-                `;
-                
-                tableBody.appendChild(row);
-            });
-        }
-        
-        // Finalizar preparación
-        function finishPreparation(index) {
-            pendingOrders.splice(index, 1);
-            updatePendingTable();
-            showNotification("¡Platillo finalizado!");
-        }
-        
-        // Resetear aplicación
-        function resetApp() {
-            document.getElementById('dishes-section').style.display = 'none';
-            document.getElementById('preparation-section').style.display = 'none';
-            document.getElementById('categories-section').style.display = 'block';
-            
-            currentCategory = '';
-            currentDish = '';
-            currentCustomizations = [];
-        }
-        
-        // Mostrar notificación
-        function showNotification(message) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.style.display = 'block';
-            
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
-    </script>
+    <!-- Modal para promedios -->
+    <div id="promedios-modal" class="modal">
+        <div class="modal-content">
+            <div id="promedios-contenido">
+                <!-- Se llenará con JavaScript -->
+            </div>
+            <button class="back-btn" id="modal-close" style="width: 100%; margin-top: 15px;">Cerrar</button>
+        </div>
+    </div>
+    
+    <!-- Guía de instalación -->
+    <div class="install-guide" id="install-guide">
+        <p>Para una mejor experiencia, añade esta app a tu pantalla de inicio</p>
+        <p>1. Toca el icono <strong>compartir</strong> <span style="font-size: 18px">⬆️</span> abajo</p>
+        <p>2. Desplázate y selecciona <strong>"Añadir a pantalla de inicio"</strong></p>
+        <button id="hide-guide">Entendido</button>
+    </div>
+
+    <script src="avika-script.js"></script>
 </body>
 </html>

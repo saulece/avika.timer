@@ -1,0 +1,702 @@
+/* Estilos base optimizados para iPhone */
+:root {
+    --bg-color: #f0f0f0;
+    --container-bg: #ffffff;
+    --text-color: #333333;
+    --header-bg: #e74c3c;
+    --header-text: white;
+    --primary-btn: #3498db;
+    --primary-btn-text: white;
+    --success-btn: #2ecc71;
+    --danger-btn: #e74c3c;
+    --warning-btn: #f0ad4e;
+    --info-btn: #5bc0de;
+    --border-color: #ddd;
+    --table-header-bg: #3498db;
+    --table-header-text: white;
+    --notification-bg: #2ecc71;
+    --highlight-bg: #f9f9f9;
+    --shadow-color: rgba(0,0,0,0.1);
+    --btn-hover: #2980b9;
+    
+    /* Variables para tiempos */
+    --time-excellent: #2ecc71;
+    --time-good: #7fdbff;
+    --time-warning: #f39c12;
+    --time-bad: #e74c3c;
+    
+    /* Transiciones */
+    --transition-speed: 0.3s;
+    
+    /* Fuentes */
+    --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    --font-monospace: 'Menlo', monospace;
+}
+
+.dark-mode {
+    --bg-color: #121212;
+    --container-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --header-bg: #c0392b;
+    --header-text: #f0f0f0;
+    --primary-btn: #2980b9;
+    --primary-btn-text: #f0f0f0;
+    --success-btn: #27ae60;
+    --danger-btn: #c0392b;
+    --warning-btn: #d35400;
+    --info-btn: #2980b9;
+    --border-color: #444;
+    --table-header-bg: #2980b9;
+    --table-header-text: #f0f0f0;
+    --notification-bg: #27ae60;
+    --highlight-bg: #2a2a2a;
+    --shadow-color: rgba(0,0,0,0.3);
+    --btn-hover: #3498db;
+    
+    /* Colores de tiempos en modo oscuro */
+    --time-excellent: #27ae60;
+    --time-good: #2980b9;
+    --time-warning: #d35400;
+    --time-bad: #c0392b;
+}
+
+/* Estilos generales */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: var(--font-main);
+    margin: 0;
+    padding: 15px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+    line-height: 1.6;
+    -webkit-user-select: none;
+    user-select: none;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: manipulation;
+}
+
+/* Encabezado */
+header {
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    padding: 15px;
+    text-align: center;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+header h1 {
+    margin: 0;
+    flex: 1;
+    font-size: 1.5rem;
+}
+
+.header-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--header-text);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color var(--transition-speed);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+}
+
+.icon-btn:active {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Contenedor principal */
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding-bottom: 80px; /* Para evitar que el último elemento quede oculto detrás del dock de iOS */
+}
+
+/* Secciones */
+section {
+    background-color: var(--container-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px var(--shadow-color);
+    margin-bottom: 20px;
+    transition: background-color var(--transition-speed);
+}
+
+/* Contenedor de categorías */
+.category-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.category-btn {
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
+    border: none;
+    padding: 15px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    height: 70px;
+    transition: background-color var(--transition-speed), transform 0.2s;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+}
+
+.category-btn:active {
+    background-color: var(--btn-hover);
+    transform: scale(0.98);
+}
+
+/* Sección de platillos */
+.dishes-section {
+    display: none;
+}
+
+.dishes-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.dish-btn {
+    background-color: var(--container-bg);
+    color: var(--text-color);
+    border: 1px solid var(--primary-btn);
+    padding: 12px 10px;
+    font-size: 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color var(--transition-speed), 
+                color var(--transition-speed), 
+                transform 0.2s;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+}
+
+.dish-btn:active {
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
+    transform: scale(0.98);
+}
+
+.dish-btn.special-combo {
+    border: 2px solid var(--danger-btn);
+    position: relative;
+}
+
+.dish-btn.special-combo::after {
+    content: "★";
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    color: var(--danger-btn);
+    font-size: 14px;
+}
+
+/* Sección de preparación */
+.preparation-section {
+    display: none;
+    background-color: var(--container-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px var(--shadow-color);
+    margin-top: 20px;
+}
+
+.option-group {
+    margin-bottom: 20px;
+}
+
+.option-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: var(--text-color);
+    font-size: 1.1rem;
+}
+
+.option-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.option-btn {
+    background-color: var(--highlight-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+    font-size: 14px;
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+    touch-action: manipulation;
+}
+
+.option-btn.selected {
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
+    border-color: var(--primary-btn);
+}
+
+/* Control de cantidad */
+.qty-control {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.qty-btn {
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+    touch-action: manipulation;
+}
+
+.qty-btn:active {
+    background-color: var(--btn-hover);
+}
+
+.qty-display {
+    font-size: 20px;
+    font-weight: bold;
+    min-width: 40px;
+    text-align: center;
+    color: var(--text-color);
+}
+
+/* Área de notas */
+.notes-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--container-bg);
+    color: var(--text-color);
+    resize: vertical;
+    min-height: 80px;
+    font-family: var(--font-main);
+    transition: border-color var(--transition-speed);
+    font-size: 16px; /* Evita el zoom automático en iOS */
+}
+
+.notes-input:focus {
+    outline: none;
+    border-color: var(--primary-btn);
+}
+
+/* Botones de acción */
+.action-btns {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 14px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), 
+                transform 0.2s,
+                box-shadow 0.2s;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    touch-action: manipulation;
+}
+
+.action-btn:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 2px var(--shadow-color);
+}
+
+.cancel-btn {
+    background-color: var(--danger-btn);
+    color: white;
+}
+
+.start-btn {
+    background-color: var(--success-btn);
+    color: white;
+}
+
+.back-btn {
+    background-color: var(--warning-btn);
+    color: white;
+    padding: 12px 18px;
+    margin: 15px 0;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), transform 0.2s;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    touch-action: manipulation;
+}
+
+.back-btn:active {
+    transform: scale(0.98);
+}
+
+/* Tablas */
+.pending-orders-section {
+    margin-top: 30px;
+    background-color: var(--container-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.timer-cell {
+    font-weight: bold;
+    color: var(--text-color);
+    font-size: 16px;
+    font-family: var(--font-monospace);
+}
+
+.timer-cell.warning {
+    color: var(--time-warning);
+}
+
+.timer-cell.alert {
+    color: var(--time-bad);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+.finish-btn {
+    background-color: var(--success-btn);
+    color: white;
+    border: none;
+    padding: 10px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    margin-bottom: 5px;
+    transition: background-color var(--transition-speed), transform 0.2s;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    font-size: 14px;
+    touch-action: manipulation;
+}
+
+.finish-btn:active {
+    transform: scale(0.98);
+}
+
+.finish-btn.hot-kitchen {
+    background-color: var(--danger-btn);
+}
+
+.finish-btn.cold-kitchen {
+    background-color: var(--info-btn);
+}
+
+.finish-btn.delivery {
+    background-color: #f39c12;
+}
+
+.finish-btn.delivery-arrived {
+    background-color: #3498db;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+th, td {
+    border: 1px solid var(--border-color);
+    padding: 8px 6px;
+    text-align: left;
+    color: var(--text-color);
+    transition: background-color var(--transition-speed);
+}
+
+th {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-text);
+    position: sticky;
+    top: 0;
+    font-size: 12px;
+}
+
+tr:active td {
+    background-color: var(--highlight-bg);
+}
+
+/* Clases para tiempos */
+.time-excellent {
+    color: var(--time-excellent);
+    font-weight: bold;
+}
+
+.time-good {
+    color: var(--time-good);
+}
+
+.time-warning {
+    color: var(--time-warning);
+}
+
+.time-bad {
+    color: var(--time-bad);
+    font-weight: bold;
+}
+
+/* Notificaciones */
+#notification {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--notification-bg);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    max-width: 350px;
+    z-index: 1000;
+    display: none;
+    animation: fadeIn 0.3s;
+    font-weight: 500;
+    text-align: center;
+    width: 85%;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, 20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Mejoras de accesibilidad */
+:focus {
+    outline: 2px solid var(--primary-btn);
+    outline-offset: 2px;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dishes-section, .preparation-section {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+/* PWA mejoras */
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.button-group .back-btn {
+    flex: 1;
+    margin: 0;
+    font-size: 14px;
+    white-space: nowrap;
+    padding: 10px;
+    text-align: center;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    z-index: 1001;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.modal.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal-content {
+    background-color: var(--container-bg);
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 90%;
+    max-height: 90%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 10px;
+}
+
+/* Filtros */
+.filter-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background-color: var(--highlight-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), 
+                color var(--transition-speed),
+                transform 0.2s;
+    font-size: 14px;
+    touch-action: manipulation;
+}
+
+.filter-btn:active {
+    transform: scale(0.98);
+}
+
+.filter-btn.active {
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
+    border-color: var(--primary-btn);
+}
+
+/* Encabezados */
+h2 {
+    margin-bottom: 15px;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+    font-size: 18px;
+}
+
+.section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.count-badge {
+    background-color: var(--primary-btn);
+    color: white;
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+/* App instalación guía */
+.install-guide {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0,0,0,0.85);
+    color: white;
+    padding: 15px;
+    font-size: 14px;
+    display: none;
+    z-index: 10000;
+}
+
+.install-guide p {
+    margin-bottom: 10px;
+}
+
+.install-guide button {
+    background-color: white;
+    color: black;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+/* Mejoras específicas para iOS */
+@supports (-webkit-touch-callout: none) {
+    /* CSS específico para iOS */
+    input, button, textarea, select {
+        font-size: 16px; /* Previene zoom automático */
+    }
+    
+    /* Corrige el comportamiento de botones en iOS */
+    button, .option-btn, .finish-btn, .action-btn, .back-btn, .category-btn, .dish-btn, .filter-btn {
+        touch-action: manipulation;
+    }
+}
