@@ -811,3 +811,48 @@ h2 {
         border: 1px solid #000;
     }
 }
+/* Ajustes para tablas de preparación para evitar desplazamiento horizontal */
+.pending-orders-section table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.pending-orders-section th:nth-child(1),
+.pending-orders-section td:nth-child(1) {
+    width: 20%; /* Columna de platillos */
+}
+
+.pending-orders-section th:nth-child(2),
+.pending-orders-section td:nth-child(2),
+.pending-orders-section th:nth-child(3),
+.pending-orders-section td:nth-child(3) {
+    width: 10%; /* Columnas de tiempo */
+}
+
+.pending-orders-section th:nth-child(4),
+.pending-orders-section td:nth-child(4) {
+    width: 40%; /* Columna de detalles */
+    word-break: break-word; /* Permitir que las palabras largas se rompan */
+}
+
+.pending-orders-section th:nth-child(5),
+.pending-orders-section td:nth-child(5) {
+    width: 20%; /* Columna de acción */
+}
+
+/* Ajustes para dispositivos móviles */
+@media (max-width: 768px) {
+    .pending-orders-section table {
+        font-size: 14px;
+    }
+    
+    .pending-orders-section th,
+    .pending-orders-section td {
+        padding: 6px 4px;
+    }
+    
+    .finish-btn {
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+}

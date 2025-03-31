@@ -159,41 +159,52 @@ Avika.ui = {
 
     // Funciones para actualizar tablas
     updatePendingTable: function() {
+        // Actualizar contador primero
+        document.getElementById('pending-count').textContent = Avika.data.pendingOrders.length;
+        
+        // Si no hay órdenes pendientes, limpiamos la tabla y salimos
+        if (Avika.data.pendingOrders.length === 0) {
+            document.getElementById('pending-body').innerHTML = '';
+            return;
+        }
+        
         var pendingBody = document.getElementById('pending-body');
         var existingRows = pendingBody.querySelectorAll('tr');
         
-        document.getElementById('pending-count').textContent = Avika.data.pendingOrders.length;
-        
-        // Actualizar o crear filas según sea necesario
-        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            var order = Avika.data.pendingOrders[i];
+        // Si el número de filas existentes no coincide con el número de órdenes, reconstruimos la tabla
+        if (existingRows.length !== Avika.data.pendingOrders.length) {
+            // Limpiar la tabla
+            pendingBody.innerHTML = '';
             
-            if (i < existingRows.length) {
-                // Actualizar fila existente
-                this.updateOrderRow(existingRows[i], order);
-            } else {
-                // Crear nueva fila
+            // Agregar todas las órdenes pendientes
+            for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                var order = Avika.data.pendingOrders[i];
                 var newRow = this.createOrderRow(order);
                 pendingBody.appendChild(newRow);
             }
+        } else {
+            // Actualizar filas existentes sin reconstruir
+            for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                var order = Avika.data.pendingOrders[i];
+                this.updateOrderRow(existingRows[i], order);
+            }
         }
-        
-        // Eliminar filas sobrantes
-        while (existingRows.length > Avika.data.pendingOrders.length && pendingBody.lastChild) {
-            pendingBody.removeChild(pendingBody.lastChild);
-        }
-    },
-    
+    }
     updateOrderRow: function(row, order) {
-        // Actualizar la información en cada celda
+        // Verificar que la fila y sus celdas existan
+        if (!row || !order) return;
+        
         var cells = row.querySelectorAll('td');
+        if (cells.length < 5) return; // La fila debe tener al menos 5 celdas
         
         // Celda del platillo
         cells[0].textContent = order.dish + (order.quantity > 1 ? ' (' + order.quantity + ')' : '');
         
         // Celda de inicio (no cambia)
+        cells[1].textContent = order.startTimeFormatted;
         
         // Celda de tiempo transcurrido (se actualiza con el timer)
+        // No actualizamos aquí ya que el timer lo hace automáticamente
         
         // Celda de detalles
         var details = Avika.config.serviceNames[order.serviceType];
@@ -381,7 +392,7 @@ Avika.ui = {
             })(order.id);
             actionCell.appendChild(finishBtn);
         }
-    },
+    }
     
     createOrderRow: function(order) {
         var row = document.createElement('tr');
