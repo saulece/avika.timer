@@ -1,106 +1,745 @@
-/* Estilos adicionales para optimizar la experiencia en iOS */
-
-/* Variables específicas para dispositivos iOS */
+/* Estilos base para Avika - Temporizador de Sushi (versión mejorada) */
 :root {
-    --ios-tint-color: #007aff;
-    --ios-danger-color: #ff3b30;
-    --ios-success-color: #34c759;
-    --ios-warning-color: #ff9500;
-    --ios-secondary-color: #8e8e93;
-    --ios-background-color: #f2f2f7;
-    --ios-card-background: #ffffff;
-    --ios-border-radius: 8px;
-    --ios-font: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    --bg-color: #f0f0f0;
+    --container-bg: #ffffff;
+    --text-color: #333333;
+    --header-bg: #e74c3c;
+    --header-text: white;
+    --primary-btn: #3498db;
+    --primary-btn-text: white;
+    --success-btn: #2ecc71;
+    --danger-btn: #e74c3c;
+    --warning-btn: #f0ad4e;
+    --info-btn: #5bc0de;
+    --border-color: #ddd;
+    --table-header-bg: #3498db;
+    --table-header-text: white;
+    --notification-bg: #2ecc71;
+    --highlight-bg: #f9f9f9;
+    --shadow-color: rgba(0,0,0,0.1);
+    --btn-hover: #2980b9;
+    
+    /* Nuevas variables para tiempos */
+    --time-excellent: #2ecc71;
+    --time-good: #7fdbff;
+    --time-warning: #f39c12;
+    --time-bad: #e74c3c;
+    
+    /* Transiciones */
+    --transition-speed: 0.3s;
+    
+    /* Fuentes */
+    --font-main: 'Segoe UI', Arial, sans-serif;
+    --font-monospace: 'Consolas', monospace;
 }
 
-/* Aplicar solo en dispositivos iOS */
-.ios-device {
-    font-family: var(--ios-font);
-    -webkit-text-size-adjust: 100%;
-    -webkit-font-smoothing: antialiased;
+.dark-mode {
+    --bg-color: #121212;
+    --container-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --header-bg: #c0392b;
+    --header-text: #f0f0f0;
+    --primary-btn: #2980b9;
+    --primary-btn-text: #f0f0f0;
+    --success-btn: #27ae60;
+    --danger-btn: #c0392b;
+    --warning-btn: #d35400;
+    --info-btn: #2980b9;
+    --border-color: #444;
+    --table-header-bg: #2980b9;
+    --table-header-text: #f0f0f0;
+    --notification-bg: #27ae60;
+    --highlight-bg: #2a2a2a;
+    --shadow-color: rgba(0,0,0,0.3);
+    --btn-hover: #3498db;
+    
+    /* Colores de tiempos en modo oscuro */
+    --time-excellent: #27ae60;
+    --time-good: #2980b9;
+    --time-warning: #d35400;
+    --time-bad: #c0392b;
 }
 
-/* Ajustes para modo oscuro en iOS */
-@media (prefers-color-scheme: dark) {
-    .ios-device.dark-mode {
-        --ios-background-color: #1c1c1e;
-        --ios-card-background: #2c2c2e;
-        --ios-secondary-color: #8e8e93;
+/* Estilos generales */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-main);
+    margin: 0;
+    padding: 20px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+    line-height: 1.6;
+}
+
+/* Encabezado */
+header {
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    padding: 15px;
+    text-align: center;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+header h1 {
+    margin: 0;
+    flex: 1;
+    font-size: 1.8rem;
+}
+
+.header-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--header-text);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color var(--transition-speed);
+}
+
+.icon-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Contenedor principal */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Secciones */
+section {
+    background-color: var(--container-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px var(--shadow-color);
+    margin-bottom: 20px;
+    transition: background-color var(--transition-speed);
+}
+
+/* Contenedor de categorías */
+.category-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.category-btn {
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
+    border: none;
+    padding: 15px 25px;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    height: 80px;
+    transition: background-color var(--transition-speed), transform 0.2s;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.category-btn:hover {
+    background-color: var(--btn-hover);
+    transform: translateY(-2px);
+}
+
+.category-btn:active {
+    transform: translateY(0);
+}
+
+/* Sección de platillos */
+.dishes-section {
+    display: none;
+}
+
+.dishes-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.dish-btn {
+    background-color: var(--container-bg);
+    color: var(--text-color);
+    border: 1px solid var(--primary-btn);
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    min-width: 150px;
+    transition: background-color var(--transition-speed), 
+                color var(--transition-speed), 
+                transform 0.2s;
+}
+
+.dish-btn:hover {
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
+    transform: translateY(-2px);
+}
+
+.dish-btn:active {
+    transform: translateY(0);
+}
+
+.dish-btn.special-combo {
+    border: 2px solid var(--danger-btn);
+    position: relative;
+}
+
+.dish-btn.special-combo::after {
+    content: "★";
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    color: var(--danger-btn);
+    font-size: 14px;
+}
+
+/* Sección de preparación */
+.preparation-section {
+    display: none;
+    background-color: var(--container-bg);
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px var(--shadow-color);
+    margin-top: 20px;
+}
+
+.option-group {
+    margin-bottom: 20px;
+}
+
+.option-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: var(--text-color);
+    font-size: 1.1rem;
+}
+
+.option-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.option-btn {
+    background-color: var(--highlight-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+.option-btn.selected {
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
+    border-color: var(--primary-btn);
+}
+
+/* Control de cantidad */
+.qty-control {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.qty-btn {
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+}
+
+.qty-btn:hover {
+    background-color: var(--btn-hover);
+}
+
+.qty-display {
+    font-size: 20px;
+    font-weight: bold;
+    min-width: 40px;
+    text-align: center;
+    color: var(--text-color);
+}
+
+/* Área de notas */
+.notes-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--container-bg);
+    color: var(--text-color);
+    resize: vertical;
+    min-height: 80px;
+    font-family: var(--font-main);
+    transition: border-color var(--transition-speed);
+}
+
+.notes-input:focus {
+    outline: none;
+    border-color: var(--primary-btn);
+}
+
+/* Botones de acción */
+.action-btns {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 14px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), 
+                transform 0.2s,
+                box-shadow 0.2s;
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px var(--shadow-color);
+}
+
+.action-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.cancel-btn {
+    background-color: var(--danger-btn);
+    color: white;
+}
+
+.start-btn {
+    background-color: var(--success-btn);
+    color: white;
+}
+
+.back-btn {
+    background-color: var(--warning-btn);
+    color: white;
+    padding: 12px 18px;
+    margin: 15px 0;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), transform 0.2s;
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.back-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Tablas */
+.pending-orders-section {
+    margin-top: 30px;
+    background-color: var(--container-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.timer-cell {
+    font-weight: bold;
+    color: var(--text-color);
+    font-size: 18px;
+    font-family: var(--font-monospace);
+}
+
+.timer-cell.warning {
+    color: var(--time-warning);
+}
+
+.timer-cell.alert {
+    color: var(--time-bad);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+.finish-btn {
+    background-color: var(--success-btn);
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    margin-bottom: 5px;
+    transition: background-color var(--transition-speed), transform 0.2s;
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.finish-btn:hover {
+    transform: translateY(-2px);
+}
+
+.finish-btn.hot-kitchen {
+    background-color: var(--danger-btn);
+}
+
+.finish-btn.cold-kitchen {
+    background-color: var(--info-btn);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+}
+
+th, td {
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    text-align: left;
+    color: var(--text-color);
+    transition: background-color var(--transition-speed);
+}
+
+th {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-text);
+    position: sticky;
+    top: 0;
+}
+
+tr:hover td {
+    background-color: var(--highlight-bg);
+}
+
+/* Clases para tiempos */
+.time-excellent {
+    color: var(--time-excellent);
+    font-weight: bold;
+}
+
+.time-good {
+    color: var(--time-good);
+}
+
+.time-warning {
+    color: var(--time-warning);
+}
+
+.time-bad {
+    color: var(--time-bad);
+    font-weight: bold;
+}
+
+/* Notificaciones */
+#notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--notification-bg);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    max-width: 350px;
+    z-index: 1000;
+    display: none;
+    animation: fadeIn 0.3s;
+    font-weight: 500;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Administración de platillos */
+.admin-options {
+    margin-bottom: 25px;
+    padding: 15px;
+    background-color: var(--highlight-bg);
+    border-radius: 8px;
+}
+
+.add-dish-form {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.form-control {
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 16px;
+    flex: 1;
+    background-color: var(--container-bg);
+    color: var(--text-color);
+    transition: border-color var(--transition-speed);
+    min-width: 150px;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-btn);
+}
+
+.add-btn {
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
+    padding: 12px 20px;
+}
+
+.current-dishes-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.dish-item {
+    background-color: var(--highlight-bg);
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--text-color);
+    box-shadow: 0 1px 3px var(--shadow-color);
+    transition: transform 0.2s;
+}
+
+.dish-item:hover {
+    transform: translateY(-2px);
+}
+
+.dish-item.special-combo {
+    border-left: 4px solid var(--danger-btn);
+}
+
+.remove-dish-btn {
+    background-color: var(--danger-btn);
+    color: white;
+    border: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    margin-left: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color var(--transition-speed);
+}
+
+.remove-dish-btn:hover {
+    background-color: #c0392b;
+}
+
+/* Búsqueda */
+.search-container {
+    margin-bottom: 20px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: var(--container-bg);
+    color: var(--text-color);
+    transition: border-color var(--transition-speed);
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary-btn);
+}
+
+/* Filtros */
+.filter-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background-color: var(--highlight-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), 
+                color var(--transition-speed),
+                transform 0.2s;
+}
+
+.filter-btn:hover {
+    transform: translateY(-2px);
+}
+
+.filter-btn.active {
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
+    border-color: var(--primary-btn);
+}
+
+#combo-special-container {
+    margin: 10px 0;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#combo-special-container input {
+    width: 18px;
+    height: 18px;
+}
+
+/* Encabezados */
+h2 {
+    margin-bottom: 15px;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+}
+
+/* Ajustes para pantallas más pequeñas */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .category-container {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .category-btn {
+        height: 70px;
+        font-size: 16px;
+        padding: 10px;
+    }
+    
+    .dish-btn {
+        min-width: 130px;
+        padding: 10px;
+    }
+    
+    .action-btns {
+        flex-direction: column;
+    }
+    
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    th, td {
+        padding: 8px;
+    }
+    
+    .timer-cell {
+        font-size: 16px;
+    }
+    
+    #notification {
+        max-width: 90%;
+        left: 50%;
+        transform: translateX(-50%);
+        right: auto;
+    }
+    
+    .add-dish-form {
+        flex-direction: column;
+        align-items: stretch;
     }
 }
 
-/* Eliminar toques de resaltado predeterminados */
-.ios-device * {
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
+@media (max-width: 480px) {
+    .category-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .dishes-container {
+        justify-content: center;
+    }
+    
+    .dish-btn {
+        width: 100%;
+    }
+    
+    .option-btns {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .option-btn {
+        text-align: center;
+    }
 }
 
-/* Mejorar apariencia de botones para que sean más iOS */
-.ios-device .category-btn,
-.ios-device .dish-btn,
-.ios-device .option-btn,
-.ios-device .action-btn,
-.ios-device .back-btn,
-.ios-device .filter-btn {
-    font-family: var(--ios-font);
-    font-weight: 500;
-    border-radius: var(--ios-border-radius);
-    touch-action: manipulation;
-    user-select: none;
-    -webkit-user-select: none;
-    transition: background-color 0.2s, transform 0.1s;
+/* Mejoras de accesibilidad */
+:focus {
+    outline: 2px solid var(--primary-btn);
+    outline-offset: 2px;
 }
 
-/* Estilo para botones principales */
-.ios-device .start-btn {
-    background-color: var(--ios-success-color);
-    box-shadow: none;
-    border: none;
-}
-
-.ios-device .cancel-btn {
-    background-color: var(--ios-danger-color);
-    box-shadow: none;
-    border: none;
-}
-
-.ios-device .back-btn {
-    background-color: var(--ios-secondary-color);
-    box-shadow: none;
-    border: none;
-}
-
-/* Estilo para inputs y textareas */
-.ios-device input,
-.ios-device textarea {
-    font-family: var(--ios-font);
-    border-radius: var(--ios-border-radius);
-    padding: 12px;
-    border: 1px solid #d1d1d6;
-    -webkit-appearance: none;
-    appearance: none;
-}
-
-.ios-device input:focus,
-.ios-device textarea:focus {
-    outline: none;
-    border-color: var(--ios-tint-color);
-    box-shadow: 0 0 0 1px var(--ios-tint-color);
-}
-
-/* Notificaciones estilo iOS */
-.ios-device #notification {
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    font-weight: 400;
-    border-radius: 16px;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    padding: 12px 16px;
-    animation: notification-slide-in 0.3s ease-out;
-}
-
-@keyframes notification-slide-in {
+/* Animaciones */
+@keyframes fadeInUp {
     from {
         opacity: 0;
         transform: translateY(20px);
@@ -111,234 +750,64 @@
     }
 }
 
-/* Iconos nativos de iOS */
-.ios-device .back-btn::before {
-    content: "‹";
-    margin-right: 5px;
-    font-size: 1.5em;
-    line-height: 0;
-    position: relative;
-    top: 2px;
+.dishes-section, .preparation-section {
+    animation: fadeInUp 0.3s ease-out;
 }
 
-/* Estilo para tablas */
-.ios-device table {
-    border-collapse: separate;
-    border-spacing: 0;
-    border-radius: var(--ios-border-radius);
-    overflow: hidden;
-    width: 100%;
-    margin-bottom: 20px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.ios-device th {
-    font-weight: 500;
-    background-color: var(--ios-tint-color);
-    color: white;
-    text-align: left;
-    padding: 12px;
-}
-
-.ios-device td {
-    padding: 12px;
-    border-bottom: 1px solid #d1d1d6;
-}
-
-/* Mejorar visualización de tablas en modo horizontal */
-.ios-device .table-responsive {
-    -webkit-overflow-scrolling: touch;
-    max-width: 100%;
-    overflow-x: auto;
-}
-
-/* Hacer las tablas responsivas en móviles - vista de tarjetas */
-@media screen and (max-width: 600px) {
-    .ios-device table, 
-    .ios-device thead, 
-    .ios-device tbody, 
-    .ios-device th, 
-    .ios-device td, 
-    .ios-device tr {
-        display: block;
-    }
-    
-    .ios-device thead tr {
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-    }
-    
-    .ios-device tr {
-        margin-bottom: 15px;
-        border-radius: var(--ios-border-radius);
-        overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        background-color: var(--ios-card-background);
-    }
-    
-    .ios-device td {
-        position: relative;
-        padding-left: 40%;
-        padding-top: 10px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #eee;
-    }
-    
-    .ios-device td:before {
-        position: absolute;
-        left: 10px;
-        width: 35%;
-        padding-right: 10px;
-        white-space: nowrap;
-        content: attr(data-label);
-        font-weight: bold;
-        color: var(--ios-secondary-color);
-    }
-    
-    .ios-device td:last-child {
-        border-bottom: none;
-    }
-}
-
-/* Scrollbar estilo iOS */
-.ios-device ::-webkit-scrollbar {
-    width: 0;  /* Ocultar scrollbar en webkit browsers */
-}
-
-/* Animaciones y transiciones */
-.ios-device .dish-btn, 
-.ios-device .option-btn,
-.ios-device .finish-btn,
-.ios-device .category-btn {
-    transition: transform 0.1s ease-out, background-color 0.2s ease-out;
-}
-
-.ios-device .btn-touch-effect {
-    transform: scale(0.97);
-}
-
-/* Feedback animado cuando tocas un elemento */
-@keyframes touch-ripple {
-    0% {
-        transform: scale(0.8);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(1.5);
-        opacity: 0;
-    }
-}
-
-.ios-device .touch-effect:after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 5px;
-    height: 5px;
-    background: rgba(255, 255, 255, 0.5);
-    opacity: 0;
-    border-radius: 100%;
-    transform: scale(1, 1) translate(-50%);
-    transform-origin: 50% 50%;
-}
-
-.ios-device .touch-effect:active:after {
-    animation: touch-ripple 0.4s ease-out;
-}
-
-/* Ajustes específicos para modo standalone (instalada como app) */
-.ios-device.standalone-mode {
-    /* Eliminar barra de navegación y dar aspecto de app */
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-}
-
-.ios-device.standalone-mode header {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    padding-top: calc(10px + env(safe-area-inset-top));
-}
-
-/* Estilo para el banner de instalación en pantalla de inicio */
-#ios-install-banner {
-    font-family: var(--ios-font);
-    background-color: rgba(250, 250, 250, 0.95);
-    border-top: 1px solid #d1d1d6;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-/* Mejorar selección y comportamiento de formularios */
-.ios-device select {
-    -webkit-appearance: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    background-size: 1em;
-    padding-right: 30px;
-}
-
-/* Estilo para menú rápido en 3D Touch */
-#quick-action-menu {
-    font-family: var(--ios-font);
-}
-
-/* Arreglar posición fija en iOS */
-.ios-device .fixed-ios {
-    position: fixed;
-    width: 100%;
-    transform: translateZ(0);
-}
-
-/* Animaciones más suaves */
-.ios-device * {
-    animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-/* Estilo modal para iOS */
-.ios-device .modal {
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-}
-
-.ios-device .modal-content {
-    border-radius: 13px;
-    overflow: hidden;
-}
-
-/* Timer células para iOS */
-.ios-device .timer-cell {
-    font-variant-numeric: tabular-nums;
-}
-
-/* Estilo para indicador de pull to refresh */
-.ios-device .pull-indicator {
-    text-align: center;
-    height: 50px;
-    line-height: 50px;
-    color: var(--ios-secondary-color);
-}
-
-.ios-device .pull-indicator:after {
-    content: '';
-    display: inline-block;
+/* Scroll personalizado */
+::-webkit-scrollbar {
     width: 10px;
     height: 10px;
-    border-radius: 50%;
-    margin-left: 10px;
-    animation: pull-indicator-pulse 1s infinite;
-    background-color: var(--ios-tint-color);
 }
 
-@keyframes pull-indicator-pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.2); opacity: 0.7; }
-    100% { transform: scale(1); opacity: 1; }
+::-webkit-scrollbar-track {
+    background: var(--highlight-bg);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-btn);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--btn-hover);
+}
+
+/* Impresión */
+@media print {
+    body {
+        background: white;
+        color: black;
+        font-size: 12pt;
+    }
+    
+    header, 
+    .search-container, 
+    .category-container,
+    .dishes-section,
+    .preparation-section,
+    .action-btns,
+    .icon-btn,
+    .finish-btn,
+    .back-btn,
+    .add-dish-form,
+    #notification {
+        display: none !important;
+    }
+    
+    .pending-orders-section,
+    table {
+        page-break-inside: avoid;
+        border: 1px solid #000;
+    }
+    
+    th {
+        background-color: #eee !important;
+        color: #000 !important;
+    }
+    
+    th, td {
+        border: 1px solid #000;
+    }
 }
