@@ -736,10 +736,6 @@ Avika.ui = {
         // Agregar botón de limpiar historial (opcional)
         var btnLimpiar = document.createElement('button');
         btnLimpiar.className = 'back-btn';
-        btnLimpiar.style.backgroundColor
-        // Agregar botón de limpiar historial (opcional)
-        var btnLimpiar = document.createElement('button');
-        btnLimpiar.className = 'back-btn';
         btnLimpiar.style.backgroundColor = '#e74c3c';
         btnLimpiar.style.marginLeft = '10px';
         btnLimpiar.textContent = 'Limpiar Historial';
