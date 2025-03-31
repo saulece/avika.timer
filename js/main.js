@@ -1,5 +1,4 @@
 // main.js - Punto de entrada y vinculación de módulos
-const Avika = Avika || {};
 
 // Inicialización
 Avika.init = function() {

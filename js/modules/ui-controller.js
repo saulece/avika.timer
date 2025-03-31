@@ -1,5 +1,4 @@
 // ui-controller.js - Funciones de interfaz de usuario
-const Avika = Avika || {};
 
 Avika.ui = {
     // Estado de la UI

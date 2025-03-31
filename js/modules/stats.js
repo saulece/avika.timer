@@ -1,5 +1,4 @@
 // stats.js - Cálculo de estadísticas y exportación
-const Avika = Avika || {};
 
 Avika.stats = {
     // Función para calcular y mostrar promedios por categoría

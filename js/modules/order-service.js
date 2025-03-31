@@ -1,5 +1,4 @@
 // order-service.js - Lógica de pedidos y temporizadores
-const Avika = Avika || {};
 
 // Estado de la aplicación
 Avika.data = {

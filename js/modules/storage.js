@@ -1,5 +1,4 @@
 // storage.js - Funciones de guardado/carga de datos
-const Avika = Avika || {};
 
 Avika.storage = {
     lastSavedState: '',

@@ -1,5 +1,5 @@
 // config.js - Configuración y datos estáticos
-const Avika = Avika || {};
+window.Avika = window.Avika || {};
 
 Avika.config = {
     // Opciones de personalización predeterminadas
