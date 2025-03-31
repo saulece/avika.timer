@@ -1,6 +1,5 @@
 /* Estilos base optimizados para iPhone */
 :root {
-    /* Variables básicas */
     --bg-color: #f0f0f0;
     --container-bg: #ffffff;
     --text-color: #333333;
@@ -32,18 +31,6 @@
     /* Fuentes */
     --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
     --font-monospace: 'Menlo', monospace;
-    
-    /* Colores para categorías */
-    --cocina-fria: #3498db;
-    --cocina-caliente: #e74c3c;
-    --combos: #9b59b6;
-    --bebidas: #2ecc71;
-    --postres: #f39c12;
-    
-    /* Variables generales */
-    --border-radius: 10px;
-    --box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    --transition: all 0.3s ease;
 }
 
 .dark-mode {
@@ -162,78 +149,38 @@ section {
     transition: background-color var(--transition-speed);
 }
 
-/* Categorías */
+/* Contenedor de categorías */
 .category-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-    margin-bottom: 25px;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
 .category-btn {
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
+    border: none;
+    padding: 15px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    height: 70px;
+    transition: background-color var(--transition-speed), transform 0.2s;
+    box-shadow: 0 2px 4px var(--shadow-color);
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 18px 12px;
-    border-radius: var(--border-radius);
-    border: none;
-    box-shadow: var(--box-shadow);
-    transition: var(--transition);
-    height: 90px;
-    text-align: center;
-    color: white;
-    font-weight: 500;
+    touch-action: manipulation;
 }
 
 .category-btn:active {
+    background-color: var(--btn-hover);
     transform: scale(0.98);
-    box-shadow: 0 2px 3px rgba(0,0,0,0.15);
 }
 
-.category-icon {
-    font-size: 24px;
-    margin-bottom: 8px;
-}
-
-.category-name {
-    font-size: 14px;
-    line-height: 1.2;
-}
-
-/* Subcategorías */
-.subcategory-header {
-    width: 100%;
-    margin-bottom: 15px;
-    text-align: center;
-}
-
-.subcategory-header h3 {
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--dark-color);
-    margin: 0;
-}
-
-.subcategory-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-width: 2px;
-    height: 80px;
-}
-
-.subcategory-icon {
-    font-size: 20px;
-    margin-bottom: 5px;
-}
-
-.subcategory-name {
-    font-size: 13px;
-    line-height: 1.2;
-}
-
-/* Platillos */
+/* Sección de platillos */
 .dishes-section {
     display: none;
 }
@@ -241,70 +188,46 @@ section {
 .dishes-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 10px;
     margin-bottom: 20px;
 }
 
-/* Grupo de platillos */
-.dish-group-header {
-    grid-column: 1 / -1;
-    margin: 10px 0 5px;
-    padding-bottom: 5px;
-    border-bottom: 1px solid #eee;
-}
-
-.dish-group-header h4 {
-    margin: 0;
-    color: var(--dark-color);
-    font-size: 15px;
-    font-weight: 600;
-}
-
 .dish-btn {
+    background-color: var(--container-bg);
+    color: var(--text-color);
+    border: 1px solid var(--primary-btn);
+    padding: 12px 10px;
+    font-size: 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color var(--transition-speed), 
+                color var(--transition-speed), 
+                transform 0.2s;
+    height: 60px;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 12px 8px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    background-color: #fff;
-    transition: var(--transition);
-    height: 70px;
-    position: relative;
-    overflow: hidden;
+    touch-action: manipulation;
 }
 
 .dish-btn:active {
-    background-color: #f9f9f9;
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
     transform: scale(0.98);
 }
 
-.dish-name {
-    font-size: 13px;
-    line-height: 1.2;
-    text-align: center;
-    font-weight: 500;
-    margin-bottom: 4px;
-    color: var(--dark-color);
+.dish-btn.special-combo {
+    border: 2px solid var(--danger-btn);
+    position: relative;
 }
 
-.dish-price {
-    font-size: 12px;
-    color: #777;
-    font-weight: 600;
-}
-
-.special-combo {
-    border: 2px solid var(--accent-color);
-}
-
-.special-combo::after {
+.dish-btn.special-combo::after {
     content: "★";
     position: absolute;
     top: 5px;
     right: 5px;
-    color: var(--accent-color);
+    color: var(--danger-btn);
     font-size: 14px;
 }
 
@@ -329,22 +252,477 @@ section {
     font-size: 1.1rem;
 }
 
-/* Opciones de personalización */
 .option-btns {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    margin-bottom: 20px;
 }
 
 .option-btn {
-    background-color: #f8f8f8;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    background-color: var(--highlight-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
     padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), color var(--transition-speed);
     font-size: 14px;
     flex: 1;
     min-width: 100px;
-    transition: var(--transition);
     text-align: center;
+    touch-action: manipulation;
+}
+
+.option-btn.selected {
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
+    border-color: var(--primary-btn);
+}
+
+/* Control de cantidad */
+.qty-control {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.qty-btn {
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+    touch-action: manipulation;
+}
+
+.qty-btn:active {
+    background-color: var(--btn-hover);
+}
+
+.qty-display {
+    font-size: 20px;
+    font-weight: bold;
+    min-width: 40px;
+    text-align: center;
+    color: var(--text-color);
+}
+
+/* Área de notas */
+.notes-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--container-bg);
+    color: var(--text-color);
+    resize: vertical;
+    min-height: 80px;
+    font-family: var(--font-main);
+    transition: border-color var(--transition-speed);
+    font-size: 16px; /* Evita el zoom automático en iOS */
+}
+
+.notes-input:focus {
+    outline: none;
+    border-color: var(--primary-btn);
+}
+
+/* Botones de acción */
+.action-btns {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 14px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), 
+                transform 0.2s,
+                box-shadow 0.2s;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    touch-action: manipulation;
+}
+
+.action-btn:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 2px var(--shadow-color);
+}
+
+.cancel-btn {
+    background-color: var(--danger-btn);
+    color: white;
+}
+
+.start-btn {
+    background-color: var(--success-btn);
+    color: white;
+}
+
+.back-btn {
+    background-color: var(--warning-btn);
+    color: white;
+    padding: 12px 18px;
+    margin: 15px 0;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), transform 0.2s;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    touch-action: manipulation;
+}
+
+.back-btn:active {
+    transform: scale(0.98);
+}
+
+/* Tablas */
+.pending-orders-section {
+    margin-top: 30px;
+    background-color: var(--container-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.timer-cell {
+    font-weight: bold;
+    color: var(--text-color);
+    font-size: 16px;
+    font-family: var(--font-monospace);
+}
+
+.timer-cell.warning {
+    color: var(--time-warning);
+}
+
+.timer-cell.alert {
+    color: var(--time-bad);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+.finish-btn {
+    background-color: var(--success-btn);
+    color: white;
+    border: none;
+    padding: 10px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    margin-bottom: 5px;
+    transition: background-color var(--transition-speed), transform 0.2s;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    font-size: 14px;
+    touch-action: manipulation;
+}
+
+.finish-btn:active {
+    transform: scale(0.98);
+}
+
+.finish-btn.hot-kitchen {
+    background-color: var(--danger-btn);
+}
+
+.finish-btn.cold-kitchen {
+    background-color: var(--info-btn);
+}
+
+.finish-btn.delivery {
+    background-color: #f39c12;
+}
+
+.finish-btn.delivery-arrived {
+    background-color: #3498db;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+th, td {
+    border: 1px solid var(--border-color);
+    padding: 8px 6px;
+    text-align: left;
+    color: var(--text-color);
+    transition: background-color var(--transition-speed);
+}
+
+th {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-text);
+    position: sticky;
+    top: 0;
+    font-size: 12px;
+}
+
+tr:active td {
+    background-color: var(--highlight-bg);
+}
+
+/* Clases para tiempos */
+.time-excellent {
+    color: var(--time-excellent);
+    font-weight: bold;
+}
+
+.time-good {
+    color: var(--time-good);
+}
+
+.time-warning {
+    color: var(--time-warning);
+}
+
+.time-bad {
+    color: var(--time-bad);
+    font-weight: bold;
+}
+
+/* Notificaciones */
+#notification {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--notification-bg);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    max-width: 350px;
+    z-index: 1000;
+    display: none;
+    animation: fadeIn 0.3s;
+    font-weight: 500;
+    text-align: center;
+    width: 85%;
+}
+
+.notification-success {
+    background-color: var(--success-btn);
+}
+
+.notification-warning {
+    background-color: var(--warning-btn);
+}
+
+.notification-error {
+    background-color: var(--danger-btn);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, 20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Mejoras de accesibilidad */
+:focus {
+    outline: 2px solid var(--primary-btn);
+    outline-offset: 2px;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dishes-section, .preparation-section {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+/* PWA mejoras */
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.button-group .back-btn {
+    flex: 1;
+    margin: 0;
+    font-size: 14px;
+    white-space: nowrap;
+    padding: 10px;
+    text-align: center;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    z-index: 1001;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.modal.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal-content {
+    background-color: var(--container-bg);
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 90%;
+    max-height: 90%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 10px;
+}
+
+/* Filtros */
+.filter-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background-color: var(--highlight-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), 
+                color var(--transition-speed),
+                transform 0.2s;
+    font-size: 14px;
+    touch-action: manipulation;
+}
+
+.filter-btn:active {
+    transform: scale(0.98);
+}
+
+.filter-btn.active {
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
+    border-color: var(--primary-btn);
+}
+
+/* Encabezados */
+h2 {
+    margin-bottom: 15px;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+    font-size: 18px;
+}
+
+.section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.count-badge {
+    background-color: var(--primary-btn);
+    color: white;
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+/* Mensajes vacíos */
+.empty-message {
+    text-align: center;
+    color: #777;
+    font-style: italic;
+    padding: 15px;
+}
+
+/* Detalles de pedido */
+.details-cell {
+    font-size: 12px;
+    line-height: 1.3;
+}
+
+/* App instalación guía */
+.install-guide {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0,0,0,0.85);
+    color: white;
+    padding: 15px;
+    font-size: 14px;
+    display: none;
+    z-index: 10000;
+}
+
+.install-guide p {
+    margin-bottom: 10px;
+}
+
+.install-guide button {
+    background-color: white;
+    color: black;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+/* Mejoras específicas para iOS */
+@supports (-webkit-touch-callout: none) {
+    /* CSS específico para iOS */
+    input, button, textarea, select {
+        font-size: 16px; /* Previene zoom automático */
+    }
+    
+    /* Corrige el comportamiento de botones en iOS */
+    button, .option-btn, .finish-btn, .action-btn, .back-btn, .category-btn, .dish-btn, .filter-btn {
+        touch-action: manipulation;
+    }
 }
