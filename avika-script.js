@@ -577,9 +577,6 @@ function markDeliveryArrival(id) {
     
     // Registra el tiempo de entrega y completa el pedido
     order.deliveryArrivalTime = new Date();
-    order.deliveryArrival
-    // Registra el tiempo de entrega y completa el pedido
-    order.deliveryArrivalTime = new Date();
     order.deliveryArrivalTimeFormatted = formatTime(order.deliveryArrivalTime);
     
     // Calcular tiempo total desde inicio hasta entrega
@@ -799,6 +796,7 @@ function calcularPromedios() {
     });
     
     // Crear tabla HTML con resultados
+    // Crear tabla HTML con resultados
     var contenidoPromedio = '<div style="margin-bottom: 20px;">';
     contenidoPromedio += '<h2>Promedio de Preparación por Categoría</h2>';
     contenidoPromedio += '<table style="width: 100%; border-collapse: collapse;">';
@@ -846,194 +844,13 @@ function calcularPromedios() {
     $('#promedios-modal').addClass('active');
 }
 
-// Primero, asegúrate de incluir SheetJS en tu index.html:
-// <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
+// Función para exportar a un reporte HTML que se abre en nueva pestaña
 function exportarDatos() {
     if (completedOrders.length === 0) {
         showNotification('No hay datos para exportar');
         return;
     }
     
-    // Crear datos para Excel con todas las columnas importantes
-    var ws_data = [
-        ['Platillo', 'Categoría', 'Cantidad', 'Tipo de Servicio', 
-         'Inicio Preparación', 'Fin Preparación', 'Tiempo Total Preparación',
-         'Salida Repartidor', 'Llegada Repartidor', 'Tiempo de Entrega']
-    ];
-    
-    // Agregar cada orden completada con todos los tiempos
-    completedOrders.forEach(function(order) {
-        ws_data.push([
-            order.dish,
-            categoryNames[order.category],
-            order.quantity,
-            getServiceName(order.serviceType),
-            order.startTimeFormatted,
-            order.endTimeFormatted,
-            order.prepTime,
-            order.deliveryDepartureTimeFormatted || '',
-            order.deliveryArrivalTimeFormatted || '',
-            order.deliveryTime || ''
-        ]);
-    });
-    
-    // Crear libro y hoja
-    var wb = XLSX.utils.book_new();
-    var ws = XLSX.utils.aoa_to_sheet(ws_data);
-    
-    // Aplicar formato a la hoja
-    ws['!cols'] = [
-        {wch: 20}, // Platillo
-        {wch: 15}, // Categoría
-        {wch: 8},  // Cantidad
-        {wch: 12}, // Tipo de Servicio
-        {wch: 15}, // Inicio Preparación
-        {wch: 15}, // Fin Preparación
-        {wch: 15}, // Tiempo Total Preparación
-        {wch: 15}, // Salida Repartidor
-        {wch: 15}, // Llegada Repartidor
-        {wch: 15}  // Tiempo de Entrega
-    ];
-    
-    // Añadir hoja al libro
-    XLSX.utils.book_append_sheet(wb, ws, "Reporte Avika");
-    
-    // Crear hoja de promedios
-    var promedios_data = calcularDatosPromedios();
-    var ws_promedios = XLSX.utils.aoa_to_sheet(promedios_data);
-    XLSX.utils.book_append_sheet(wb, ws_promedios, "Promedios");
-    
-    // Generar archivo
-    var hoy = new Date();
-    var fecha = hoy.getFullYear() + '-' + padZero(hoy.getMonth() + 1) + '-' + padZero(hoy.getDate());
-    var fileName = 'avika_tiempos_' + fecha + '.xlsx';
-    
-    // En iOS
-    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    if (isIOS) {
-        try {
-            // Método 1: Usar FileSaver.js (necesita incluir FileSaver.js en index.html)
-            if (typeof saveAs === 'function') {
-                var wbout = XLSX.write(wb, {bookType:'xlsx', type:'array'});
-                var blob = new Blob([wbout], {type:'application/octet-stream'});
-                saveAs(blob, fileName);
-                showNotification('Excel generado. Usa la opción guardar.');
-                return;
-            }
-            
-            // Método 2: URL directa con content-disposition
-            var wbout = XLSX.write(wb, {bookType:'xlsx', type:'base64'});
-            var dataUrl = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + wbout;
-            
-            // Crear un iframe temporal para forzar la descarga
-            var downloadFrame = document.createElement('iframe');
-            downloadFrame.style.display = 'none';
-            document.body.appendChild(downloadFrame);
-            
-            downloadFrame.onload = function() {
-                setTimeout(function() {
-                    document.body.removeChild(downloadFrame);
-                }, 1000);
-            };
-            
-            downloadFrame.src = dataUrl;
-            showNotification('Archivo Excel generado. Busca en tus descargas o archivos.');
-            
-            // También abrimos una nueva ventana/pestaña como respaldo
-            window.open(dataUrl, '_blank');
-        } catch (e) {
-            console.error('Error al exportar Excel:', e);
-            
-            // Método de respaldo: Abrir un reporte en una nueva pestaña
-            exportarReporteHTML();
-            showNotification('No se pudo generar Excel. Se ha creado un reporte HTML.');
-        }
-    } else {
-        // Para otros dispositivos, usar método de descarga directa
-        XLSX.writeFile(wb, fileName);
-        showNotification('Datos exportados correctamente');
-    }
-}
-
-// Función auxiliar para calcular datos de promedios
-function calcularDatosPromedios() {
-    // Agrupar por categoría
-    var categoriasTiempos = {};
-    var totalPorCategoria = {};
-    
-    // Para tiempos de entrega
-    var tiempoTotalEntrega = 0;
-    var totalEntregas = 0;
-    
-    // Inicializar contadores para cada categoría
-    for (var key in categoryNames) {
-        categoriasTiempos[key] = 0;
-        totalPorCategoria[key] = 0;
-    }
-    
-    // Sumar tiempos por categoría
-    completedOrders.forEach(function(order) {
-        // Ignorar órdenes sin tiempo de preparación completo
-        if (!order.endTime) return;
-        
-        var categoria = order.category;
-        var tiempoEnSegundos = (new Date(order.endTime) - new Date(order.startTime)) / 1000;
-        
-        categoriasTiempos[categoria] += tiempoEnSegundos;
-        totalPorCategoria[categoria]++;
-        
-        // Calcular estadísticas de entrega si están disponibles
-        if (order.deliveryDepartureTime && order.deliveryArrivalTime) {
-            var tiempoEntregaSegundos = (new Date(order.deliveryArrivalTime) - new Date(order.deliveryDepartureTime)) / 1000;
-            tiempoTotalEntrega += tiempoEntregaSegundos;
-            totalEntregas++;
-        }
-    });
-    
-    // Crear datos para Excel
-    var promedios_data = [
-        ['Categoría', 'Tiempo Promedio (minutos)', 'Cantidad de Platillos']
-    ];
-    
-    for (var categoria in categoriasTiempos) {
-        if (totalPorCategoria[categoria] > 0) {
-            var tiempoPromedio = categoriasTiempos[categoria] / totalPorCategoria[categoria];
-            var minutos = Math.floor(tiempoPromedio / 60);
-            var segundos = Math.floor(tiempoPromedio % 60);
-            
-            promedios_data.push([
-                categoryNames[categoria],
-                minutos + ':' + padZero(segundos),
-                totalPorCategoria[categoria]
-            ]);
-        }
-    }
-    
-    // Agregar un espacio
-    promedios_data.push([]);
-    promedios_data.push([]);
-    
-    // Agregar estadísticas de entrega si hay datos
-    if (totalEntregas > 0) {
-        var tiempoPromedioEntrega = tiempoTotalEntrega / totalEntregas;
-        var minutosEntrega = Math.floor(tiempoPromedioEntrega / 60);
-        var segundosEntrega = Math.floor(tiempoPromedioEntrega % 60);
-        
-        promedios_data.push(['Estadísticas de Entregas a Domicilio']);
-        promedios_data.push(['Concepto', 'Tiempo Promedio (minutos)', 'Cantidad']);
-        promedios_data.push([
-            'Tiempo de Entrega (desde salida hasta llegada)',
-            minutosEntrega + ':' + padZero(segundosEntrega),
-            totalEntregas
-        ]);
-    }
-    
-    return promedios_data;
-}
-
-// Método de respaldo: exportar como HTML
-function exportarReporteHTML() {
     // Crear tabla HTML para exportación
     var tablaHtml = '<html><head>';
     tablaHtml += '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
@@ -1054,11 +871,11 @@ function exportarReporteHTML() {
     tablaHtml += '<h1>Reporte de Tiempos Avika - ' + fecha + '</h1>';
     
     tablaHtml += '<div class="download-note">';
-    tablaHtml += '<p><strong>Nota:</strong> Para guardar este reporte como PDF:</p>';
+    tablaHtml += '<p><strong>Nota:</strong> Para guardar este reporte:</p>';
     tablaHtml += '<ol>';
     tablaHtml += '<li>Toca el botón compartir en Safari (ícono cuadrado con flecha hacia arriba)</li>';
     tablaHtml += '<li>Selecciona "Imprimir"</li>';
-    tablaHtml += '<li>Usa la función de vista previa y guarda como PDF</li>';
+    tablaHtml += '<li>En la vista previa, pellizca para ampliar y toca "Guardar en PDF"</li>';
     tablaHtml += '</ol>';
     tablaHtml += '</div>';
     
@@ -1088,71 +905,58 @@ function exportarReporteHTML() {
     tablaHtml += '</table>';
     tablaHtml += '</div>';
     
-    // Añadir secciones de promedios
-    var datosPromedios = calcularDatosPromedios();
+    // Calcular y añadir promedios por categoría
+    // Agrupar por categoría
+    var categoriasTiempos = {};
+    var totalPorCategoria = {};
     
-    tablaHtml += '<h2>Promedios por Categoría</h2>';
-    tablaHtml += '<table>';
+    // Para tiempos de entrega
+    var tiempoTotalEntrega = 0;
+    var totalEntregas = 0;
     
-    // Primera sección: promedios por categoría
-    var enSeccionCategorias = true;
-    var enSeccionEntregas = false;
+    // Inicializar contadores para cada categoría
+    for (var key in categoryNames) {
+        categoriasTiempos[key] = 0;
+        totalPorCategoria[key] = 0;
+    }
     
-    datosPromedios.forEach(function(fila, index) {
-        // Saltar la fila de encabezado de la primera sección
-        if (index === 0) {
-            tablaHtml += '<tr>';
-            fila.forEach(function(celda) {
-                tablaHtml += '<th>' + celda + '</th>';
-            });
-            tablaHtml += '</tr>';
-            return;
-        }
+    // Sumar tiempos por categoría
+    completedOrders.forEach(function(order) {
+        if (!order.endTime) return;
         
-        // Detectar filas vacías (cambio de sección)
-        if (fila.length === 0) {
-            enSeccionCategorias = false;
-            return;
-        }
+        var categoria = order.category;
+        var tiempoEnSegundos = (new Date(order.endTime) - new Date(order.startTime)) / 1000;
         
-        // Detectar encabezado de sección de entregas
-        if (fila.length === 1 && fila[0] === 'Estadísticas de Entregas a Domicilio') {
-            enSeccionEntregas = true;
-            tablaHtml += '</table><h2>Estadísticas de Entregas</h2><table>';
-            return;
-        }
+        categoriasTiempos[categoria] += tiempoEnSegundos;
+        totalPorCategoria[categoria]++;
         
-        // Detectar encabezado de tabla de entregas
-        if (enSeccionEntregas && fila[0] === 'Concepto') {
-            tablaHtml += '<tr>';
-            fila.forEach(function(celda) {
-                tablaHtml += '<th>' + celda + '</th>';
-            });
-            tablaHtml += '</tr>';
-            return;
-        }
-        
-        // Filas de datos
-        if ((enSeccionCategorias && fila.length === 3) || 
-            (enSeccionEntregas && fila.length === 3)) {
-            tablaHtml += '<tr>';
-            fila.forEach(function(celda) {
-                tablaHtml += '<td>' + celda + '</td>';
-            });
-            tablaHtml += '</tr>';
+        // Calcular estadísticas de entrega
+        if (order.deliveryDepartureTime && order.deliveryArrivalTime) {
+            var tiempoEntregaSegundos = (new Date(order.deliveryArrivalTime) - new Date(order.deliveryDepartureTime)) / 1000;
+            tiempoTotalEntrega += tiempoEntregaSegundos;
+            totalEntregas++;
         }
     });
     
-    tablaHtml += '</table>';
-    tablaHtml += '</body></html>';
+    // Tabla de promedios
+    tablaHtml += '<h2>Promedios por Categoría</h2>';
+    tablaHtml += '<table>';
+    tablaHtml += '<tr><th>Categoría</th><th>Tiempo Promedio</th><th>Cantidad</th></tr>';
     
-    // Crear archivo y enlace para abrir
-    var htmlBlob = new Blob([tablaHtml], {type: 'text/html'});
-    var htmlUrl = URL.createObjectURL(htmlBlob);
-    
-    // Abrir en una nueva ventana/pestaña
-    window.open(htmlUrl, '_blank');
-}
+    // Añadir filas para cada categoría
+    for (var categoria in categoriasTiempos) {
+        if (totalPorCategoria[categoria] > 0) {
+            var tiempoPromedio = categoriasTiempos[categoria] / totalPorCategoria[categoria];
+            var minutos = Math.floor(tiempoPromedio / 60);
+            var segundos = Math.floor(tiempoPromedio % 60);
+            
+            tablaHtml += '<tr>';
+            tablaHtml += '<td>' + categoryNames[categoria] + '</td>';
+            tablaHtml += '<td>' + padZero(minutos) + ':' + padZero(segundos) + ' min</td>';
+            tablaHtml += '<td>' + totalPorCategoria[categoria] + '</td>';
+            tablaHtml += '</tr>';
+        }
+    }
     
     tablaHtml += '</table>';
     
@@ -1175,100 +979,13 @@ function exportarReporteHTML() {
     
     tablaHtml += '</body></html>';
     
-    // Crear archivo y enlace para descargar/ver
+    // Crear archivo y enlace para abrir
     var htmlBlob = new Blob([tablaHtml], {type: 'text/html'});
     var htmlUrl = URL.createObjectURL(htmlBlob);
     
-    // En iOS, abrir en una nueva ventana/pestaña
+    // Abrir en una nueva ventana/pestaña
     showNotification('Abriendo el reporte en una nueva ventana...');
     window.open(htmlUrl, '_blank');
-}
-
-// Función para crear la hoja de promedios
-function crearHojaPromedios(wb) {
-    // Agrupar por categoría
-    var categoriasTiempos = {};
-    var totalPorCategoria = {};
-    
-    // Para tiempos de entrega
-    var tiempoTotalEntrega = 0;
-    var totalEntregas = 0;
-    
-    // Inicializar contadores para cada categoría
-    for (var key in categoryNames) {
-        categoriasTiempos[key] = 0;
-        totalPorCategoria[key] = 0;
-    }
-    
-    // Sumar tiempos por categoría
-    completedOrders.forEach(function(order) {
-        // Ignorar órdenes sin tiempo de preparación completo
-        if (!order.endTime) return;
-        
-        var categoria = order.category;
-        var tiempoEnSegundos = (new Date(order.endTime) - new Date(order.startTime)) / 1000;
-        
-        categoriasTiempos[categoria] += tiempoEnSegundos;
-        totalPorCategoria[categoria]++;
-        
-        // Calcular estadísticas de entrega si están disponibles
-        if (order.deliveryDepartureTime && order.deliveryArrivalTime) {
-            var tiempoEntregaSegundos = (new Date(order.deliveryArrivalTime) - new Date(order.deliveryDepartureTime)) / 1000;
-            tiempoTotalEntrega += tiempoEntregaSegundos;
-            totalEntregas++;
-        }
-    });
-    
-    // Crear datos para Excel
-    var promedios_data = [
-        ['Categoría', 'Tiempo Promedio (minutos)', 'Cantidad de Platillos']
-    ];
-    
-    for (var categoria in categoriasTiempos) {
-        if (totalPorCategoria[categoria] > 0) {
-            var tiempoPromedio = categoriasTiempos[categoria] / totalPorCategoria[categoria];
-            var minutos = Math.floor(tiempoPromedio / 60);
-            var segundos = Math.floor(tiempoPromedio % 60);
-            
-            promedios_data.push([
-                categoryNames[categoria],
-                minutos + ':' + padZero(segundos),
-                totalPorCategoria[categoria]
-            ]);
-        }
-    }
-    
-    // Agregar un espacio
-    promedios_data.push([]);
-    promedios_data.push([]);
-    
-    // Agregar estadísticas de entrega si hay datos
-    if (totalEntregas > 0) {
-        var tiempoPromedioEntrega = tiempoTotalEntrega / totalEntregas;
-        var minutosEntrega = Math.floor(tiempoPromedioEntrega / 60);
-        var segundosEntrega = Math.floor(tiempoPromedioEntrega % 60);
-        
-        promedios_data.push(['Estadísticas de Entregas a Domicilio']);
-        promedios_data.push(['Concepto', 'Tiempo Promedio (minutos)', 'Cantidad']);
-        promedios_data.push([
-            'Tiempo de Entrega (desde salida hasta llegada)',
-            minutosEntrega + ':' + padZero(segundosEntrega),
-            totalEntregas
-        ]);
-    }
-    
-    // Crear hoja
-    var ws_promedios = XLSX.utils.aoa_to_sheet(promedios_data);
-    
-    // Aplicar formato a la hoja
-    ws_promedios['!cols'] = [
-        {wch: 30}, // Categoría/Concepto
-        {wch: 25}, // Tiempo Promedio
-        {wch: 20}  // Cantidad
-    ];
-    
-    // Añadir hoja al libro
-    XLSX.utils.book_append_sheet(wb, ws_promedios, "Promedios");
 }
 
 // Función para guardar datos automáticamente en el almacenamiento local
