@@ -1,6 +1,4 @@
 // order-service.js - Lógica de pedidos y temporizadores
-
-// Estado de la aplicación
 Avika.data = {
     currentCategory: '',
     currentDish: '',
@@ -36,7 +34,8 @@ Avika.orders = {
             preparation.coldKitchenFinished = false;
         }
         
-        Avika.data.pendingOrders.push(preparation);
+        // Crear una copia para evitar referencias directas
+        Avika.data.pendingOrders.push(JSON.parse(JSON.stringify(preparation)));
         
         Avika.ui.updatePendingTable();
         Avika.storage.guardarDatosLocales();
@@ -79,6 +78,7 @@ Avika.orders = {
             Avika.storage.guardarDatosLocales();
         }
     },
+
     finishColdKitchen: function(id) {
         var orderIndex = -1;
         for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
@@ -159,6 +159,7 @@ Avika.orders = {
         Avika.ui.updatePendingTable();
         Avika.storage.guardarDatosLocales();
     },
+
     // Esta función registra la entrega al cliente
     markDeliveryArrival: function(id) {
         var orderIndex = -1;
@@ -198,12 +199,17 @@ Avika.orders = {
         
         order.deliveryTime = Avika.ui.padZero(deliveryMins) + ':' + Avika.ui.padZero(deliverySecs) + ' minutos';
         
-        // Mover a completados
-        Avika.data.completedOrders.unshift(order);
+        // Crear una copia profunda del objeto para evitar problemas de referencia
+        var orderCopy = JSON.parse(JSON.stringify(order));
+        
+        // Mover a completados (usando la copia)
+        Avika.data.completedOrders.unshift(orderCopy);
+        
+        // Eliminar de pendientes
         Avika.data.pendingOrders.splice(orderIndex, 1);
         
         Avika.ui.showNotification('¡' + order.dish + ' entregado al cliente! Tiempo total: ' + 
-                        prepTimeFormatted + ', Tiempo de entrega: ' + order.deliveryTime);
+                      prepTimeFormatted + ', Tiempo de entrega: ' + order.deliveryTime);
         
         Avika.ui.updatePendingTable();
         Avika.ui.updateCompletedTable();
@@ -235,7 +241,13 @@ Avika.orders = {
         order.endTimeFormatted = Avika.ui.formatTime(endTime);
         order.prepTime = prepTimeFormatted;
         
-        Avika.data.completedOrders.unshift(order);
+        // Crear una copia profunda del objeto para evitar problemas de referencia
+        var orderCopy = JSON.parse(JSON.stringify(order));
+        
+        // Mover a completados (usando la copia)
+        Avika.data.completedOrders.unshift(orderCopy);
+        
+        // Eliminar de pendientes
         Avika.data.pendingOrders.splice(orderIndex, 1);
         
         Avika.ui.showNotification('¡' + order.dish + ' finalizado en ' + prepTimeFormatted + '!');
