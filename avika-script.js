@@ -12,21 +12,6 @@ var completedOrders = [];
 var timerInterval;
 
 // Opciones de personalización predeterminadas
-var
-// Variables globales (estado)
-var currentCategory = '';
-var currentDish = '';
-var currentCustomizations = [];
-var currentService = 'comedor';
-var currentQuantity = 1;
-var isSpecialCombo = false;
-
-// Arrays para almacenar pedidos
-var pendingOrders = [];
-var completedOrders = [];
-var timerInterval;
-
-// Opciones de personalización predeterminadas
 var customizationOptions = {
     'sin-alga': 'Sin Alga',
     'extra-picante': 'Extra Picante',
@@ -743,40 +728,8 @@ function showPromedios() {
         } else if (item.promedio >= 10) {
             timeClass = 'time-warning';
         } else if (item.promedio >= 5) {
-            timeClass = 'time-good';
-        }
-        
-        html += `
-            <tr>
-                <td>${item.platillo}</td>
-                <td class="${timeClass}">${item.promedio.toFixed(1)} min</td>
-                <td>${item.count}</td>
-            </tr>
-        `;
-    });
-    
-    html += `
-            </tbody>
-        </table>
-    `;
-    
-    container.innerHTML += html;
-    document.getElementById('pro// Variables globales (estado)
-var currentCategory = '';
-var currentDish = '';
-var currentCustomizations = [];
-var currentService = 'comedor';
-var currentQuantity = 1;
-var isSpecialCombo = false;
-
-// Arrays para almacenar pedidos
-var pendingOrders = [];
-var completedOrders = [];
-var timerInterval;
-
-// Opciones de personalización predeterminadas
-var
-// Variables globales (estado)
+            timeClass = 'time-goo
+            // Variables globales (estado)
 var currentCategory = '';
 var currentDish = '';
 var currentCustomizations = [];
@@ -1569,18 +1522,4 @@ function formatDateForFile(date) {
     const mins = padZero(date.getMinutes());
     
     return `${year}${month}${day}_${hours}${mins}`;
-}// Variables globales (estado)
-var currentCategory = '';
-var currentDish = '';
-var currentCustomizations = [];
-var currentService = 'comedor';
-var currentQuantity = 1;
-var isSpecialCombo = false;
-
-// Arrays para almacenar pedidos
-var pendingOrders = [];
-var completedOrders = [];
-var timerInterval;
-
-// Opciones de personalización predeterminadas
-var
+}
