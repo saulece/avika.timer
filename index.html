@@ -5,18 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="#e74c3c">
     <title>Avika - Temporizador de Sushi</title>
+    
+    <!-- jQuery CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    
+    <!-- Hammer.js para mejor manejo de eventos táctiles -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    
+    <!-- CSS principal -->
     <link rel="stylesheet" href="avika-style.css">
+    <link rel="stylesheet" href="ios-style.css">
+    
     <!-- Ícono para agregar a la pantalla de inicio en iOS -->
     <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAKElNQgAAAAk1BMVEX////+FBwAAAD+GiP+Exv+ERr+ICn+Hif/KjP/pKf+DhiUlJTOzs7v7+/J29zZ2dnk5OTCwsL09PS5ubkcHBywsLDp6eldXV1ubm5TU1OFhYWlpaU7OztCQkJLS0ssLCwQEBCampp3d3cYGBiAgICnp6dOTk7T09MzMzM5OTkjIyNqamp6enq0tLRFRUUqKirCEy1uAAAE4ElEQVR4nO2b15aqMBSGgdBBKaKIDZVR7Mz7v90JWLDOGXDYAnvmyvfC18U/IZudfDG1Wh6Px+PxeDwej8fj8Xg8Ho/H4/F4PB6Px+P5/wijoTWJRVRUoXk88jECuCKQ54thzGM0H1MeQVFSm/FYfXTTOQHfFszzRPBTXgP0aPUO5llCR2wRvlcQGQA6jwS+JsCr3tZA64BxuLSMRqNoqwnPR8L8+kKqFG3JdzWOPp5D+Fc5Pk6gG30Jg4sMx7HI70lH7XA1DM9HQWQG3Xgm0Nf9SN0Z5vQofqRR+cO4n0ajQzQaxpvEwviJwvEoVt0RwmXMRmIl7RYiiJd4HWs+3QroeieOVXIf++IjOjBq7j/kx0HE1uP0IhyExXHzSfDI8ufTfHm2lQ2XWfgw/CiaZdQHAhNovIyuxTLbX+bjdZYe6bHs3HA+FsVrBDGa5X/Fw8WJQYP2O2G5Iu9Ydqq0NKbZR9vOosX8cpqN0Tg7Xjw4KsC+y4bJPFZvI2sN6nYLsE8JCYTpSLdQtJsFw9Ut4PKl4pPQsG59+JAcbYF1tIJeDEV6Ixyi5Vq/j5cwFDM9bm0ZLdMYj9eC7Ul0ZMo+XKIYRkOMD+qtwbiBg/bEOuDLR5ZH9dgkXl1JtyZ9X6LM94N75UjLdGm8N1lhxO+8vkYZYF97sZbFdUQS/S3UZL6+6D9ZbN8J1Hh1C3Wc8OxK+rBcX5dbXvCylnQYfj96YpTLBpUafp2PH9nYMy9saTrXaVH0Y7Zt3oTL66lVNNJfk7VIVqfxaZl+PpprJr+tBk8RTKDX1qDVXm1Zr6Mfj2Xn1gDq9PbzmcByNnw0Vkj7SDbHy06qO5hBK+fV6q4B9tBqTdp2Mm8TaHaL9Nm2kc4ZQPOZ4JfsmMH+Gmi1X2QH6/bKHLq1stvtJrMGQXOzQT1kZpkOvIBWnb8FtFoYOwOuoM1uxBnE+hvoFjOzpnNtwJefwPRrnAG0ctxmoeuRbaCb7Ic76KaBTaEz+mIw3UDCo3EJyMoAHnQYfXEJgwYMXnQYfXEJqIZHGUxLATaNO8j1zl0NLp87hUfjwfXMXR0ujzuFRxMWLUdUh5vjTuPRhEfLZZdDR9HYoPFoTJy7VR5ySXHk6J7Fo1npcd+PuPDodv0MHs2hGhq+kU6WLdWC0ng0oWoOp7g8tTrbFXg0oS57V2pGY1LtrcKjCcdUr7VrqfZYiUcTPsrXUy4S2Aq/r/FowtO0J67UmEFNeE9N7tOkHuUeLe2b3KOpIdLvVXrLq/yO3qPpfXZy5SCXXNZ5dD6jyJeWq1O9x4JHkyucnq2OU7+j9Vh4tJSHl15LR1S/U/BYeLScUDiKQYzLH9d6bHk0YSGdAJfKoR1SzWPLowfF5YkTHsM6USOPDY9WnkTg1yLYQvNJNY9Nj2/lXeVWO1WPjxx2ys/FdV2+26nHvkerc8eSx7oN9Onv0f6jRwu0PPpw9ujj0aNlOj06e/Tp6NGKRnj0/t+jH/8evfn36M8nj958evTm06NH+t09evPl0an/6dGTzx69+fXozbNHbx49/Pbo/btn797zO/Hny6Mn3x5NvPh2buPDl39/Hj34Ac7CsvQYBn07AAAAAElFTkSuQmCC">
-    <!-- Prevenir el zoom en dispositivos móviles -->
+    
+    <!-- Pantallas de inicio para diferentes dispositivos iOS -->
+    <link rel="apple-touch-startup-image" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAKElNQgAAAAk1BMVEX////+FBwAAAD+GiP+Exv+ERr+ICn+Hif/KjP/pKf+DhiUlJTOzs7v7+/J29zZ2dnk5OTCwsL09PS5ubkcHBywsLDp6eldXV1ubm5TU1OFhYWlpaU7OztCQkJLS0ssLCwQEBCampp3d3cYGBiAgICnp6dOTk7T09MzMzM5OTkjIyNqamp6enq0tLRFRUUqKirCEy1uAAAE4ElEQVR4nO2b15aqMBSGgdBBKaKIDZVR7Mz7v90JWLDOGXDYAnvmyvfC18U/IZudfDG1Wh6Px+PxeDwej8fj8Xg8Ho/H4/F4PB6Px+P5/wijoTWJRVRUoXk88jECuCKQ54thzGM0H1MeQVFSm/FYfXTTOQHfFszzRPBTXgP0aPUO5llCR2wRvlcQGQA6jwS+JsCr3tZA64BxuLSMRqNoqwnPR8L8+kKqFG3JdzWOPp5D+Fc5Pk6gG30Jg4sMx7HI70lH7XA1DM9HQWQG3Xgm0Nf9SN0Z5vQofqRR+cO4n0ajQzQaxpvEwviJwvEoVt0RwmXMRmIl7RYiiJd4HWs+3QroeieOVXIf++IjOjBq7j/kx0HE1uP0IhyExXHzSfDI8ufTfHm2lQ2XWfgw/CiaZdQHAhNovIyuxTLbX+bjdZYe6bHs3HA+FsVrBDGa5X/Fw8WJQYP2O2G5Iu9Ydqq0NKbZR9vOosX8cpqN0Tg7Xjw4KsC+y4bJPFZvI2sN6nYLsE8JCYTpSLdQtJsFw9Ut4PKl4pPQsG59+JAcbYF1tIJeDEV6Ixyi5Vq/j5cwFDM9bm0ZLdMYj9eC7Ul0ZMo+XKIYRkOMD+qtwbiBg/bEOuDLR5ZH9dgkXl1JtyZ9X6LM94N75UjLdGm8N1lhxO+8vkYZYF97sZbFdUQS/S3UZL6+6D9ZbN8J1Hh1C3Wc8OxK+rBcX5dbXvCylnQYfj96YpTLBpUafp2PH9nYMy9saTrXaVH0Y7Zt3oTL66lVNNJfk7VIVqfxaZl+PpprJr+tBk8RTKDX1qDVXm1Zr6Mfj2Xn1gDq9PbzmcByNnw0Vkj7SDbHy06qO5hBK+fV6q4B9tBqTdp2Mm8TaHaL9Nm2kc4ZQPOZ4JfsmMH+Gmi1X2QH6/bKHLq1stvtJrMGQXOzQT1kZpkOvIBWnb8FtFoYOwOuoM1uxBnE+hvoFjOzpnNtwJefwPRrnAG0ctxmoeuRbaCb7Ic76KaBTaEz+mIw3UDCo3EJyMoAHnQYfXEJgwYMXnQYfXEJqIZHGUxLATaNO8j1zl0NLp87hUfjwfXMXR0ujzuFRxMWLUdUh5vjTuPRhEfLZZdDR9HYoPFoTJy7VR5ySXHk6J7Fo1npcd+PuPDodv0MHs2hGhq+kU6WLdWC0ng0oWoOp7g8tTrbFXg0oS57V2pGY1LtrcKjCcdUr7VrqfZYiUcTPsrXUy4S2Aq/r/FowtO0J67UmEFNeE9N7tOkHuUeLe2b3KOpIdLvVXrLq/yO3qPpfXZy5SCXXNZ5dD6jyJeWq1O9x4JHkyucnq2OU7+j9Vh4tJSHl15LR1S/U/BYeLScUDiKQYzLH9d6bHk0YSGdAJfKoR1SzWPLowfF5YkTHsM6USOPDY9WnkTg1yLYQvNJNY9Nj2/lXeVWO1WPjxx2ys/FdV2+26nHvkerc8eSx7oN9Onv0f6jRwu0PPpw9ujj0aNlOj06e/Tp6NGKRnj0/t+jH/8evfn36M8nj958evTm06NH+t09evPl0an/6dGTzx69+fXozbNHbx49/Pbo/btn797zO/Hny6Mn3x5NvPh2buPDl39/Hj34Ac7CsvQYBn07AAAAAElFTkSuQmCC" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)">
+    <link rel="apple-touch-startup-image" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAKElNQgAAAAk1BMVEX////+FBwAAAD+GiP+Exv+ERr+ICn+Hif/KjP/pKf+DhiUlJTOzs7v7+/J29zZ2dnk5OTCwsL09PS5ubkcHBywsLDp6eldXV1ubm5TU1OFhYWlpaU7OztCQkJLS0ssLCwQEBCampp3d3cYGBiAgICnp6dOTk7T09MzMzM5OTkjIyNqamp6enq0tLRFRUUqKirCEy1uAAAE4ElEQVR4nO2b15aqMBSGgdBBKaKIDZVR7Mz7v90JWLDOGXDYAnvmyvfC18U/IZudfDG1Wh6Px+PxeDwej8fj8Xg8Ho/H4/F4PB6Px+P5/wijoTWJRVRUoXk88jECuCKQ54thzGM0H1MeQVFSm/FYfXTTOQHfFszzRPBTXgP0aPUO5llCR2wRvlcQGQA6jwS+JsCr3tZA64BxuLSMRqNoqwnPR8L8+kKqFG3JdzWOPp5D+Fc5Pk6gG30Jg4sMx7HI70lH7XA1DM9HQWQG3Xgm0Nf9SN0Z5vQofqRR+cO4n0ajQzQaxpvEwviJwvEoVt0RwmXMRmIl7RYiiJd4HWs+3QroeieOVXIf++IjOjBq7j/kx0HE1uP0IhyExXHzSfDI8ufTfHm2lQ2XWfgw/CiaZdQHAhNovIyuxTLbX+bjdZYe6bHs3HA+FsVrBDGa5X/Fw8WJQYP2O2G5Iu9Ydqq0NKbZR9vOosX8cpqN0Tg7Xjw4KsC+y4bJPFZvI2sN6nYLsE8JCYTpSLdQtJsFw9Ut4PKl4pPQsG59+JAcbYF1tIJeDEV6Ixyi5Vq/j5cwFDM9bm0ZLdMYj9eC7Ul0ZMo+XKIYRkOMD+qtwbiBg/bEOuDLR5ZH9dgkXl1JtyZ9X6LM94N75UjLdGm8N1lhxO+8vkYZYF97sZbFdUQS/S3UZL6+6D9ZbN8J1Hh1C3Wc8OxK+rBcX5dbXvCylnQYfj96YpTLBpUafp2PH9nYMy9saTrXaVH0Y7Zt3oTL66lVNNJfk7VIVqfxaZl+PpprJr+tBk8RTKDX1qDVXm1Zr6Mfj2Xn1gDq9PbzmcByNnw0Vkj7SDbHy06qO5hBK+fV6q4B9tBqTdp2Mm8TaHaL9Nm2kc4ZQPOZ4JfsmMH+Gmi1X2QH6/bKHLq1stvtJrMGQXOzQT1kZpkOvIBWnb8FtFoYOwOuoM1uxBnE+hvoFjOzpnNtwJefwPRrnAG0ctxmoeuRbaCb7Ic76KaBTaEz+mIw3UDCo3EJyMoAHnQYfXEJgwYMXnQYfXEJqIZHGUxLATaNO8j1zl0NLp87hUfjwfXMXR0ujzuFRxMWLUdUh5vjTuPRhEfLZZdDR9HYoPFoTJy7VR5ySXHk6J7Fo1npcd+PuPDodv0MHs2hGhq+kU6WLdWC0ng0oWoOp7g8tTrbFXg0oS57V2pGY1LtrcKjCcdUr7VrqfZYiUcTPsrXUy4S2Aq/r/FowtO0J67UmEFNeE9N7tOkHuUeLe2b3KOpIdLvVXrLq/yO3qPpfXZy5SCXXNZ5dD6jyJeWq1O9x4JHkyucnq2OU7+j9Vh4tJSHl15LR1S/U/BYeLScUDiKQYzLH9d6bHk0YSGdAJfKoR1SzWPLowfF5YkTHsM6USOPDY9WnkTg1yLYQvNJNY9Nj2/lXeVWO1WPjxx2ys/FdV2+26nHvkerc8eSx7oN9Onv0f6jRwu0PPpw9ujj0aNlOj06e/Tp6NGKRnj0/t+jH/8evfn36M8nj958evTm06NH+t09evPl0an/6dGTzx69+fXozbNHbx49/Pbo/btn797zO/Hny6Mn3x5NvPh2buPDl39/Hj34Ac7CsvQYBn07AAAAAElFTkSuQmCC" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)">
+    <link rel="apple-touch-startup-image" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAKElNQgAAAAk1BMVEX////+FBwAAAD+GiP+Exv+ERr+ICn+Hif/KjP/pKf+DhiUlJTOzs7v7+/J29zZ2dnk5OTCwsL09PS5ubkcHBywsLDp6eldXV1ubm5TU1OFhYWlpaU7OztCQkJLS0ssLCwQEBCampp3d3cYGBiAgICnp6dOTk7T09MzMzM5OTkjIyNqamp6enq0tLRFRUUqKirCEy1uAAAE4ElEQVR4nO2b15aqMBSGgdBBKaKIDZVR7Mz7v90JWLDOGXDYAnvmyvfC18U/IZudfDG1Wh6Px+PxeDwej8fj8Xg8Ho/H4/F4PB6Px+P5/wijoTWJRVRUoXk88jECuCKQ54thzGM0H1MeQVFSm/FYfXTTOQHfFszzRPBTXgP0aPUO5llCR2wRvlcQGQA6jwS+JsCr3tZA64BxuLSMRqNoqwnPR8L8+kKqFG3JdzWOPp5D+Fc5Pk6gG30Jg4sMx7HI70lH7XA1DM9HQWQG3Xgm0Nf9SN0Z5vQofqRR+cO4n0ajQzQaxpvEwviJwvEoVt0RwmXMRmIl7RYiiJd4HWs+3QroeieOVXIf++IjOjBq7j/kx0HE1uP0IhyExXHzSfDI8ufTfHm2lQ2XWfgw/CiaZdQHAhNovIyuxTLbX+bjdZYe6bHs3HA+FsVrBDGa5X/Fw8WJQYP2O2G5Iu9Ydqq0NKbZR9vOosX8cpqN0Tg7Xjw4KsC+y4bJPFZvI2sN6nYLsE8JCYTpSLdQtJsFw9Ut4PKl4pPQsG59+JAcbYF1tIJeDEV6Ixyi5Vq/j5cwFDM9bm0ZLdMYj9eC7Ul0ZMo+XKIYRkOMD+qtwbiBg/bEOuDLR5ZH9dgkXl1JtyZ9X6LM94N75UjLdGm8N1lhxO+8vkYZYF97sZbFdUQS/S3UZL6+6D9ZbN8J1Hh1C3Wc8OxK+rBcX5dbXvCylnQYfj96YpTLBpUafp2PH9nYMy9saTrXaVH0Y7Zt3oTL66lVNNJfk7VIVqfxaZl+PpprJr+tBk8RTKDX1qDVXm1Zr6Mfj2Xn1gDq9PbzmcByNnw0Vkj7SDbHy06qO5hBK+fV6q4B9tBqTdp2Mm8TaHaL9Nm2kc4ZQPOZ4JfsmMH+Gmi1X2QH6/bKHLq1stvtJrMGQXOzQT1kZpkOvIBWnb8FtFoYOwOuoM1uxBnE+hvoFjOzpnNtwJefwPRrnAG0ctxmoeuRbaCb7Ic76KaBTaEz+mIw3UDCo3EJyMoAHnQYfXEJgwYMXnQYfXEJqIZHGUxLATaNO8j1zl0NLp87hUfjwfXMXR0ujzuFRxMWLUdUh5vjTuPRhEfLZZdDR9HYoPFoTJy7VR5ySXHk6J7Fo1npcd+PuPDodv0MHs2hGhq+kU6WLdWC0ng0oWoOp7g8tTrbFXg0oS57V2pGY1LtrcKjCcdUr7VrqfZYiUcTPsrXUy4S2Aq/r/FowtO0J67UmEFNeE9N7tOkHuUeLe2b3KOpIdLvVXrLq/yO3qPpfXZy5SCXXNZ5dD6jyJeWq1O9x4JHkyucnq2OU7+j9Vh4tJSHl15LR1S/U/BYeLScUDiKQYzLH9d6bHk0YSGdAJfKoR1SzWPLowfF5YkTHsM6USOPDY9WnkTg1yLYQvNJNY9Nj2/lXeVWO1WPjxx2ys/FdV2+26nHvkerc8eSx7oN9Onv0f6jRwu0PPpw9ujj0aNlOj06e/Tp6NGKRnj0/t+jH/8evfn36M8nj958evTm06NH+t09evPl0an/6dGTzx69+fXozbNHbx49/Pbo/btn797zO/Hny6Mn3x5NvPh2buPDl39/Hj34Ac7CsvQYBn07AAAAAElFTkSuQmCC" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)">
+
+    <!-- Prevenir el zoom en dispositivos móviles y mejorar experiencia táctil -->
     <style>
         html {
             touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        /* Optimizaciones para elementos táctiles en iOS */
+        .category-btn, .dish-btn, .option-btn, .action-btn, .back-btn, .qty-btn, .icon-btn, .finish-btn {
+            -webkit-appearance: none;
+            -webkit-touch-callout: none;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: transform 50ms ease-out;
+        }
+        
+        /* Efecto de toque para botones */
+        .btn-touch-effect {
+            transform: scale(0.97);
+        }
+        
+        /* Mejorar tamaño de áreas táctiles para iOS */
+        button, .option-btn, .action-btn {
+            min-height: 44px; /* Apple recomendado */
+        }
+        
+        .icon-btn {
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Feedback visual para acciones táctiles */
+        @keyframes touch-highlight {
+            0% { background-color: rgba(52, 152, 219, 0.2); }
+            100% { background-color: transparent; }
+        }
+        
+        .touch-highlight {
+            animation: touch-highlight 300ms ease-out;
+        }
+        
+        /* Desactivar selección de texto en elementos interactivos */
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
     </style>
-</head>
-<body>
+</head><body>
     <header>
         <h1>Avika - Temporizador de Sushi</h1>
         <div class="header-controls">
@@ -37,11 +102,11 @@
             
             <h2>Selecciona una categoría</h2>
             <div class="category-container">
-                <button class="category-btn" id="btn-frio">Platillos Fríos</button>
-                <button class="category-btn" id="btn-entrada-fria">Entradas Frías</button>
-                <button class="category-btn" id="btn-caliente">Platillos Calientes</button>
-                <button class="category-btn" id="btn-entrada-caliente">Entradas Calientes</button>
-                <button class="category-btn" id="btn-combos">Combos</button>
+                <button class="category-btn no-select" id="btn-frio">Platillos Fríos</button>
+                <button class="category-btn no-select" id="btn-entrada-fria">Entradas Frías</button>
+                <button class="category-btn no-select" id="btn-caliente">Platillos Calientes</button>
+                <button class="category-btn no-select" id="btn-entrada-caliente">Entradas Calientes</button>
+                <button class="category-btn no-select" id="btn-combos">Combos</button>
             </div>
             
             <!-- Órdenes pendientes -->
@@ -69,8 +134,8 @@
             <div class="pending-orders-section">
                 <h2>Platillos completados</h2>
                 <div class="filter-controls">
-                    <button id="btn-show-all-history" class="filter-btn">Ver historial completo</button>
-                    <button id="btn-show-recent" class="filter-btn active">Últimos 10</button>
+                    <button id="btn-show-all-history" class="filter-btn no-select">Ver historial completo</button>
+                    <button id="btn-show-recent" class="filter-btn active no-select">Últimos 10</button>
                 </div>
                 <div class="table-responsive">
                     <table>
@@ -98,7 +163,7 @@
                 <!-- Se llenará con JavaScript -->
             </div>
             
-            <button class="back-btn" id="btn-back-to-categories">Volver a Categorías</button>
+            <button class="back-btn no-select" id="btn-back-to-categories">Volver a Categorías</button>
         </div>
         
         <!-- Sección de preparación -->
@@ -117,18 +182,18 @@
             <div class="option-group">
                 <div class="option-title">Tipo de Servicio</div>
                 <div class="option-btns">
-                    <button class="option-btn selected" id="btn-comedor">Comedor</button>
-                    <button class="option-btn" id="btn-domicilio">Domicilio</button>
-                    <button class="option-btn" id="btn-para-llevar">Ordena y Recoge</button>
+                    <button class="option-btn selected no-select" id="btn-comedor">Comedor</button>
+                    <button class="option-btn no-select" id="btn-domicilio">Domicilio</button>
+                    <button class="option-btn no-select" id="btn-para-llevar">Ordena y Recoge</button>
                 </div>
             </div>
             
             <div class="option-group">
                 <div class="option-title">Cantidad</div>
                 <div class="qty-control">
-                    <button class="qty-btn" id="btn-decrease">-</button>
-                    <span class="qty-display" id="quantity-display">1</span>
-                    <button class="qty-btn" id="btn-increase">+</button>
+                    <button class="qty-btn no-select" id="btn-decrease">-</button>
+                    <span class="qty-display no-select" id="quantity-display">1</span>
+                    <button class="qty-btn no-select" id="btn-increase">+</button>
                 </div>
             </div>
             
@@ -138,47 +203,139 @@
             </div>
             
             <div class="action-btns">
-                <button class="action-btn cancel-btn" id="btn-cancel">Cancelar</button>
-                <button class="action-btn start-btn" id="btn-start">Iniciar Preparación</button>
+                <button class="action-btn cancel-btn no-select" id="btn-cancel">Cancelar</button>
+                <button class="action-btn start-btn no-select" id="btn-start">Iniciar Preparación</button>
             </div>
             
-            <button class="back-btn" id="btn-back-to-dishes">Atrás</button>
+            <button class="back-btn no-select" id="btn-back-to-dishes">Atrás</button>
         </div>
     </div>
-
-    <script>
-        // Script para habilitar el modo oscuro
-        document.addEventListener('DOMContentLoaded', function() {
-            // Botón modo oscuro
-            document.getElementById('btn-dark-mode').addEventListener('click', function() {
-                document.body.classList.toggle('dark-mode');
-                // Guardar preferencia en localStorage
-                const isDarkMode = document.body.classList.contains('dark-mode');
-                localStorage.setItem('avika_darkMode', isDarkMode);
-                
-                // Actualizar el icono
-                this.textContent = isDarkMode ? '☀️' : '🌙';
-            });
+    <body>
+        <header>
+            <h1>Avika - Temporizador de Sushi</h1>
+            <div class="header-controls">
+                <button id="btn-dark-mode" class="icon-btn" title="Cambiar tema claro/oscuro">🌙</button>
+                <button id="btn-export" class="icon-btn" title="Exportar datos">📊</button>
+            </div>
+        </header>
+        
+        <div class="container">
+            <!-- Notificaciones -->
+            <div id="notification"></div>
             
-            // Cargar preferencia de tema al iniciar
-            const darkModeSaved = localStorage.getItem('avika_darkMode');
-            if (darkModeSaved === 'true') {
-                document.body.classList.add('dark-mode');
-                document.getElementById('btn-dark-mode').textContent = '☀️';
-            }
-
-            // Solo para este script incorporado, registrar también el evento del botón de exportación
-            // (esto es solo una copia de seguridad por si falla la carga del script principal)
-            document.getElementById('btn-export').addEventListener('click', function() {
-                if (typeof exportData === 'function') {
-                    exportData();
-                } else {
-                    alert('Cargando la función de exportación... por favor espere unos segundos e intente nuevamente.');
-                }
-            });
-        });
-    </script>
-    
-    <script src="avika-script.js"></script>
-</body>
-</html>
+            <!-- Sección de categorías -->
+            <div id="categories-section">
+                <div class="search-container">
+                    <input type="text" id="search-input" class="search-input" placeholder="Buscar platillo o número...">
+                </div>
+                
+                <h2>Selecciona una categoría</h2>
+                <div class="category-container">
+                    <button class="category-btn no-select" id="btn-frio">Platillos Fríos</button>
+                    <button class="category-btn no-select" id="btn-entrada-fria">Entradas Frías</button>
+                    <button class="category-btn no-select" id="btn-caliente">Platillos Calientes</button>
+                    <button class="category-btn no-select" id="btn-entrada-caliente">Entradas Calientes</button>
+                    <button class="category-btn no-select" id="btn-combos">Combos</button>
+                </div>
+                
+                <!-- Órdenes pendientes -->
+                <div class="pending-orders-section">
+                    <h2>Platillos en preparación <span id="pending-count">(0)</span></h2>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Platillo</th>
+                                    <th>Inicio</th>
+                                    <th>Tiempo</th>
+                                    <th>Detalles</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pending-body">
+                                <!-- Se llenará con JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Órdenes completadas -->
+                <div class="pending-orders-section">
+                    <h2>Platillos completados</h2>
+                    <div class="filter-controls">
+                        <button id="btn-show-all-history" class="filter-btn no-select">Ver historial completo</button>
+                        <button id="btn-show-recent" class="filter-btn active no-select">Últimos 10</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Platillo</th>
+                                    <th>Inicio</th>
+                                    <th>Fin</th>
+                                    <th>Tiempo</th>
+                                    <th>Detalles</th>
+                                </tr>
+                            </thead>
+                            <tbody id="completed-body">
+                                <!-- Se llenará con JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sección de platillos -->
+            <div id="dishes-section">
+                <h2 id="selected-category-title">Categoría</h2>
+                <div id="dishes-container" class="dishes-container">
+                    <!-- Se llenará con JavaScript -->
+                </div>
+                
+                <button class="back-btn no-select" id="btn-back-to-categories">Volver a Categorías</button>
+            </div>
+            
+            <!-- Sección de preparación -->
+            <div id="preparation-section" class="preparation-section">
+                <h2 id="selected-dish-title">Platillo</h2>
+                
+                <div id="personalization-section">
+                    <div class="option-group">
+                        <div class="option-title">Personalización</div>
+                        <div class="option-btns" id="personalization-options">
+                            <!-- Se llenará dinámicamente con JS -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="option-group">
+                    <div class="option-title">Tipo de Servicio</div>
+                    <div class="option-btns">
+                        <button class="option-btn selected no-select" id="btn-comedor">Comedor</button>
+                        <button class="option-btn no-select" id="btn-domicilio">Domicilio</button>
+                        <button class="option-btn no-select" id="btn-para-llevar">Ordena y Recoge</button>
+                    </div>
+                </div>
+                
+                <div class="option-group">
+                    <div class="option-title">Cantidad</div>
+                    <div class="qty-control">
+                        <button class="qty-btn no-select" id="btn-decrease">-</button>
+                        <span class="qty-display no-select" id="quantity-display">1</span>
+                        <button class="qty-btn no-select" id="btn-increase">+</button>
+                    </div>
+                </div>
+                
+                <div class="option-group">
+                    <div class="option-title">Notas Especiales</div>
+                    <textarea class="notes-input" id="notes-input" placeholder="Ej: Cliente alérgico a mariscos" rows="3"></textarea>
+                </div>
+                
+                <div class="action-btns">
+                    <button class="action-btn cancel-btn no-select" id="btn-cancel">Cancelar</button>
+                    <button class="action-btn start-btn no-select" id="btn-start">Iniciar Preparación</button>
+                </div>
+                
+                <button class="back-btn no-select" id="btn-back-to-dishes">Atrás</button>
+            </div>
+        </div>
