@@ -228,6 +228,15 @@ section {
     margin-top: 20px;
 }
 
+/* Nuevo contenedor compacto para el formulario */
+.compact-form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 85vh; /* Asegurar que todo quepa en la pantalla */
+    overflow-y: auto;
+}
+
 .option-group {
     margin-bottom: 12px; /* Reducido de 20px */
 }
@@ -853,8 +862,20 @@ h2 {
     width: 20%; /* Columna de acción */
     position: sticky; /* Mantener visible al desplazar horizontalmente */
     right: 0;
-    background-color: var(--container-bg);
+    background-color: var(--table-header-bg); /* Color de fondo para el encabezado */
+    color: var(--table-header-text); /* Color de texto para el encabezado */
     z-index: 2;
+}
+
+/* Asegurar que la celda th de Acción tenga el fondo del encabezado */
+.pending-orders-section th:nth-child(5) {
+    background-color: var(--table-header-bg) !important;
+    color: var(--table-header-text) !important;
+}
+
+/* Y las celdas td tengan el fondo del contenido */
+.pending-orders-section td:nth-child(5) {
+    background-color: var(--container-bg);
 }
 
 /* Ajustes para dispositivos móviles */
