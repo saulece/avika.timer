@@ -1,5 +1,4 @@
 // ui-controller.js - Funciones de interfaz de usuario
-
 Avika.ui = {
     // Estado de la UI
     state: {
@@ -157,39 +156,31 @@ Avika.ui = {
         document.getElementById('quantity-display').textContent = Avika.data.currentQuantity;
     },
 
-    // Funciones para actualizar tablas
+    // Funciones para actualizar tablas - CORREGIDA
     updatePendingTable: function() {
         // Actualizar contador primero
         document.getElementById('pending-count').textContent = Avika.data.pendingOrders.length;
         
-        // Si no hay órdenes pendientes, limpiamos la tabla y salimos
+        var pendingBody = document.getElementById('pending-body');
+        
+        // Si no hay órdenes pendientes, limpiamos la tabla
         if (Avika.data.pendingOrders.length === 0) {
-            document.getElementById('pending-body').innerHTML = '';
+            pendingBody.innerHTML = '';
             return;
         }
         
-        var pendingBody = document.getElementById('pending-body');
-        var existingRows = pendingBody.querySelectorAll('tr');
+        // Reconstruir la tabla completamente para evitar problemas
+        pendingBody.innerHTML = '';
         
-        // Si el número de filas existentes no coincide con el número de órdenes, reconstruimos la tabla
-        if (existingRows.length !== Avika.data.pendingOrders.length) {
-            // Limpiar la tabla
-            pendingBody.innerHTML = '';
-            
-            // Agregar todas las órdenes pendientes
-            for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-                var order = Avika.data.pendingOrders[i];
-                var newRow = this.createOrderRow(order);
-                pendingBody.appendChild(newRow);
-            }
-        } else {
-            // Actualizar filas existentes sin reconstruir
-            for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-                var order = Avika.data.pendingOrders[i];
-                this.updateOrderRow(existingRows[i], order);
-            }
+        // Agregar todas las órdenes pendientes desde cero
+        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+            var order = Avika.data.pendingOrders[i];
+            // Crear una nueva fila para cada orden
+            var newRow = this.createOrderRow(order);
+            pendingBody.appendChild(newRow);
         }
-    }
+    },
+    
     updateOrderRow: function(row, order) {
         // Verificar que la fila y sus celdas existan
         if (!row || !order) return;
@@ -392,7 +383,7 @@ Avika.ui = {
             })(order.id);
             actionCell.appendChild(finishBtn);
         }
-    }
+    },
     
     createOrderRow: function(order) {
         var row = document.createElement('tr');
@@ -720,6 +711,52 @@ Avika.ui = {
             }
             .finish-btn.delivery-arrived {
                 background-color: #3498db;
+            }
+            
+            /* Ajustes para tablas de preparación para evitar desplazamiento horizontal */
+            .pending-orders-section table {
+                table-layout: fixed;
+                width: 100%;
+            }
+            
+            .pending-orders-section th:nth-child(1),
+            .pending-orders-section td:nth-child(1) {
+                width: 20%; /* Columna de platillos */
+            }
+            
+            .pending-orders-section th:nth-child(2),
+            .pending-orders-section td:nth-child(2),
+            .pending-orders-section th:nth-child(3),
+            .pending-orders-section td:nth-child(3) {
+                width: 10%; /* Columnas de tiempo */
+            }
+            
+            .pending-orders-section th:nth-child(4),
+            .pending-orders-section td:nth-child(4) {
+                width: 40%; /* Columna de detalles */
+                word-break: break-word; /* Permitir que las palabras largas se rompan */
+            }
+            
+            .pending-orders-section th:nth-child(5),
+            .pending-orders-section td:nth-child(5) {
+                width: 20%; /* Columna de acción */
+            }
+            
+            /* Ajustes para dispositivos móviles */
+            @media (max-width: 768px) {
+                .pending-orders-section table {
+                    font-size: 14px;
+                }
+                
+                .pending-orders-section th,
+                .pending-orders-section td {
+                    padding: 6px 4px;
+                }
+                
+                .finish-btn {
+                    padding: 6px 8px;
+                    font-size: 12px;
+                }
             }
         `;
         document.head.appendChild(styleElement);
