@@ -1,12 +1,37 @@
-/* Estilos mejorados para la aplicación Avika */
-
+/* Estilos base optimizados para iPhone */
 :root {
-    /* Paleta de colores primaria */
-    --primary-color: #e74c3c;
-    --secondary-color: #3498db;
-    --tertiary-color: #2ecc71;
-    --accent-color: #f39c12;
-    --dark-color: #34495e;
+    /* Variables básicas */
+    --bg-color: #f0f0f0;
+    --container-bg: #ffffff;
+    --text-color: #333333;
+    --header-bg: #e74c3c;
+    --header-text: white;
+    --primary-btn: #3498db;
+    --primary-btn-text: white;
+    --success-btn: #2ecc71;
+    --danger-btn: #e74c3c;
+    --warning-btn: #f0ad4e;
+    --info-btn: #5bc0de;
+    --border-color: #ddd;
+    --table-header-bg: #3498db;
+    --table-header-text: white;
+    --notification-bg: #2ecc71;
+    --highlight-bg: #f9f9f9;
+    --shadow-color: rgba(0,0,0,0.1);
+    --btn-hover: #2980b9;
+    
+    /* Variables para tiempos */
+    --time-excellent: #2ecc71;
+    --time-good: #7fdbff;
+    --time-warning: #f39c12;
+    --time-bad: #e74c3c;
+    
+    /* Transiciones */
+    --transition-speed: 0.3s;
+    
+    /* Fuentes */
+    --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    --font-monospace: 'Menlo', monospace;
     
     /* Colores para categorías */
     --cocina-fria: #3498db;
@@ -21,7 +46,123 @@
     --transition: all 0.3s ease;
 }
 
-/* Mejoras en la categoría de botones */
+.dark-mode {
+    --bg-color: #121212;
+    --container-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --header-bg: #c0392b;
+    --header-text: #f0f0f0;
+    --primary-btn: #2980b9;
+    --primary-btn-text: #f0f0f0;
+    --success-btn: #27ae60;
+    --danger-btn: #c0392b;
+    --warning-btn: #d35400;
+    --info-btn: #2980b9;
+    --border-color: #444;
+    --table-header-bg: #2980b9;
+    --table-header-text: #f0f0f0;
+    --notification-bg: #27ae60;
+    --highlight-bg: #2a2a2a;
+    --shadow-color: rgba(0,0,0,0.3);
+    --btn-hover: #3498db;
+    
+    /* Colores de tiempos en modo oscuro */
+    --time-excellent: #27ae60;
+    --time-good: #2980b9;
+    --time-warning: #d35400;
+    --time-bad: #c0392b;
+}
+
+/* Estilos generales */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: var(--font-main);
+    margin: 0;
+    padding: 15px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+    line-height: 1.6;
+    -webkit-user-select: none;
+    user-select: none;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: manipulation;
+}
+
+/* Encabezado */
+header {
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    padding: 15px;
+    text-align: center;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+header h1 {
+    margin: 0;
+    flex: 1;
+    font-size: 1.5rem;
+}
+
+.header-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--header-text);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color var(--transition-speed);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+}
+
+.icon-btn:active {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Contenedor principal */
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding-bottom: 80px; /* Para evitar que el último elemento quede oculto detrás del dock de iOS */
+}
+
+/* Secciones */
+section {
+    background-color: var(--container-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px var(--shadow-color);
+    margin-bottom: 20px;
+    transition: background-color var(--transition-speed);
+}
+
+/* Categorías */
 .category-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -92,7 +233,11 @@
     line-height: 1.2;
 }
 
-/* Botones de platillos */
+/* Platillos */
+.dishes-section {
+    display: none;
+}
+
 .dishes-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -163,6 +308,27 @@
     font-size: 14px;
 }
 
+/* Sección de preparación */
+.preparation-section {
+    display: none;
+    background-color: var(--container-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px var(--shadow-color);
+    margin-top: 20px;
+}
+
+.option-group {
+    margin-bottom: 20px;
+}
+
+.option-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: var(--text-color);
+    font-size: 1.1rem;
+}
+
 /* Opciones de personalización */
 .option-btns {
     display: flex;
@@ -181,25 +347,4 @@
     min-width: 100px;
     transition: var(--transition);
     text-align: center;
-}
-
-.option-btn.selected {
-    background-color: var(--secondary-color);
-    color: white;
-    border-color: var(--secondary-color);
-}
-
-.premium-option {
-    background-color: #fff8e1;
-    border-color: #ffcc80;
-}
-
-.premium-option small {
-    display: block;
-    font-size: 11px;
-    opacity: 0.8;
-}
-
-.mt-3 {
-    margin-top: 15px;
 }

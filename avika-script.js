@@ -1,5 +1,15 @@
-// Estructura mejorada de categorías y platillos para Avika
-// Organización optimizada para el flujo de usuario
+// Variables globales (estado)
+var currentCategory = '';
+var currentDish = '';
+var currentCustomizations = [];
+var currentService = 'comedor';
+var currentQuantity = 1;
+var isSpecialCombo = false;
+
+// Arrays para almacenar pedidos
+var pendingOrders = [];
+var completedOrders = [];
+var timerInterval;
 
 // Categorías principales para la interfaz
 var categories = [
@@ -232,8 +242,6 @@ var customizationOptions = {
     ]
 };
 
-// Funciones para renderizar interfaz mejorada
-
 // Renderiza las categorías principales
 function renderCategories() {
     const container = document.getElementById('categories-container');
@@ -406,6 +414,12 @@ function loadCustomizationOptions(dish) {
     const optionsContainer = document.getElementById('personalization-options');
     optionsContainer.innerHTML = '';
     
+    // Limpia contenedores adicionales de proteínas si existen
+    const proteinContainer = document.getElementById('protein-options');
+    if (proteinContainer) {
+        proteinContainer.remove();
+    }
+    
     // Agrega opciones generales siempre
     customizationOptions.general.forEach(option => {
         const btn = document.createElement('button');
@@ -492,39 +506,28 @@ function updateCustomizations() {
     });
 }
 
-// Inicio de preparación
-function startPreparation() {
-    // Crea el pedido
-    const order = {
-        id: generateId(),
-        dish: document.getElementById('selected-dish-title').textContent,
-        category: currentCategory,
-        customizations: currentCustomizations,
-        service: currentService,
-        quantity: currentQuantity,
-        notes: document.getElementById('notes-input').value,
-        startTime: new Date(),
-        startTimeFormatted: formatTime(new Date())
-    };
+// Mostrar notificación
+function showNotification(message, type = 'success') {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.style.display = 'block';
     
-    // Agrega a pendientes
-    pendingOrders.push(order);
+    // Asignar clase según tipo
+    notification.className = '';
+    notification.classList.add('notification', `notification-${type}`);
     
-    // Actualiza la tabla y muestra notificación
-    updatePendingTable();
-    showNotification(`Nuevo pedido: ${order.dish} × ${order.quantity}`);
-    
-    // Regresa a la vista principal
-    resetApp();
-    guardarDatosLocales();
+    // Ocultar después de 3 segundos
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 3000);
 }
 
-// Función de utilidad para generar ID
+// Generar ID único
 function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
-// Función para formatear hora
+// Formatear hora
 function formatTime(date) {
     return date.toLocaleTimeString('es-MX', {
         hour: '2-digit',
@@ -533,24 +536,98 @@ function formatTime(date) {
     });
 }
 
-// Función para regresar a la pantalla principal
-function resetApp() {
-    document.getElementById('dishes-section').style.display = 'none';
-    document.getElementById('preparation-section').style.display = 'none';
-    document.getElementById('categories-section').style.display = 'block';
-    
-    // Reset estados
-    currentCategory = '';
-    currentDish = '';
-    currentCustomizations = [];
-    currentService = 'comedor';
-    currentQuantity = 1;
-    document.getElementById('quantity-display').textContent = "1";
-    document.getElementById('notes-input').value = '';
-    
-    // Reset UI de servicio
-    document.querySelectorAll('.option-btn[id^="btn-"]').forEach(el => {
-        el.classList.remove('selected');
-    });
-    document.getElementById('btn-comedor').classList.add('selected');
+// Agregar ceros iniciales
+function padZero(num) {
+    return num < 10 ? '0' + num : num;
 }
+
+// Obtener nombre del servicio
+function getServiceName(serviceId) {
+    const services = {
+        'comedor': 'Comedor',
+        'domicilio': 'Domicilio',
+        'para-llevar': 'Ordena y Espera'
+    };
+    return services[serviceId] || serviceId;
+}
+
+// Obtener botón de acción según tipo de pedido
+function getActionButton(order) {
+    if (order.service === 'domicilio') {
+        if (!order.deliveryDepartureTime) {
+            return `<button class="finish-btn delivery" onclick="markDeliveryDeparture('${order.id}')">Salida</button>`;
+        } else if (!order.deliveryArrivalTime) {
+            return `<button class="finish-btn delivery-arrived" onclick="markDeliveryArrival('${order.id}')">Entregado</button>`;
+        }
+    }
+    
+    let btnClass = '';
+    if (order.category.includes('fria') || order.category === 'roll' || order.category === 'sashimi' || order.category === 'sushi') {
+        btnClass = 'cold-kitchen';
+    } else {
+        btnClass = 'hot-kitchen';
+    }
+    
+    return `<button class="finish-btn ${btnClass}" onclick="finishPreparation('${order.id}')">Finalizar</button>`;
+}
+
+// Actualiza tabla de pedidos pendientes
+function updatePendingTable() {
+    const tableBody = document.getElementById('pending-body');
+    const pendingCount = document.getElementById('pending-count');
+    
+    // Actualiza contador
+    pendingCount.textContent = pendingOrders.length;
+    
+    // Limpia tabla
+    tableBody.innerHTML = '';
+    
+    // Si no hay pedidos
+    if (pendingOrders.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="5" class="empty-message">No hay platillos en preparación</td>';
+        tableBody.appendChild(row);
+        return;
+    }
+    
+    // Agrega cada pedido a la tabla
+    pendingOrders.forEach(order => {
+        const row = document.createElement('tr');
+        
+        // Calcula tiempo transcurrido
+        const now = new Date();
+        const startTime = new Date(order.startTime);
+        const elapsedMs = now - startTime;
+        const elapsedSecs = Math.floor(elapsedMs / 1000);
+        const mins = Math.floor(elapsedSecs / 60);
+        const secs = elapsedSecs % 60;
+        
+        // Determina clase CSS según tiempo transcurrido
+        let timerClass = '';
+        if (mins >= 10) {
+            timerClass = 'alert';
+        } else if (mins >= 5) {
+            timerClass = 'warning';
+        }
+        
+        // Información a mostrar
+        const customInfo = order.customizations.length > 0 
+            ? `<strong>Personalización:</strong> ${order.customizations.join(', ')}<br>` 
+            : '';
+        const serviceInfo = `<strong>Servicio:</strong> ${getServiceName(order.service)}<br>`;
+        const quantityInfo = order.quantity > 1 ? `<strong>Cantidad:</strong> ${order.quantity}<br>` : '';
+        const notesInfo = order.notes ? `<strong>Notas:</strong> ${order.notes}` : '';
+        
+        row.innerHTML = `
+            <td>${order.dish}</td>
+            <td>${order.startTimeFormatted}</td>
+            <td class="timer-cell ${timerClass}">${padZero(mins)}:${padZero(secs)}</td>
+            <td class="details-cell">
+                ${customInfo}
+                ${serviceInfo}
+                ${quantityInfo}
+                ${notesInfo}
+            </td>
+            <td>
+                ${getActionButton(order)}
+            </td>
