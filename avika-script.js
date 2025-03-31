@@ -852,89 +852,128 @@ function exportarDatos() {
         return;
     }
     
-    // Crear datos para Excel con todas las columnas importantes
-    var ws_data = [
-        ['Platillo', 'Categoría', 'Cantidad', 'Tipo de Servicio', 
-         'Inicio Preparación', 'Fin Preparación', 'Tiempo Total Preparación',
-         'Cocina Caliente', 'Cocina Fría', 'Salida Repartidor', 'Llegada Repartidor', 'Tiempo de Entrega']
-    ];
+    // Crear tabla HTML para exportación
+    var tablaHtml = '<html><head>';
+    tablaHtml += '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
+    tablaHtml += '<style>';
+    tablaHtml += 'body { font-family: Arial, sans-serif; }';
+    tablaHtml += 'table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }';
+    tablaHtml += 'th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }';
+    tablaHtml += 'th { background-color: #3498db; color: white; }';
+    tablaHtml += 'h1, h2 { color: #333; }';
+    tablaHtml += 'tr:nth-child(even) { background-color: #f2f2f2; }';
+    tablaHtml += '</style>';
+    tablaHtml += '</head><body>';
     
-    // Agregar cada orden completada con todos los tiempos
-    completedOrders.forEach(function(order) {
-        ws_data.push([
-            order.dish,
-            categoryNames[order.category],
-            order.quantity,
-            getServiceName(order.serviceType),
-            order.startTimeFormatted,
-            order.endTimeFormatted,
-            order.prepTime,
-            order.hotKitchenTimeFormatted || '',
-            order.coldKitchenTimeFormatted || '',
-            order.deliveryDepartureTimeFormatted || '',
-            order.deliveryArrivalTimeFormatted || '',
-            order.deliveryTime || ''
-        ]);
-    });
-    
-    // Crear libro y hoja
-    var wb = XLSX.utils.book_new();
-    var ws = XLSX.utils.aoa_to_sheet(ws_data);
-    
-    // Aplicar formato a la hoja (encabezados en negrita, ajustar ancho de columnas)
-    ws['!cols'] = [
-        {wch: 20}, // Platillo
-        {wch: 15}, // Categoría
-        {wch: 8},  // Cantidad
-        {wch: 12}, // Tipo de Servicio
-        {wch: 15}, // Inicio Preparación
-        {wch: 15}, // Fin Preparación
-        {wch: 15}, // Tiempo Total Preparación
-        {wch: 15}, // Cocina Caliente
-        {wch: 15}, // Cocina Fría
-        {wch: 15}, // Salida Repartidor
-        {wch: 15}, // Llegada Repartidor
-        {wch: 15}  // Tiempo de Entrega
-    ];
-    
-    // Añadir hoja al libro
-    XLSX.utils.book_append_sheet(wb, ws, "Reporte Avika");
-    
-    // Crear hoja de estadísticas de promedios
-    crearHojaPromedios(wb);
-    
-    // Generar archivo
+    // Fecha del reporte
     var hoy = new Date();
     var fecha = hoy.getFullYear() + '-' + padZero(hoy.getMonth() + 1) + '-' + padZero(hoy.getDate());
-    var fileName = 'avika_tiempos_' + fecha + '.xlsx';
+    tablaHtml += '<h1>Reporte de Tiempos Avika - ' + fecha + '</h1>';
     
-    // Escribir archivo y descargar
-    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    // Tabla de datos
+    tablaHtml += '<h2>Datos Detallados</h2>';
+    tablaHtml += '<table>';
+    tablaHtml += '<tr><th>Platillo</th><th>Categoría</th><th>Cantidad</th><th>Servicio</th>';
+    tablaHtml += '<th>Inicio</th><th>Fin</th><th>Tiempo Total</th>';
+    tablaHtml += '<th>Salida Repartidor</th><th>Llegada Repartidor</th><th>Tiempo Entrega</th></tr>';
     
-    if (isIOS) {
-        // Mostrar instrucciones específicas para iOS
-        showNotification('Generando Excel. Utiliza la opción "Compartir" cuando aparezca.');
-        
-        // Usar método de escritura para iOS
-        var wbout = XLSX.write(wb, {bookType:'xlsx', type:'array'});
-        var blob = new Blob([wbout], {type:'application/octet-stream'});
-        var url = URL.createObjectURL(blob);
-        
-        // Crear enlace temporal
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function() {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }, 0);
-    } else {
-        // Para otros dispositivos, usar método de descarga directa
-        XLSX.writeFile(wb, fileName);
-        showNotification('Datos exportados correctamente');
+    completedOrders.forEach(function(order) {
+        tablaHtml += '<tr>';
+        tablaHtml += '<td>' + order.dish + '</td>';
+        tablaHtml += '<td>' + categoryNames[order.category] + '</td>';
+        tablaHtml += '<td>' + order.quantity + '</td>';
+        tablaHtml += '<td>' + getServiceName(order.serviceType) + '</td>';
+        tablaHtml += '<td>' + order.startTimeFormatted + '</td>';
+        tablaHtml += '<td>' + order.endTimeFormatted + '</td>';
+        tablaHtml += '<td>' + order.prepTime + '</td>';
+        tablaHtml += '<td>' + (order.deliveryDepartureTimeFormatted || '-') + '</td>';
+        tablaHtml += '<td>' + (order.deliveryArrivalTimeFormatted || '-') + '</td>';
+        tablaHtml += '<td>' + (order.deliveryTime || '-') + '</td>';
+        tablaHtml += '</tr>';
+    });
+    
+    tablaHtml += '</table>';
+    
+    // Tabla de promedios por categoría
+    tablaHtml += '<h2>Promedios por Categoría</h2>';
+    tablaHtml += '<table>';
+    tablaHtml += '<tr><th>Categoría</th><th>Tiempo Promedio</th><th>Cantidad</th></tr>';
+    
+    // Calcular promedios por categoría
+    var categoriasTiempos = {};
+    var totalPorCategoria = {};
+    
+    // Para tiempos de entrega
+    var tiempoTotalEntrega = 0;
+    var totalEntregas = 0;
+    
+    // Inicializar contadores para cada categoría
+    for (var key in categoryNames) {
+        categoriasTiempos[key] = 0;
+        totalPorCategoria[key] = 0;
     }
+    
+    // Sumar tiempos por categoría
+    completedOrders.forEach(function(order) {
+        if (!order.endTime) return;
+        
+        var categoria = order.category;
+        var tiempoEnSegundos = (new Date(order.endTime) - new Date(order.startTime)) / 1000;
+        
+        categoriasTiempos[categoria] += tiempoEnSegundos;
+        totalPorCategoria[categoria]++;
+        
+        // Calcular estadísticas de entrega
+        if (order.deliveryDepartureTime && order.deliveryArrivalTime) {
+            var tiempoEntregaSegundos = (new Date(order.deliveryArrivalTime) - new Date(order.deliveryDepartureTime)) / 1000;
+            tiempoTotalEntrega += tiempoEntregaSegundos;
+            totalEntregas++;
+        }
+    });
+    
+    // Añadir filas para cada categoría
+    for (var categoria in categoriasTiempos) {
+        if (totalPorCategoria[categoria] > 0) {
+            var tiempoPromedio = categoriasTiempos[categoria] / totalPorCategoria[categoria];
+            var minutos = Math.floor(tiempoPromedio / 60);
+            var segundos = Math.floor(tiempoPromedio % 60);
+            
+            tablaHtml += '<tr>';
+            tablaHtml += '<td>' + categoryNames[categoria] + '</td>';
+            tablaHtml += '<td>' + padZero(minutos) + ':' + padZero(segundos) + ' min</td>';
+            tablaHtml += '<td>' + totalPorCategoria[categoria] + '</td>';
+            tablaHtml += '</tr>';
+        }
+    }
+    
+    tablaHtml += '</table>';
+    
+    // Tabla de tiempos de entrega
+    if (totalEntregas > 0) {
+        var tiempoPromedioEntrega = tiempoTotalEntrega / totalEntregas;
+        var minutosEntrega = Math.floor(tiempoPromedioEntrega / 60);
+        var segundosEntrega = Math.floor(tiempoPromedioEntrega % 60);
+        
+        tablaHtml += '<h2>Tiempos de Entrega</h2>';
+        tablaHtml += '<table>';
+        tablaHtml += '<tr><th>Concepto</th><th>Tiempo Promedio</th><th>Cantidad</th></tr>';
+        tablaHtml += '<tr>';
+        tablaHtml += '<td>Tiempo de Entrega (desde salida hasta llegada)</td>';
+        tablaHtml += '<td>' + padZero(minutosEntrega) + ':' + padZero(segundosEntrega) + ' min</td>';
+        tablaHtml += '<td>' + totalEntregas + '</td>';
+        tablaHtml += '</tr>';
+        tablaHtml += '</table>';
+    }
+    
+    tablaHtml += '</body></html>';
+    
+    // Crear archivo y enlace para descargar/ver
+    var htmlBlob = new Blob([tablaHtml], {type: 'text/html'});
+    var htmlUrl = URL.createObjectURL(htmlBlob);
+    
+    // En iOS, abrir en una nueva ventana/pestaña
+    showNotification('Abriendo el reporte en una nueva ventana...');
+    window.open(htmlUrl, '_blank');
 }
 
 // Función para crear la hoja de promedios
