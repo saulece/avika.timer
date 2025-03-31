@@ -2,18 +2,302 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Avika - Temporizador</title>
-    <link rel="stylesheet" href="avika-style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avika - Temporizador de Sushi</title>
+    <style>
+        /* Estilos básicos para la aplicación */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        
+        header {
+            background-color: #e74c3c;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        header h1 {
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        /* Estilos para secciones */
+        #dishes-section, #preparation-section {
+            display: none;
+        }
+        
+        /* Botones de categoría */
+        .category-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .category-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            height: 80px;
+        }
+        
+        .category-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        /* Botones de platillos */
+        .dishes-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .dish-btn {
+            background-color: white;
+            color: #333;
+            border: 1px solid #3498db;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            min-width: 150px;
+        }
+        
+        .dish-btn:hover {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .dish-btn.special-combo {
+            border: 2px solid #e74c3c;
+        }
+        
+        /* Sección de preparación */
+        .preparation-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        
+        .option-group {
+            margin-bottom: 15px;
+        }
+        
+        .option-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .option-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .option-btn {
+            background-color: #f9f9f9;
+            color: #333;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .option-btn.selected {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .qty-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .qty-display {
+            font-size: 18px;
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .notes-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        
+        .action-btns {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .cancel-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .start-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .back-btn {
+            background-color: #f0ad4e;
+            color: white;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        /* Tablas */
+        .pending-orders-section {
+            margin-top: 30px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .timer-cell {
+            font-weight: bold;
+            color: #e74c3c;
+            font-size: 18px;
+        }
+        
+        .finish-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+        
+        .finish-btn.hot-kitchen {
+            background-color: #e74c3c;
+        }
+        
+        .finish-btn.cold-kitchen {
+            background-color: #5bc0de;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        /* Filtros */
+        .filter-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .filter-btn {
+            background-color: #f9f9f9;
+            color: #333;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .filter-btn.active {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        /* Notificaciones */
+        #notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #2ecc71;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 300px;
+            z-index: 1000;
+            display: none;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .category-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-btns {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
     <header>
-        <h1>Avika - Temporizador</h1>
-        <div class="header-controls">
-            <button id="toggle-theme" class="icon-btn">🌙</button>
-        </div>
+        <h1>Avika - Temporizador de Sushi</h1>
     </header>
     
     <div class="container">
@@ -33,56 +317,45 @@
             
             <!-- Órdenes pendientes -->
             <div class="pending-orders-section">
-                <div class="section-title">
-                    <h2>Platillos en preparación</h2>
-                    <div class="count-badge" id="pending-count">0</div>
-                </div>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Platillo</th>
-                                <th>Inicio</th>
-                                <th>Tiempo</th>
-                                <th>Detalles</th>
-                                <th>Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="pending-body">
-                            <!-- Se llenará con JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
+                <h2>Platillos en preparación <span id="pending-count">0</span></h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Platillo</th>
+                            <th>Inicio</th>
+                            <th>Tiempo transcurrido</th>
+                            <th>Detalles</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pending-body">
+                        <!-- Se llenará con JavaScript -->
+                    </tbody>
+                </table>
             </div>
             
             <!-- Órdenes completadas -->
             <div class="pending-orders-section">
                 <h2>Platillos completados</h2>
                 <div class="filter-controls">
-                    <button id="btn-show-all-history" class="filter-btn">Ver historial</button>
+                    <button id="btn-show-all-history" class="filter-btn">Ver historial completo</button>
                     <button id="btn-show-recent" class="filter-btn active">Ver recientes</button>
                 </div>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Platillo</th>
-                                <th>Inicio</th>
-                                <th>Fin</th>
-                                <th>Total</th>
-                                <th>Detalles</th>
-                            </tr>
-                        </thead>
-                        <tbody id="completed-body">
-                            <!-- Se llenará con JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="button-group">
-                    <button class="back-btn" id="btn-promedios" style="background-color: #3498db;">Ver Promedios</button>
-                    <button class="back-btn" id="btn-export">Exportar a Excel</button>
-                    <button class="back-btn" id="btn-clear" style="background-color: #e74c3c;">Limpiar</button>
-                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Platillo</th>
+                            <th>Inicio</th>
+                            <th>Fin</th>
+                            <th>Tiempo total</th>
+                            <th>Detalles</th>
+                        </tr>
+                    </thead>
+                    <tbody id="completed-body">
+                        <!-- Se llenará con JavaScript -->
+                    </tbody>
+                </table>
+                <button class="back-btn" id="btn-export">Exportar datos</button>
             </div>
         </div>
         
@@ -135,27 +408,9 @@
             <div class="action-btns">
                 <button class="action-btn cancel-btn" id="btn-cancel">Cancelar</button>
                 <button class="action-btn start-btn" id="btn-start">Iniciar Preparación</button>
+                <button class="action-btn back-btn" id="btn-back-to-dishes">Atrás</button>
             </div>
-            <button class="back-btn" id="btn-back-to-dishes" style="width: 100%; margin-top: 10px;">Atrás</button>
         </div>
-    </div>
-    
-    <!-- Modal para promedios -->
-    <div id="promedios-modal" class="modal">
-        <div class="modal-content">
-            <div id="promedios-contenido">
-                <!-- Se llenará con JavaScript -->
-            </div>
-            <button class="back-btn" id="modal-close" style="width: 100%; margin-top: 15px;">Cerrar</button>
-        </div>
-    </div>
-    
-    <!-- Guía de instalación -->
-    <div class="install-guide" id="install-guide">
-        <p>Para una mejor experiencia, añade esta app a tu pantalla de inicio</p>
-        <p>1. Toca el icono <strong>compartir</strong> <span style="font-size: 18px">⬆️</span> abajo</p>
-        <p>2. Desplázate y selecciona <strong>"Añadir a pantalla de inicio"</strong></p>
-        <button id="hide-guide">Entendido</button>
     </div>
 
     <script src="avika-script.js"></script>
