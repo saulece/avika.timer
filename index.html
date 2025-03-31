@@ -34,7 +34,7 @@
                         <tr>
                             <th>Platillo</th>
                             <th>Inicio</th>
-                            <th>Tiempo transcurrido</th>
+                            <th>Tiempo</th> <!-- Modificado para acortar el texto -->
                             <th>Detalles</th>
                             <th>Acción</th>
                         </tr>
@@ -80,46 +80,50 @@
             <button class="back-btn" id="btn-back-to-categories">Volver a Categorías</button>
         </div>
         
-        <!-- Sección de preparación -->
+        <!-- Sección de preparación - Modificada para un diseño más compacto -->
         <div id="preparation-section" class="preparation-section">
             <h2 id="selected-dish-title">Platillo</h2>
             
-            <div id="personalization-section">
-                <div class="option-group">
-                    <div class="option-title">Personalización</div>
-                    <div class="option-btns" id="personalization-options">
-                        <!-- Se llenará dinámicamente con JS -->
+            <!-- Contenedor principal más compacto -->
+            <div class="compact-form-container">
+                <div id="personalization-section">
+                    <div class="option-group">
+                        <div class="option-title">Personalización</div>
+                        <div class="option-btns" id="personalization-options">
+                            <!-- Se llenará dinámicamente con JS -->
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="option-group">
-                <div class="option-title">Tipo de Servicio</div>
-                <div class="option-btns">
-                    <button class="option-btn selected" id="btn-comedor">Comedor</button>
-                    <button class="option-btn" id="btn-domicilio">Domicilio</button>
-                    <button class="option-btn" id="btn-para-llevar">Ordena y Espera</button>
+                
+                <div class="option-group">
+                    <div class="option-title">Tipo de Servicio</div>
+                    <div class="option-btns">
+                        <button class="option-btn selected" id="btn-comedor">Comedor</button>
+                        <button class="option-btn" id="btn-domicilio">Domicilio</button>
+                        <button class="option-btn" id="btn-para-llevar">Ordena y Espera</button>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="option-group">
-                <div class="option-title">Cantidad</div>
-                <div class="qty-control">
-                    <button class="qty-btn" id="btn-decrease">-</button>
-                    <span class="qty-display" id="quantity-display">1</span>
-                    <button class="qty-btn" id="btn-increase">+</button>
+                
+                <div class="option-group">
+                    <div class="option-title">Cantidad</div>
+                    <div class="qty-control">
+                        <button class="qty-btn" id="btn-decrease">-</button>
+                        <span class="qty-display" id="quantity-display">1</span>
+                        <button class="qty-btn" id="btn-increase">+</button>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="option-group">
-                <div class="option-title">Notas Especiales</div>
-                <textarea class="notes-input" id="notes-input" placeholder="Ej: Cliente alérgico a mariscos" rows="3"></textarea>
-            </div>
-            
-            <div class="action-btns">
-                <button class="action-btn cancel-btn" id="btn-cancel">Cancelar</button>
-                <button class="action-btn start-btn" id="btn-start">Iniciar Preparación</button>
-                <button class="action-btn back-btn" id="btn-back-to-dishes">Atrás</button>
+                
+                <div class="option-group">
+                    <div class="option-title">Notas Especiales</div>
+                    <textarea class="notes-input" id="notes-input" placeholder="Ej: Cliente alérgico a mariscos" rows="2"></textarea>
+                </div>
+                
+                <!-- Botones de acción siempre visibles -->
+                <div class="action-btns">
+                    <button class="action-btn cancel-btn" id="btn-cancel">Cancelar</button>
+                    <button class="action-btn start-btn" id="btn-start">Iniciar Preparación</button>
+                    <button class="action-btn back-btn" id="btn-back-to-dishes">Atrás</button>
+                </div>
             </div>
         </div>
     </div>

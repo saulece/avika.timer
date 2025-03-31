@@ -218,23 +218,23 @@ section {
     font-size: 14px;
 }
 
-/* Sección de preparación */
+/* Sección de preparación - MODIFICADA PARA COMPACTAR */
 .preparation-section {
     display: none;
     background-color: var(--container-bg);
-    padding: 25px;
+    padding: 15px;  /* Reducido de 25px */
     border-radius: 8px;
     box-shadow: 0 3px 10px var(--shadow-color);
     margin-top: 20px;
 }
 
 .option-group {
-    margin-bottom: 20px;
+    margin-bottom: 12px; /* Reducido de 20px */
 }
 
 .option-title {
     font-weight: bold;
-    margin-bottom: 10px;
+    margin-bottom: 5px; /* Reducido de 10px */
     color: var(--text-color);
     font-size: 1.1rem;
 }
@@ -242,14 +242,14 @@ section {
 .option-btns {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px; /* Reducido de 10px */
 }
 
 .option-btn {
     background-color: var(--highlight-bg);
     color: var(--text-color);
     border: 1px solid var(--border-color);
-    padding: 10px 15px;
+    padding: 8px 12px; /* Reducido de 10px 15px */
     border-radius: 6px;
     cursor: pointer;
     transition: background-color var(--transition-speed), color var(--transition-speed);
@@ -272,10 +272,10 @@ section {
     background-color: var(--primary-btn);
     color: var(--primary-btn-text);
     border: none;
-    width: 35px;
-    height: 35px;
+    width: 30px; /* Reducido de 35px */
+    height: 30px; /* Reducido de 35px */
     border-radius: 50%;
-    font-size: 20px;
+    font-size: 18px; /* Reducido de 20px */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -288,7 +288,7 @@ section {
 }
 
 .qty-display {
-    font-size: 20px;
+    font-size: 18px; /* Reducido de 20px */
     font-weight: bold;
     min-width: 40px;
     text-align: center;
@@ -298,13 +298,13 @@ section {
 /* Área de notas */
 .notes-input {
     width: 100%;
-    padding: 12px;
+    padding: 10px; /* Reducido de 12px */
     border: 1px solid var(--border-color);
     border-radius: 6px;
     background-color: var(--container-bg);
     color: var(--text-color);
     resize: vertical;
-    min-height: 80px;
+    min-height: 60px; /* Reducido de 80px */
     font-family: var(--font-main);
     transition: border-color var(--transition-speed);
 }
@@ -314,16 +314,21 @@ section {
     border-color: var(--primary-btn);
 }
 
-/* Botones de acción */
+/* Botones de acción - MODIFICADO PARA MOSTRAR EN LA MISMA LINEA */
 .action-btns {
     display: flex;
-    gap: 15px;
-    margin-top: 25px;
+    gap: 10px; /* Reducido de 15px */
+    margin-top: 15px; /* Reducido de 25px */
+    position: sticky; /* NUEVO: Fijar en la parte inferior */
+    bottom: 10px;
+    background-color: var(--container-bg);
+    padding: 10px 0;
+    z-index: 100;
 }
 
 .action-btn {
     flex: 1;
-    padding: 14px;
+    padding: 12px; /* Reducido de 14px */
     font-size: 16px;
     border: none;
     border-radius: 8px;
@@ -370,7 +375,7 @@ section {
     transform: translateY(-2px);
 }
 
-/* Tablas */
+/* Tablas - MODIFICADO PARA AJUSTAR ANCHO DE COLUMNAS */
 .pending-orders-section {
     margin-top: 30px;
     background-color: var(--container-bg);
@@ -679,7 +684,7 @@ h2 {
     }
     
     .action-btns {
-        flex-direction: column;
+        flex-direction: row; /* Cambiado a row para mantenerlos en la misma línea */
     }
     
     table {
@@ -723,12 +728,15 @@ h2 {
     }
     
     .option-btns {
-        flex-direction: column;
-        align-items: stretch;
+        flex-direction: row; /* Cambiado a row para mantener opciones en línea horizontal */
+        flex-wrap: wrap;
+        justify-content: space-between;
     }
     
     .option-btn {
         text-align: center;
+        flex: 0 0 48%; /* Hacer que las opciones ocupen aproximadamente la mitad del ancho */
+        margin-bottom: 4px;
     }
 }
 
@@ -811,33 +819,42 @@ h2 {
         border: 1px solid #000;
     }
 }
+
 /* Ajustes para tablas de preparación para evitar desplazamiento horizontal */
 .pending-orders-section table {
     table-layout: fixed;
     width: 100%;
 }
 
+/* MODIFICADO: Reducir ancho de la columna de tiempo transcurrido */
 .pending-orders-section th:nth-child(1),
 .pending-orders-section td:nth-child(1) {
-    width: 20%; /* Columna de platillos */
+    width: 22%; /* Columna de platillos */
 }
 
 .pending-orders-section th:nth-child(2),
-.pending-orders-section td:nth-child(2),
+.pending-orders-section td:nth-child(2) {
+    width: 12%; /* Columna de inicio */
+}
+
 .pending-orders-section th:nth-child(3),
 .pending-orders-section td:nth-child(3) {
-    width: 10%; /* Columnas de tiempo */
+    width: 12%; /* Columna de tiempo (REDUCIDA) */
 }
 
 .pending-orders-section th:nth-child(4),
 .pending-orders-section td:nth-child(4) {
-    width: 40%; /* Columna de detalles */
+    width: 34%; /* Columna de detalles (REDUCIDA) */
     word-break: break-word; /* Permitir que las palabras largas se rompan */
 }
 
 .pending-orders-section th:nth-child(5),
 .pending-orders-section td:nth-child(5) {
     width: 20%; /* Columna de acción */
+    position: sticky; /* Mantener visible al desplazar horizontalmente */
+    right: 0;
+    background-color: var(--container-bg);
+    z-index: 2;
 }
 
 /* Ajustes para dispositivos móviles */
@@ -854,5 +871,21 @@ h2 {
     .finish-btn {
         padding: 6px 8px;
         font-size: 12px;
+    }
+    
+    /* Estilos específicos para iPhone */
+    @media screen and (max-width: 390px) {
+        .pending-orders-section th:nth-child(3),
+        .pending-orders-section td:nth-child(3) {
+            width: 10%; /* Reducir aún más para iPhone */
+            font-size: 13px;
+        }
+        
+        .pending-orders-section th:nth-child(5),
+        .pending-orders-section td:nth-child(5) {
+            position: sticky;
+            right: 0;
+            background-color: var(--container-bg);
+        }
     }
 }

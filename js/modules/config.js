@@ -149,4 +149,4 @@ Avika.config = {
     
     // Intervalo de auto-guardado (en milisegundos)
     autoSaveInterval: 30000
-};
+}
