@@ -1,765 +1,205 @@
-/* Fixes para eventos táctiles en iOS - Añadir al inicio de avika-style.css */
+/* Estilos mejorados para la aplicación Avika */
 
-/* Deshabilitar efectos de toque y selección por defecto */
-* {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-touch-callout: none !important;
-    -webkit-user-select: none !important;
-    user-select: none !important;
-    touch-action: manipulation !important;
-    cursor: pointer !important;
-}
-
-/* Hacer explícitamente seleccionable el campo de texto */
-textarea, input[type="text"] {
-    -webkit-user-select: text !important;
-    user-select: text !important;
-    touch-action: auto !important;
-}
-
-/* Aumentar el tamaño de todos los botones para una mejor área táctil */
-button, 
-.category-btn, 
-.dish-btn, 
-.option-btn, 
-.finish-btn, 
-.action-btn, 
-.back-btn,
-.filter-btn {
-    min-height: 44px !important; /* Tamaño mínimo recomendado por Apple */
-    font-size: 16px !important; /* Evita el zoom automático */
-    padding: 12px !important;
-    margin-bottom: 10px !important;
-    position: relative;
-    z-index: 2; /* Asegurar que esté encima de otros elementos */
-}
-
-/* Agregar un estado activo más visible */
-button:active, 
-.category-btn:active, 
-.dish-btn:active, 
-.option-btn:active, 
-.finish-btn:active, 
-.action-btn:active, 
-.back-btn:active,
-.filter-btn:active {
-    opacity: 0.7 !important;
-    transform: scale(0.97) !important;
-}
-
-/* Asegurar que el contenedor principal tenga suficiente espacio */
-.container {
-    padding-bottom: 100px !important;
-}
-
-/* Eliminar delay de 300ms en iOS Safari */
-html {
-    touch-action: manipulation !important;
-}
-
-/* Mejorar visibilidad de los botones seleccionados */
-.selected {
-    box-shadow: 0px 0px 0px 2px white inset !important;
-}
-/* Estilos base optimizados para iPhone */
 :root {
-    --bg-color: #f0f0f0;
-    --container-bg: #ffffff;
-    --text-color: #333333;
-    --header-bg: #e74c3c;
-    --header-text: white;
-    --primary-btn: #3498db;
-    --primary-btn-text: white;
-    --success-btn: #2ecc71;
-    --danger-btn: #e74c3c;
-    --warning-btn: #f0ad4e;
-    --info-btn: #5bc0de;
-    --border-color: #ddd;
-    --table-header-bg: #3498db;
-    --table-header-text: white;
-    --notification-bg: #2ecc71;
-    --highlight-bg: #f9f9f9;
-    --shadow-color: rgba(0,0,0,0.1);
-    --btn-hover: #2980b9;
+    /* Paleta de colores primaria */
+    --primary-color: #e74c3c;
+    --secondary-color: #3498db;
+    --tertiary-color: #2ecc71;
+    --accent-color: #f39c12;
+    --dark-color: #34495e;
     
-    /* Variables para tiempos */
-    --time-excellent: #2ecc71;
-    --time-good: #7fdbff;
-    --time-warning: #f39c12;
-    --time-bad: #e74c3c;
+    /* Colores para categorías */
+    --cocina-fria: #3498db;
+    --cocina-caliente: #e74c3c;
+    --combos: #9b59b6;
+    --bebidas: #2ecc71;
+    --postres: #f39c12;
     
-    /* Transiciones */
-    --transition-speed: 0.3s;
-    
-    /* Fuentes */
-    --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-    --font-monospace: 'Menlo', monospace;
+    /* Variables generales */
+    --border-radius: 10px;
+    --box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    --transition: all 0.3s ease;
 }
 
-.dark-mode {
-    --bg-color: #121212;
-    --container-bg: #1e1e1e;
-    --text-color: #e0e0e0;
-    --header-bg: #c0392b;
-    --header-text: #f0f0f0;
-    --primary-btn: #2980b9;
-    --primary-btn-text: #f0f0f0;
-    --success-btn: #27ae60;
-    --danger-btn: #c0392b;
-    --warning-btn: #d35400;
-    --info-btn: #2980b9;
-    --border-color: #444;
-    --table-header-bg: #2980b9;
-    --table-header-text: #f0f0f0;
-    --notification-bg: #27ae60;
-    --highlight-bg: #2a2a2a;
-    --shadow-color: rgba(0,0,0,0.3);
-    --btn-hover: #3498db;
-    
-    /* Colores de tiempos en modo oscuro */
-    --time-excellent: #27ae60;
-    --time-good: #2980b9;
-    --time-warning: #d35400;
-    --time-bad: #c0392b;
+/* Mejoras en la categoría de botones */
+.category-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
 }
 
-/* Estilos generales */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    -webkit-tap-highlight-color: transparent;
-}
-
-body {
-    font-family: var(--font-main);
-    margin: 0;
-    padding: 15px;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    transition: background-color var(--transition-speed), color var(--transition-speed);
-    line-height: 1.6;
-    -webkit-user-select: none;
-    user-select: none;
-    overscroll-behavior: none;
-    -webkit-overflow-scrolling: touch;
-    touch-action: manipulation;
-}
-
-/* Encabezado */
-header {
-    background-color: var(--header-bg);
-    color: var(--header-text);
-    padding: 15px;
-    text-align: center;
-    margin-bottom: 20px;
-    border-radius: 8px;
+.category-btn {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 4px var(--shadow-color);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-header h1 {
-    margin: 0;
-    flex: 1;
-    font-size: 1.5rem;
-}
-
-.header-controls {
-    display: flex;
-    gap: 10px;
-}
-
-.icon-btn {
-    background: none;
-    border: none;
-    font-size: 20px;
-    color: var(--header-text);
-    cursor: pointer;
-    padding: 5px;
-    border-radius: 50%;
-    transition: background-color var(--transition-speed);
-    width: 36px;
-    height: 36px;
-    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    touch-action: manipulation;
+    padding: 18px 12px;
+    border-radius: var(--border-radius);
+    border: none;
+    box-shadow: var(--box-shadow);
+    transition: var(--transition);
+    height: 90px;
+    text-align: center;
+    color: white;
+    font-weight: 500;
 }
 
-.icon-btn:active {
-    background-color: rgba(255, 255, 255, 0.2);
+.category-btn:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 3px rgba(0,0,0,0.15);
 }
 
-/* Contenedor principal */
-.container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding-bottom: 80px; /* Para evitar que el último elemento quede oculto detrás del dock de iOS */
+.category-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
 }
 
-/* Secciones */
-section {
-    background-color: var(--container-bg);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px var(--shadow-color);
-    margin-bottom: 20px;
-    transition: background-color var(--transition-speed);
+.category-name {
+    font-size: 14px;
+    line-height: 1.2;
 }
 
-/* Contenedor de categorías */
-.category-container {
+/* Subcategorías */
+.subcategory-header {
+    width: 100%;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.subcategory-header h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--dark-color);
+    margin: 0;
+}
+
+.subcategory-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-width: 2px;
+    height: 80px;
+}
+
+.subcategory-icon {
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+.subcategory-name {
+    font-size: 13px;
+    line-height: 1.2;
+}
+
+/* Botones de platillos */
+.dishes-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     margin-bottom: 20px;
 }
 
-.category-btn {
-    background-color: var(--primary-btn);
-    color: var(--primary-btn-text);
-    border: none;
-    padding: 15px;
-    font-size: 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    text-align: center;
-    height: 70px;
-    transition: background-color var(--transition-speed), transform 0.2s;
-    box-shadow: 0 2px 4px var(--shadow-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    touch-action: manipulation;
+/* Grupo de platillos */
+.dish-group-header {
+    grid-column: 1 / -1;
+    margin: 10px 0 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
 }
 
-.category-btn:active {
-    background-color: var(--btn-hover);
-    transform: scale(0.98);
-}
-
-/* Sección de platillos */
-.dishes-section {
-    display: none;
-}
-
-.dishes-container {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 20px;
+.dish-group-header h4 {
+    margin: 0;
+    color: var(--dark-color);
+    font-size: 15px;
+    font-weight: 600;
 }
 
 .dish-btn {
-    background-color: var(--container-bg);
-    color: var(--text-color);
-    border: 1px solid var(--primary-btn);
-    padding: 12px 10px;
-    font-size: 14px;
-    border-radius: 8px;
-    cursor: pointer;
-    text-align: center;
-    transition: background-color var(--transition-speed), 
-                color var(--transition-speed), 
-                transform 0.2s;
-    height: 60px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    touch-action: manipulation;
+    padding: 12px 8px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    transition: var(--transition);
+    height: 70px;
+    position: relative;
+    overflow: hidden;
 }
 
 .dish-btn:active {
-    background-color: var(--primary-btn);
-    color: var(--primary-btn-text);
+    background-color: #f9f9f9;
     transform: scale(0.98);
 }
 
-.dish-btn.special-combo {
-    border: 2px solid var(--danger-btn);
-    position: relative;
+.dish-name {
+    font-size: 13px;
+    line-height: 1.2;
+    text-align: center;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: var(--dark-color);
 }
 
-.dish-btn.special-combo::after {
+.dish-price {
+    font-size: 12px;
+    color: #777;
+    font-weight: 600;
+}
+
+.special-combo {
+    border: 2px solid var(--accent-color);
+}
+
+.special-combo::after {
     content: "★";
     position: absolute;
     top: 5px;
     right: 5px;
-    color: var(--danger-btn);
+    color: var(--accent-color);
     font-size: 14px;
 }
 
-/* Sección de preparación */
-.preparation-section {
-    display: none;
-    background-color: var(--container-bg);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 3px 10px var(--shadow-color);
-    margin-top: 20px;
-}
-
-.option-group {
-    margin-bottom: 20px;
-}
-
-.option-title {
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: var(--text-color);
-    font-size: 1.1rem;
-}
-
+/* Opciones de personalización */
 .option-btns {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
+    margin-bottom: 20px;
 }
 
 .option-btn {
-    background-color: var(--highlight-bg);
-    color: var(--text-color);
-    border: 1px solid var(--border-color);
-    padding: 10px 15px;
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
     border-radius: 6px;
-    cursor: pointer;
-    transition: background-color var(--transition-speed), color var(--transition-speed);
+    padding: 10px 15px;
     font-size: 14px;
     flex: 1;
     min-width: 100px;
+    transition: var(--transition);
     text-align: center;
-    touch-action: manipulation;
 }
 
 .option-btn.selected {
-    background-color: var(--primary-btn);
-    color: var(--primary-btn-text);
-    border-color: var(--primary-btn);
-}
-
-/* Control de cantidad */
-.qty-control {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.qty-btn {
-    background-color: var(--primary-btn);
-    color: var(--primary-btn-text);
-    border: none;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background-color var(--transition-speed);
-    touch-action: manipulation;
-}
-
-.qty-btn:active {
-    background-color: var(--btn-hover);
-}
-
-.qty-display {
-    font-size: 20px;
-    font-weight: bold;
-    min-width: 40px;
-    text-align: center;
-    color: var(--text-color);
-}
-
-/* Área de notas */
-.notes-input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    background-color: var(--container-bg);
-    color: var(--text-color);
-    resize: vertical;
-    min-height: 80px;
-    font-family: var(--font-main);
-    transition: border-color var(--transition-speed);
-    font-size: 16px; /* Evita el zoom automático en iOS */
-}
-
-.notes-input:focus {
-    outline: none;
-    border-color: var(--primary-btn);
-}
-
-/* Botones de acción */
-.action-btns {
-    display: flex;
-    gap: 15px;
-    margin-top: 25px;
-}
-
-.action-btn {
-    flex: 1;
-    padding: 14px;
-    font-size: 16px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color var(--transition-speed), 
-                transform 0.2s,
-                box-shadow 0.2s;
-    box-shadow: 0 2px 4px var(--shadow-color);
-    touch-action: manipulation;
-}
-
-.action-btn:active {
-    transform: scale(0.98);
-    box-shadow: 0 1px 2px var(--shadow-color);
-}
-
-.cancel-btn {
-    background-color: var(--danger-btn);
+    background-color: var(--secondary-color);
     color: white;
+    border-color: var(--secondary-color);
 }
 
-.start-btn {
-    background-color: var(--success-btn);
-    color: white;
+.premium-option {
+    background-color: #fff8e1;
+    border-color: #ffcc80;
 }
 
-.back-btn {
-    background-color: var(--warning-btn);
-    color: white;
-    padding: 12px 18px;
-    margin: 15px 0;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color var(--transition-speed), transform 0.2s;
-    box-shadow: 0 2px 4px var(--shadow-color);
-    touch-action: manipulation;
+.premium-option small {
+    display: block;
+    font-size: 11px;
+    opacity: 0.8;
 }
 
-.back-btn:active {
-    transform: scale(0.98);
-}
-
-/* Tablas */
-.pending-orders-section {
-    margin-top: 30px;
-    background-color: var(--container-bg);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px var(--shadow-color);
-}
-
-.table-responsive {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-.timer-cell {
-    font-weight: bold;
-    color: var(--text-color);
-    font-size: 16px;
-    font-family: var(--font-monospace);
-}
-
-.timer-cell.warning {
-    color: var(--time-warning);
-}
-
-.timer-cell.alert {
-    color: var(--time-bad);
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.6; }
-    100% { opacity: 1; }
-}
-
-.finish-btn {
-    background-color: var(--success-btn);
-    color: white;
-    border: none;
-    padding: 10px 8px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-    width: 100%;
-    margin-bottom: 5px;
-    transition: background-color var(--transition-speed), transform 0.2s;
-    box-shadow: 0 2px 4px var(--shadow-color);
-    font-size: 14px;
-    touch-action: manipulation;
-}
-
-.finish-btn:active {
-    transform: scale(0.98);
-}
-
-.finish-btn.hot-kitchen {
-    background-color: var(--danger-btn);
-}
-
-.finish-btn.cold-kitchen {
-    background-color: var(--info-btn);
-}
-
-.finish-btn.delivery {
-    background-color: #f39c12;
-}
-
-.finish-btn.delivery-arrived {
-    background-color: #3498db;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 15px;
-    font-size: 14px;
-}
-
-th, td {
-    border: 1px solid var(--border-color);
-    padding: 8px 6px;
-    text-align: left;
-    color: var(--text-color);
-    transition: background-color var(--transition-speed);
-}
-
-th {
-    background-color: var(--table-header-bg);
-    color: var(--table-header-text);
-    position: sticky;
-    top: 0;
-    font-size: 12px;
-}
-
-tr:active td {
-    background-color: var(--highlight-bg);
-}
-
-/* Clases para tiempos */
-.time-excellent {
-    color: var(--time-excellent);
-    font-weight: bold;
-}
-
-.time-good {
-    color: var(--time-good);
-}
-
-.time-warning {
-    color: var(--time-warning);
-}
-
-.time-bad {
-    color: var(--time-bad);
-    font-weight: bold;
-}
-
-/* Notificaciones */
-#notification {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: var(--notification-bg);
-    color: white;
-    padding: 15px 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px var(--shadow-color);
-    max-width: 350px;
-    z-index: 1000;
-    display: none;
-    animation: fadeIn 0.3s;
-    font-weight: 500;
-    text-align: center;
-    width: 85%;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translate(-50%, 20px); }
-    to { opacity: 1; transform: translate(-50%, 0); }
-}
-
-/* Mejoras de accesibilidad */
-:focus {
-    outline: 2px solid var(--primary-btn);
-    outline-offset: 2px;
-}
-
-/* Animaciones */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.dishes-section, .preparation-section {
-    animation: fadeInUp 0.3s ease-out;
-}
-
-/* PWA mejoras */
-.button-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+.mt-3 {
     margin-top: 15px;
-}
-
-.button-group .back-btn {
-    flex: 1;
-    margin: 0;
-    font-size: 14px;
-    white-space: nowrap;
-    padding: 10px;
-    text-align: center;
-}
-
-/* Modal */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.7);
-    z-index: 1001;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
-}
-
-.modal.active {
-    opacity: 1;
-    pointer-events: all;
-}
-
-.modal-content {
-    background-color: var(--container-bg);
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 90%;
-    max-height: 90%;
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-    margin: 10px;
-}
-
-/* Filtros */
-.filter-controls {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-}
-
-.filter-btn {
-    background-color: var(--highlight-bg);
-    color: var(--text-color);
-    border: 1px solid var(--border-color);
-    padding: 8px 15px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color var(--transition-speed), 
-                color var(--transition-speed),
-                transform 0.2s;
-    font-size: 14px;
-    touch-action: manipulation;
-}
-
-.filter-btn:active {
-    transform: scale(0.98);
-}
-
-.filter-btn.active {
-    background-color: var(--primary-btn);
-    color: var(--primary-btn-text);
-    border-color: var(--primary-btn);
-}
-
-/* Encabezados */
-h2 {
-    margin-bottom: 15px;
-    color: var(--text-color);
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 8px;
-    font-size: 18px;
-}
-
-.section-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.count-badge {
-    background-color: var(--primary-btn);
-    color: white;
-    font-size: 12px;
-    padding: 3px 8px;
-    border-radius: 10px;
-    font-weight: bold;
-}
-
-/* App instalación guía */
-.install-guide {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: rgba(0,0,0,0.85);
-    color: white;
-    padding: 15px;
-    font-size: 14px;
-    display: none;
-    z-index: 10000;
-}
-
-.install-guide p {
-    margin-bottom: 10px;
-}
-
-.install-guide button {
-    background-color: white;
-    color: black;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    touch-action: manipulation;
-}
-
-/* Mejoras específicas para iOS */
-@supports (-webkit-touch-callout: none) {
-    /* CSS específico para iOS */
-    input, button, textarea, select {
-        font-size: 16px; /* Previene zoom automático */
-    }
-    
-    /* Corrige el comportamiento de botones en iOS */
-    button, .option-btn, .finish-btn, .action-btn, .back-btn, .category-btn, .dish-btn, .filter-btn {
-        touch-action: manipulation;
-    }
 }

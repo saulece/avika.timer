@@ -5,15 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#e74c3c">
     <title>Avika - Temporizador</title>
     <link rel="stylesheet" href="avika-style.css">
-    <!-- jQuery para mejorar la compatibilidad con iOS -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <!-- FastClick para eliminar el retraso de 300ms en clics táctiles -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js"></script>
 </head>
 <body>
     <header>
@@ -30,12 +23,8 @@
         <!-- Sección de categorías -->
         <div id="categories-section">
             <h2>Selecciona una categoría</h2>
-            <div class="category-container">
-                <button class="category-btn" id="btn-frio">Platillos Fríos</button>
-                <button class="category-btn" id="btn-entrada-fria">Entradas Frías</button>
-                <button class="category-btn" id="btn-caliente">Platillos Calientes</button>
-                <button class="category-btn" id="btn-entrada-caliente">Entradas Calientes</button>
-                <button class="category-btn" id="btn-combos">Combos</button>
+            <div id="categories-container" class="category-container">
+                <!-- Se llenará dinámicamente con JavaScript -->
             </div>
             
             <!-- Órdenes pendientes -->
@@ -94,7 +83,7 @@
         </div>
         
         <!-- Sección de platillos -->
-        <div id="dishes-section">
+        <div id="dishes-section" style="display: none;">
             <h2 id="selected-category-title">Categoría</h2>
             <div id="dishes-container" class="dishes-container">
                 <!-- Se llenará con JavaScript -->
@@ -104,7 +93,7 @@
         </div>
         
         <!-- Sección de preparación -->
-        <div id="preparation-section" class="preparation-section">
+        <div id="preparation-section" class="preparation-section" style="display: none;">
             <h2 id="selected-dish-title">Platillo</h2>
             
             <div id="personalization-section">
@@ -164,7 +153,7 @@
         <p>2. Desplázate y selecciona <strong>"Añadir a pantalla de inicio"</strong></p>
         <button id="hide-guide">Entendido</button>
     </div>
-    
+
     <script src="avika-script.js"></script>
 </body>
 </html>
