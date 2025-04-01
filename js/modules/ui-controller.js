@@ -39,32 +39,59 @@ Avika.ui = {
     },
     
     // Función para manejar subcategorías
-    selectCategory: function(category) {
-        Avika.data.currentCategory = category;
-        document.getElementById('selected-category-title').textContent = Avika.config.categoryNames[category];
+    // Reemplaza la función selectCategory en ui-controller.js con esta versión corregida
+
+selectCategory: function(category) {
+    console.log("Seleccionando categoría:", category); // Añadido para depuración
+    
+    Avika.data.currentCategory = category;
+    document.getElementById('selected-category-title').textContent = Avika.config.categoryNames[category];
+    
+    var dishesContainer = document.getElementById('dishes-container');
+    // Limpiar el contenedor completamente
+    dishesContainer.innerHTML = '';
+    
+    // Verificar si hay datos de platillos
+    if (!Avika.config.dishes[category] || Avika.config.dishes[category].length === 0) {
+        dishesContainer.innerHTML = '<p>No hay platillos en esta categoría</p>';
+        this.showSection('dishes-section');
+        return;
+    }
+    
+    // Verificar si hay subcategorías configuradas para esta categoría
+    if (Avika.config.subCategories && 
+        Avika.config.subCategories[category] && 
+        Avika.config.subCategories[category].length > 0) {
         
-        var dishesContainer = document.getElementById('dishes-container');
-        dishesContainer.innerHTML = '';
+        console.log("Procesando subcategorías para:", category); // Añadido para depuración
         
-        // Verificar si hay datos de platillos
-        if (!Avika.config.dishes[category] || Avika.config.dishes[category].length === 0) {
-            dishesContainer.innerHTML = '<p>No hay platillos en esta categoría</p>';
-            this.showSection('dishes-section');
-            return;
-        }
+        // Crear contenedor para subcategorías
+        var subCategoriesContainer = document.createElement('div');
+        subCategoriesContainer.className = 'subcategories-container';
         
-        // Verificar si hay subcategorías configuradas para esta categoría
-        if (Avika.config.subCategories && Avika.config.subCategories[category] && Avika.config.subCategories[category].length > 0) {
-            // Crear contenedor para subcategorías
-            var subCategoriesContainer = document.createElement('div');
-            subCategoriesContainer.className = 'subcategories-container';
+        // Añadir botón para "Todos los platillos"
+        var allButton = document.createElement('button');
+        allButton.className = 'subcategory-btn active';
+        allButton.textContent = 'Todos los platillos';
+        allButton.onclick = function() {
+            Avika.ui.selectSubCategory(category, null);
             
-            // Añadir botón para "Todos los platillos"
-            var allButton = document.createElement('button');
-            allButton.className = 'subcategory-btn active';
-            allButton.textContent = 'Todos los platillos';
-            allButton.onclick = function() {
-                Avika.ui.selectSubCategory(category, null);
+            // Marcar este botón como activo
+            var buttons = subCategoriesContainer.querySelectorAll('.subcategory-btn');
+            buttons.forEach(function(btn) {
+                btn.classList.remove('active');
+            });
+            this.classList.add('active');
+        };
+        subCategoriesContainer.appendChild(allButton);
+        
+        // Añadir un botón para cada subcategoría
+        Avika.config.subCategories[category].forEach(function(subcat) {
+            var button = document.createElement('button');
+            button.className = 'subcategory-btn';
+            button.textContent = subcat.name;
+            button.onclick = function() {
+                Avika.ui.selectSubCategory(category, subcat);
                 
                 // Marcar este botón como activo
                 var buttons = subCategoriesContainer.querySelectorAll('.subcategory-btn');
@@ -73,149 +100,154 @@ Avika.ui = {
                 });
                 this.classList.add('active');
             };
-            subCategoriesContainer.appendChild(allButton);
-            
-            // Añadir un botón para cada subcategoría
-            Avika.config.subCategories[category].forEach(function(subcat) {
-                var button = document.createElement('button');
-                button.className = 'subcategory-btn';
-                button.textContent = subcat.name;
-                button.onclick = function() {
-                    Avika.ui.selectSubCategory(category, subcat);
-                    
-                    // Marcar este botón como activo
-                    var buttons = subCategoriesContainer.querySelectorAll('.subcategory-btn');
-                    buttons.forEach(function(btn) {
-                        btn.classList.remove('active');
-                    });
-                    this.classList.add('active');
-                };
-                subCategoriesContainer.appendChild(button);
-            });
-            
-            // Añadir el contenedor de subcategorías al principio
-            dishesContainer.appendChild(subCategoriesContainer);
-            
-            // Añadir la sección de búsqueda rápida
-            var searchContainer = document.createElement('div');
-            searchContainer.className = 'search-container';
-            var searchInput = document.createElement('input');
-            searchInput.type = 'text';
-            searchInput.placeholder = 'Buscar platillo...';
-            searchInput.className = 'search-input';
-            searchInput.id = 'dish-search';
-            searchInput.addEventListener('input', function() {
-                Avika.ui.filterDishes(this.value.toLowerCase());
-            });
-            searchContainer.appendChild(searchInput);
-            dishesContainer.appendChild(searchContainer);
-            
-            // Crear contenedor para los botones de platillos
-            var platillosContainer = document.createElement('div');
-            platillosContainer.className = 'dishes-buttons-container';
-            dishesContainer.appendChild(platillosContainer);
-            
-            // Mostrar todos los platillos inicialmente
-            this.selectSubCategory(category, null, platillosContainer);
-        } else {
-            // Si no hay subcategorías, mostrar todos los platillos directamente
-            
-            // Añadir la sección de búsqueda rápida
-            var searchContainer = document.createElement('div');
-            searchContainer.className = 'search-container';
-            var searchInput = document.createElement('input');
-            searchInput.type = 'text';
-            searchInput.placeholder = 'Buscar platillo...';
-            searchInput.className = 'search-input';
-            searchInput.id = 'dish-search';
-            searchInput.addEventListener('input', function() {
-                Avika.ui.filterDishes(this.value.toLowerCase());
-            });
-            searchContainer.appendChild(searchInput);
-            dishesContainer.appendChild(searchContainer);
-            
-            // Crear contenedor para los botones de platillos
-            var platillosContainer = document.createElement('div');
-            platillosContainer.className = 'dishes-buttons-container';
-            dishesContainer.appendChild(platillosContainer);
-            
-            for (var i = 0; i < Avika.config.dishes[category].length; i++) {
-                var dish = Avika.config.dishes[category][i];
-                var button = document.createElement('button');
-                button.className = 'dish-btn';
-                button.setAttribute('data-dish', dish.toLowerCase());
-                
-                if (category === 'combos' && Avika.config.specialCombos.indexOf(dish) !== -1) {
-                    button.className += ' special-combo';
-                }
-                
-                button.textContent = dish;
-                button.onclick = (function(selectedDish) {
-                    return function() {
-                        Avika.ui.selectDish(selectedDish);
-                    };
-                })(dish);
-                
-                platillosContainer.appendChild(button);
-            }
-        }
+            subCategoriesContainer.appendChild(button);
+        });
         
-        this.showSection('dishes-section');
-    },
+        // Añadir el contenedor de subcategorías al principio
+        dishesContainer.appendChild(subCategoriesContainer);
+        
+        // Añadir la sección de búsqueda rápida
+        var searchContainer = document.createElement('div');
+        searchContainer.className = 'search-container';
+        var searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.placeholder = 'Buscar platillo...';
+        searchInput.className = 'search-input';
+        searchInput.id = 'dish-search';
+        searchInput.addEventListener('input', function() {
+            Avika.ui.filterDishes(this.value.toLowerCase());
+        });
+        searchContainer.appendChild(searchInput);
+        dishesContainer.appendChild(searchContainer);
+        
+        // Crear contenedor para los botones de platillos
+        var platillosContainer = document.createElement('div');
+        platillosContainer.className = 'dishes-buttons-container';
+        dishesContainer.appendChild(platillosContainer);
+        
+        // Mostrar todos los platillos inicialmente
+        this.selectSubCategory(category, null, platillosContainer);
+    } else {
+        // Si no hay subcategorías, mostrar todos los platillos directamente
+        console.log("Mostrando todos los platillos para:", category); // Añadido para depuración
+        
+        // Añadir la sección de búsqueda rápida
+        var searchContainer = document.createElement('div');
+        searchContainer.className = 'search-container';
+        var searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.placeholder = 'Buscar platillo...';
+        searchInput.className = 'search-input';
+        searchInput.id = 'dish-search';
+        searchInput.addEventListener('input', function() {
+            Avika.ui.filterDishes(this.value.toLowerCase());
+        });
+        searchContainer.appendChild(searchInput);
+        dishesContainer.appendChild(searchContainer);
+        
+        // Crear contenedor para los botones de platillos
+        var platillosContainer = document.createElement('div');
+        platillosContainer.className = 'dishes-buttons-container';
+        dishesContainer.appendChild(platillosContainer);
+        
+        // Añadir todos los platillos como botones
+        for (var i = 0; i < Avika.config.dishes[category].length; i++) {
+            var dish = Avika.config.dishes[category][i];
+            var button = document.createElement('button');
+            button.className = 'dish-btn';
+            button.setAttribute('data-dish', dish.toLowerCase());
+            
+            if (category === 'combos' && Avika.config.specialCombos.indexOf(dish) !== -1) {
+                button.className += ' special-combo';
+            }
+            
+            button.textContent = dish;
+            button.onclick = (function(selectedDish) {
+                return function() {
+                    Avika.ui.selectDish(selectedDish);
+                };
+            })(dish);
+            
+            platillosContainer.appendChild(button);
+        }
+    }
+    
+    // Asegurarse de que se muestre la sección correcta
+    this.showSection('dishes-section');
+    console.log("Sección de platillos mostrada"); // Añadido para depuración
+},
     
     // Función para seleccionar una subcategoría
-    selectSubCategory: function(category, subcategory, container) {
-        this.state.currentSubCategory = subcategory;
+    // Reemplaza la función selectSubCategory en ui-controller.js con esta versión corregida
+
+selectSubCategory: function(category, subcategory, container) {
+    console.log("Seleccionando subcategoría:", subcategory ? subcategory.name : "Todos"); // Añadido para depuración
+    
+    this.state.currentSubCategory = subcategory;
+    
+    // Si no se proporciona un contenedor, usar el predeterminado
+    var platillosContainer = container || document.querySelector('.dishes-buttons-container');
+    if (!platillosContainer) {
+        console.error("No se encontró el contenedor de platillos"); // Añadido para depuración
+        return;
+    }
+    
+    // Limpiar contenedor
+    platillosContainer.innerHTML = '';
+    
+    // Si se seleccionó una subcategoría específica
+    if (subcategory) {
+        console.log("Mostrando platillos de subcategoría:", subcategory.name); // Añadido para depuración
         
-        // Si no se proporciona un contenedor, usar el predeterminado
-        var platillosContainer = container || document.querySelector('.dishes-buttons-container');
-        if (!platillosContainer) return;
-        
-        // Limpiar contenedor
-        platillosContainer.innerHTML = '';
-        
-        // Si se seleccionó una subcategoría específica
-        if (subcategory) {
-            // Mostrar solo los platillos de esta subcategoría
-            subcategory.items.forEach(function(dish) {
-                var button = document.createElement('button');
-                button.className = 'dish-btn';
-                button.setAttribute('data-dish', dish.toLowerCase());
-                
-                if (category === 'combos' && Avika.config.specialCombos.indexOf(dish) !== -1) {
-                    button.className += ' special-combo';
-                }
-                
-                button.textContent = dish;
-                button.onclick = function() {
-                    Avika.ui.selectDish(dish);
-                };
-                
-                platillosContainer.appendChild(button);
-            });
-        } else {
-            // Si se seleccionó "Todos", mostrar todos los platillos de la categoría
-            for (var i = 0; i < Avika.config.dishes[category].length; i++) {
-                var dish = Avika.config.dishes[category][i];
-                var button = document.createElement('button');
-                button.className = 'dish-btn';
-                button.setAttribute('data-dish', dish.toLowerCase());
-                
-                if (category === 'combos' && Avika.config.specialCombos.indexOf(dish) !== -1) {
-                    button.className += ' special-combo';
-                }
-                
-                button.textContent = dish;
-                button.onclick = (function(selectedDish) {
-                    return function() {
-                        Avika.ui.selectDish(selectedDish);
-                    };
-                })(dish);
-                
-                platillosContainer.appendChild(button);
+        // Mostrar solo los platillos de esta subcategoría
+        subcategory.items.forEach(function(dish) {
+            var button = document.createElement('button');
+            button.className = 'dish-btn';
+            button.setAttribute('data-dish', dish.toLowerCase());
+            
+            if (category === 'combos' && Avika.config.specialCombos.indexOf(dish) !== -1) {
+                button.className += ' special-combo';
             }
+            
+            button.textContent = dish;
+            button.onclick = function() {
+                Avika.ui.selectDish(dish);
+            };
+            
+            platillosContainer.appendChild(button);
+        });
+    } else {
+        console.log("Mostrando todos los platillos de la categoría:", category); // Añadido para depuración
+        
+        // Si se seleccionó "Todos", mostrar todos los platillos de la categoría
+        if (!Avika.config.dishes[category]) {
+            console.error("No se encontraron platillos para la categoría:", category); // Añadido para depuración
+            return;
         }
-    },
+        
+        for (var i = 0; i < Avika.config.dishes[category].length; i++) {
+            var dish = Avika.config.dishes[category][i];
+            var button = document.createElement('button');
+            button.className = 'dish-btn';
+            button.setAttribute('data-dish', dish.toLowerCase());
+            
+            if (category === 'combos' && Avika.config.specialCombos.indexOf(dish) !== -1) {
+                button.className += ' special-combo';
+            }
+            
+            button.textContent = dish;
+            button.onclick = (function(selectedDish) {
+                return function() {
+                    Avika.ui.selectDish(selectedDish);
+                };
+            })(dish);
+            
+            platillosContainer.appendChild(button);
+        }
+    }
+    
+    console.log("Platillos añadidos:", platillosContainer.children.length); // Añadido para depuración
+},
     
     // Función para filtrar platillos por búsqueda
     filterDishes: function(searchText) {
