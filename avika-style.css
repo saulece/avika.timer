@@ -384,15 +384,100 @@ section {
     transform: translateY(-2px);
 }
 
-/* Tablas - MODIFICADO PARA AJUSTAR ANCHO DE COLUMNAS */
+/* Tablas y configuración de columna de acción fija */
 .pending-orders-section {
     margin-top: 30px;
     background-color: var(--container-bg);
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 8px var(--shadow-color);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
 }
 
+/* Configuración básica de la tabla */
+.pending-orders-section table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    table-layout: fixed;
+}
+
+/* Estilo general para celdas de tabla */
+.pending-orders-section th, 
+.pending-orders-section td {
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    text-align: left;
+    color: var(--text-color);
+}
+
+/* Estilo para encabezados de tabla */
+.pending-orders-section th {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-text);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* Efecto hover para filas */
+.pending-orders-section tr:hover td {
+    background-color: var(--highlight-bg);
+}
+
+/* Estilos específicos para la columna de Acción (última columna) */
+.pending-orders-section th:last-child,
+.pending-orders-section td:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 20;
+    width: 120px;
+    min-width: 120px;
+}
+
+/* Estilo para el encabezado de Acción */
+.pending-orders-section th:last-child {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-text);
+    z-index: 21;
+}
+
+/* Estilo para las celdas de Acción */
+.pending-orders-section td:last-child {
+    background-color: var(--container-bg);
+    box-shadow: -5px 0 8px -2px rgba(0, 0, 0, 0.15);
+}
+
+/* Mantener fondo correcto al hacer hover */
+.pending-orders-section tr:hover td:last-child {
+    background-color: var(--container-bg);
+}
+
+/* Configurar columnas con anchos específicos para mejorar la visualización */
+.pending-orders-section th:nth-child(1),
+.pending-orders-section td:nth-child(1) {
+    width: 22%;
+}
+
+.pending-orders-section th:nth-child(2),
+.pending-orders-section td:nth-child(2) {
+    width: 12%;
+}
+
+.pending-orders-section th:nth-child(3),
+.pending-orders-section td:nth-child(3) {
+    width: 10%;
+}
+
+.pending-orders-section th:nth-child(4),
+.pending-orders-section td:nth-child(4) {
+    width: 36%;
+    word-break: break-word;
+}
+
+/* Estilo para celda de temporizador */
 .timer-cell {
     font-weight: bold;
     color: var(--text-color);
@@ -415,6 +500,7 @@ section {
     100% { opacity: 1; }
 }
 
+/* Botones de acción */
 .finish-btn {
     background-color: var(--success-btn);
     color: white;
@@ -427,6 +513,12 @@ section {
     margin-bottom: 5px;
     transition: background-color var(--transition-speed), transform 0.2s;
     box-shadow: 0 2px 4px var(--shadow-color);
+    white-space: normal;
+    height: auto;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .finish-btn:hover {
@@ -441,6 +533,15 @@ section {
     background-color: var(--info-btn);
 }
 
+.finish-btn.delivery {
+    background-color: var(--warning-btn);
+}
+
+.finish-btn.delivery-arrived {
+    background-color: var(--info-btn);
+}
+
+/* Estilos para tablas generales */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -667,108 +768,48 @@ h2 {
     padding-bottom: 8px;
 }
 
-/* Ajustes para pantallas más pequeñas */
-@media (max-width: 768px) {
-    body {
-        padding: 10px;
-    }
-    
-    header h1 {
-        font-size: 1.5rem;
-    }
-    
-    .category-container {
-        grid-template-columns: 1fr 1fr;
-    }
-    
-    .category-btn {
-        height: 70px;
-        font-size: 16px;
-        padding: 10px;
-    }
-    
-    .dish-btn {
-        min-width: 130px;
-        padding: 10px;
-    }
-    
-    .action-btns {
-        flex-direction: row; /* Cambiado a row para mantenerlos en la misma línea */
-    }
-    
-    table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-    
-    th, td {
-        padding: 8px;
-    }
-    
-    .timer-cell {
-        font-size: 16px;
-    }
-    
-    #notification {
-        max-width: 90%;
-        left: 50%;
-        transform: translateX(-50%);
-        right: auto;
-    }
-    
-    .add-dish-form {
-        flex-direction: column;
-        align-items: stretch;
-    }
+/* Estilos para subcategorías */
+.subcategories-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 12px;
+    background-color: var(--highlight-bg);
+    border-radius: 8px;
 }
 
-@media (max-width: 480px) {
-    .category-container {
-        grid-template-columns: 1fr;
-    }
-    
-    .dishes-container {
-        justify-content: center;
-    }
-    
-    .dish-btn {
-        width: 100%;
-    }
-    
-    .option-btns {
-        flex-direction: row; /* Cambiado a row para mantener opciones en línea horizontal */
-        flex-wrap: wrap;
-        justify-content: space-between;
-    }
-    
-    .option-btn {
-        text-align: center;
-        flex: 0 0 48%; /* Hacer que las opciones ocupen aproximadamente la mitad del ancho */
-        margin-bottom: 4px;
-    }
+.subcategory-btn {
+    background-color: var(--container-bg);
+    color: var(--text-color);
+    border: 1px solid var(--primary-btn);
+    padding: 12px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    min-width: 120px;
+    text-align: center;
 }
 
-/* Mejoras de accesibilidad */
-:focus {
-    outline: 2px solid var(--primary-btn);
-    outline-offset: 2px;
+.subcategory-btn:hover {
+    background-color: var(--primary-btn);
+    color: white;
+    transform: translateY(-2px);
 }
 
-/* Animaciones */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.subcategory-btn.active {
+    background-color: var(--primary-btn);
+    color: white;
+    font-weight: bold;
 }
 
-.dishes-section, .preparation-section {
-    animation: fadeInUp 0.3s ease-out;
+/* Contenedor para los botones de platillos */
+.dishes-buttons-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
 }
 
 /* Scroll personalizado */
@@ -789,6 +830,22 @@ h2 {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--btn-hover);
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dishes-section, .preparation-section {
+    animation: fadeInUp 0.3s ease-out;
 }
 
 /* Impresión */
@@ -829,142 +886,82 @@ h2 {
     }
 }
 
-/* Ajustes para tablas de preparación para evitar desplazamiento horizontal */
-.pending-orders-section table {
-    table-layout: fixed;
-    width: 100%;
-}
-
-/* MODIFICADO: Reducir ancho de la columna de tiempo transcurrido */
-.pending-orders-section th:nth-child(1),
-.pending-orders-section td:nth-child(1) {
-    width: 22%; /* Columna de platillos */
-}
-
-.pending-orders-section th:nth-child(2),
-.pending-orders-section td:nth-child(2) {
-    width: 12%; /* Columna de inicio */
-}
-
-.pending-orders-section th:nth-child(3),
-.pending-orders-section td:nth-child(3) {
-    width: 12%; /* Columna de tiempo (REDUCIDA) */
-}
-
-.pending-orders-section th:nth-child(4),
-.pending-orders-section td:nth-child(4) {
-    width: 34%; /* Columna de detalles (REDUCIDA) */
-    word-break: break-word; /* Permitir que las palabras largas se rompan */
-}
-
-.pending-orders-section th:nth-child(5),
-.pending-orders-section td:nth-child(5) {
-    width: 20%; /* Columna de acción */
-    position: sticky; /* Mantener visible al desplazar horizontalmente */
-    right: 0;
-    background-color: var(--table-header-bg); /* Color de fondo para el encabezado */
-    color: var(--table-header-text); /* Color de texto para el encabezado */
-    z-index: 2;
-}
-
-/* Asegurar que la celda th de Acción tenga el fondo del encabezado */
-.pending-orders-section th:nth-child(5) {
-    background-color: var(--table-header-bg) !important;
-    color: var(--table-header-text) !important;
-}
-
-/* Y las celdas td tengan el fondo del contenido */
-.pending-orders-section td:nth-child(5) {
-    background-color: var(--container-bg);
-}
-
 /* Ajustes para dispositivos móviles */
 @media (max-width: 768px) {
-    .pending-orders-section table {
-        font-size: 14px;
+    body {
+        padding: 10px;
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .category-container {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .category-btn {
+        height: 70px;
+        font-size: 16px;
+        padding: 10px;
+    }
+    
+    .dish-btn {
+        min-width: 130px;
+        padding: 10px;
+    }
+    
+    .action-btns {
+        flex-direction: row;
+    }
+    
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    th, td {
+        padding: 8px;
+    }
+    
+    .timer-cell {
+        font-size: 16px;
+    }
+    
+    #notification {
+        max-width: 90%;
+        left: 50%;
+        transform: translateX(-50%);
+        right: auto;
+    }
+    
+    .add-dish-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    /* Ajustes para tablas en móviles */
+    .pending-orders-section {
+        padding: 10px;
     }
     
     .pending-orders-section th,
     .pending-orders-section td {
-        padding: 6px 4px;
+        padding: 6px;
+    }
+    
+    .pending-orders-section th:last-child,
+    .pending-orders-section td:last-child {
+        min-width: 100px;
+        width: 100px;
     }
     
     .finish-btn {
         padding: 6px 8px;
-        font-size: 12px;
+        font-size: 13px;
     }
     
-    /* Estilos específicos para iPhone */
-    @media screen and (max-width: 390px) {
-        .pending-orders-section th:nth-child(3),
-        .pending-orders-section td:nth-child(3) {
-            width: 10%; /* Reducir aún más para iPhone */
-            font-size: 13px;
-        }
-        
-        .pending-orders-section th:nth-child(5),
-        .pending-orders-section td:nth-child(5) {
-            position: sticky;
-            right: 0;
-            background-color: var(--container-bg);
-        }
-    }
-}
-
-/* Estilos de main.js */
-.finish-btn.delivery {
-    background-color: #f39c12;
-}
-.finish-btn.delivery-arrived {
-    background-color: #3498db;
-}
-
-/* Estilos para subcategorías */
-.subcategories-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 20px;
-    padding: 12px;
-    background-color: var(--highlight-bg);
-    border-radius: 8px;
-}
-
-.subcategory-btn {
-    background-color: var(--container-bg);
-    color: var(--text-color);
-    border: 1px solid var(--primary-btn);
-    padding: 12px 16px; /* Aumentado de 8px 12px */
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 16px; /* Aumentado de 14px */
-    transition: all 0.2s ease;
-    min-width: 120px; /* Asegura un ancho mínimo para facilitar el toque */
-    text-align: center;
-}
-
-.subcategory-btn:hover {
-    background-color: var(--primary-btn);
-    color: white;
-    transform: translateY(-2px);
-}
-
-.subcategory-btn.active {
-    background-color: var(--primary-btn);
-    color: white;
-    font-weight: bold;
-}
-
-/* Contenedor para los botones de platillos */
-.dishes-buttons-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-/* Mejoras para dispositivos móviles */
-@media (max-width: 768px) {
     .subcategory-btn {
         padding: 10px 14px;
         font-size: 15px;
@@ -974,15 +971,6 @@ h2 {
     .subcategories-container {
         padding: 10px;
         gap: 8px;
-    }
-    
-    .pending-orders-section {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .pending-orders-section table {
-        min-width: 500px; /* Asegura que la tabla tenga un ancho mínimo para ser legible */
     }
     
     /* Mejora la visualización de los botones de filtrado en móviles */
@@ -1000,224 +988,53 @@ h2 {
     }
 }
 
-/* Estilos específicos para pantallas muy pequeñas (iPhone SE, etc) */
+/* Ajustes específicos para pantallas muy pequeñas */
+@media (max-width: 480px) {
+    .category-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .dishes-container {
+        justify-content: center;
+    }
+    
+    .dish-btn {
+        width: 100%;
+    }
+    
+    .option-btns {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+    
+    .option-btn {
+        text-align: center;
+        flex: 0 0 48%;
+        margin-bottom: 4px;
+    }
+    
+    .pending-orders-section th:last-child,
+    .pending-orders-section td:last-child {
+        min-width: 90px;
+        width: 90px;
+    }
+}
+
+/* Ajustes para pantallas extra pequeñas */
 @media (max-width: 375px) {
     .filter-controls {
         grid-template-columns: 1fr;
     }
-    /* Añade este CSS al final de tu archivo avika-style.css */
-
-/* Mejorar visualización de columna de acciones */
-.pending-orders-section {
-    position: relative; /* Necesario para el posicionamiento sticky */
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-/* Fijar la columna de acciones a la derecha */
-.pending-orders-section th:last-child,
-.pending-orders-section td:last-child {
-    position: sticky;
-    right: 0;
-    z-index: 10;
-}
-
-.pending-orders-section th:last-child {
-    background-color: var(--table-header-bg);
-    color: var(--table-header-text);
-    z-index: 11; /* Mayor z-index para el encabezado */
-}
-
-.pending-orders-section td:last-child {
-    background-color: var(--container-bg);
-    box-shadow: -5px 0 5px -2px rgba(0, 0, 0, 0.1); /* Sombra para mejor visualización */
-}
-
-/* Añadir scroll horizontal visible en móviles */
-@media (max-width: 768px) {
-    .pending-orders-section:after {
-        content: "";
-        position: absolute;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        width: 15px;
-        background: linear-gradient(to right, rgba(255,255,255,0), rgba(0,0,0,0.1));
-        z-index: 9;
-        pointer-events: none;
-    }
     
-    .pending-orders-section table {
-        margin-right: 0;
-    }
-    
-    /* Mejorar visibilidad del botón de acción en móviles */
-    .finish-btn {
-        white-space: normal; /* Permitir salto de línea en botones */
-        height: auto;
-        min-height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-}
-/* Agregar estos estilos al final de tu archivo avika-style.css 
-   para mejorar el comportamiento de la columna de acción */
-
-/* Mejora para mantener la columna de acción siempre visible */
-.pending-orders-section {
-    position: relative;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-/* Fijar la columna de Acción a la derecha - versión mejorada */
-.pending-orders-section th:last-child,
-.pending-orders-section td:last-child {
-    position: sticky !important;
-    right: 0 !important;
-    z-index: 10 !important;
-    min-width: 120px; /* Garantiza que el botón tenga espacio suficiente */
-}
-
-/* Estilo para el encabezado de Acción */
-.pending-orders-section th:last-child {
-    background-color: var(--table-header-bg) !important;
-    color: var(--table-header-text) !important;
-    z-index: 11 !important; /* Mayor z-index para el encabezado */
-}
-
-/* Estilo para las celdas de Acción */
-.pending-orders-section td:last-child {
-    background-color: var(--container-bg) !important;
-    box-shadow: -5px 0 8px -2px rgba(0, 0, 0, 0.15) !important; /* Sombra más visible */
-}
-
-/* Indicador visual para scroll horizontal */
-.pending-orders-section::after {
-    content: "";
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 20px;
-    background: linear-gradient(to right, rgba(255,255,255,0), rgba(0,0,0,0.1));
-    pointer-events: none;
-    z-index: 5;
-}
-
-/* Estilo mejorado para los botones de acción */
-.finish-btn {
-    white-space: normal !important; /* Permitir salto de línea en botones */
-    height: auto !important;
-    min-height: 44px !important; /* Mayor para mejor accesibilidad en móviles */
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 100% !important;
-    margin-bottom: 5px !important;
-    font-size: 14px !important; /* Tamaño de texto legible */
-    padding: 8px 10px !important;
-}
-
-/* Ajustes específicos para móviles */
-@media (max-width: 768px) {
-    /* Resetear anchura fija de columna en móviles para una mejor visualización */
-    .pending-orders-section th:nth-child(1),
-    .pending-orders-section td:nth-child(1),
-    .pending-orders-section th:nth-child(2),
-    .pending-orders-section td:nth-child(2),
-    .pending-orders-section th:nth-child(3),
-    .pending-orders-section td:nth-child(3),
-    .pending-orders-section th:nth-child(4),
-    .pending-orders-section td:nth-child(4) {
-        min-width: auto !important;
-        width: auto !important;
-    }
-    
-    /* Garantizar que la columna de acción tenga ancho suficiente */
     .pending-orders-section th:last-child,
     .pending-orders-section td:last-child {
-        min-width: 100px !important;
-        width: 100px !important;
-    }
-    
-    /* Hacer que las celdas de acción destaquen más */
-    .pending-orders-section td:last-child {
-        border-left: 2px solid var(--border-color) !important;
-    }
-}
-
-/* Ajustes para pantallas extra pequeñas (iPhone SE, etc.) */
-@media (max-width: 375px) {
-    .pending-orders-section th:last-child,
-    .pending-orders-section td:last-child {
-        min-width: 90px !important;
-        width: 90px !important;
+        min-width: 90px;
+        width: 90px;
     }
     
     .finish-btn {
-        font-size: 12px !important;
-        padding: 6px 8px !important;
+        font-size: 12px;
+        padding: 6px 8px;
     }
-}
-/* Solución para columna de acción fija */
-
-/* Asegurar que la tabla tiene layout fijo y posición relativa para el posicionamiento */
-.pending-orders-section table {
-    table-layout: fixed;
-    width: 100%;
-    position: relative;
-    border-collapse: collapse;
-  }
-  
-  /* Estilos específicos para la columna de Acción (última columna) */
-  .pending-orders-section th:last-child,
-  .pending-orders-section td:last-child {
-    position: sticky !important;
-    right: 0 !important;
-    z-index: 20 !important; /* Mayor que cualquier otro elemento */
-    min-width: 100px;
-    box-shadow: -4px 0 5px rgba(0, 0, 0, 0.15);
-  }
-  
-  /* Asegurar que el header de Acción tiene el color correcto */
-  .pending-orders-section th:last-child {
-    background-color: var(--table-header-bg) !important;
-    color: var(--table-header-text) !important;
-    z-index: 21 !important; /* Mayor que las celdas normales */
-  }
-  
-  /* Asegurar que las celdas de Acción tienen el fondo correcto */
-  .pending-orders-section td:last-child {
-    background-color: var(--container-bg) !important;
-  }
-  
-  /* Evitar que el color de fondo cambie al hacer hover */
-  .pending-orders-section tr:hover td:last-child {
-    background-color: var(--container-bg) !important;
-  }
-  
-  /* Hacer que el contenedor de la tabla tenga overflow visible */
-  .pending-orders-section {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* Mejoras para dispositivos móviles */
-  @media (max-width: 768px) {
-    .pending-orders-section th:last-child,
-    .pending-orders-section td:last-child {
-      min-width: 90px;
-      padding: 6px;
-    }
-    
-    .finish-btn {
-      padding: 6px 8px;
-      font-size: 13px;
-      white-space: normal;
-      height: auto;
-      min-height: 40px;
-    }
-  }
 }
