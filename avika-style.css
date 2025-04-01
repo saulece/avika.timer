@@ -1061,4 +1061,104 @@ h2 {
         justify-content: center;
     }
 }
+/* Agregar estos estilos al final de tu archivo avika-style.css 
+   para mejorar el comportamiento de la columna de acción */
+
+/* Mejora para mantener la columna de acción siempre visible */
+.pending-orders-section {
+    position: relative;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Fijar la columna de Acción a la derecha - versión mejorada */
+.pending-orders-section th:last-child,
+.pending-orders-section td:last-child {
+    position: sticky !important;
+    right: 0 !important;
+    z-index: 10 !important;
+    min-width: 120px; /* Garantiza que el botón tenga espacio suficiente */
+}
+
+/* Estilo para el encabezado de Acción */
+.pending-orders-section th:last-child {
+    background-color: var(--table-header-bg) !important;
+    color: var(--table-header-text) !important;
+    z-index: 11 !important; /* Mayor z-index para el encabezado */
+}
+
+/* Estilo para las celdas de Acción */
+.pending-orders-section td:last-child {
+    background-color: var(--container-bg) !important;
+    box-shadow: -5px 0 8px -2px rgba(0, 0, 0, 0.15) !important; /* Sombra más visible */
+}
+
+/* Indicador visual para scroll horizontal */
+.pending-orders-section::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(to right, rgba(255,255,255,0), rgba(0,0,0,0.1));
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* Estilo mejorado para los botones de acción */
+.finish-btn {
+    white-space: normal !important; /* Permitir salto de línea en botones */
+    height: auto !important;
+    min-height: 44px !important; /* Mayor para mejor accesibilidad en móviles */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin-bottom: 5px !important;
+    font-size: 14px !important; /* Tamaño de texto legible */
+    padding: 8px 10px !important;
+}
+
+/* Ajustes específicos para móviles */
+@media (max-width: 768px) {
+    /* Resetear anchura fija de columna en móviles para una mejor visualización */
+    .pending-orders-section th:nth-child(1),
+    .pending-orders-section td:nth-child(1),
+    .pending-orders-section th:nth-child(2),
+    .pending-orders-section td:nth-child(2),
+    .pending-orders-section th:nth-child(3),
+    .pending-orders-section td:nth-child(3),
+    .pending-orders-section th:nth-child(4),
+    .pending-orders-section td:nth-child(4) {
+        min-width: auto !important;
+        width: auto !important;
+    }
+    
+    /* Garantizar que la columna de acción tenga ancho suficiente */
+    .pending-orders-section th:last-child,
+    .pending-orders-section td:last-child {
+        min-width: 100px !important;
+        width: 100px !important;
+    }
+    
+    /* Hacer que las celdas de acción destaquen más */
+    .pending-orders-section td:last-child {
+        border-left: 2px solid var(--border-color) !important;
+    }
+}
+
+/* Ajustes para pantallas extra pequeñas (iPhone SE, etc.) */
+@media (max-width: 375px) {
+    .pending-orders-section th:last-child,
+    .pending-orders-section td:last-child {
+        min-width: 90px !important;
+        width: 90px !important;
+    }
+    
+    .finish-btn {
+        font-size: 12px !important;
+        padding: 6px 8px !important;
+    }
+}
 }
