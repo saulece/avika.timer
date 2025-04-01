@@ -1,4 +1,6 @@
 // ui-controller.js - Funciones de interfaz de usuario con soporte para subcategorías
+window.Avika = window.Avika || {};
+
 Avika.ui = {
     // Estado de la UI
     state: {

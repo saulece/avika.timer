@@ -5,6 +5,7 @@
 // Este script debe cargarse después de todos los demás scripts de Avika
 
 // Esperamos a que el DOM esté completamente cargado
+window.Avika = window.Avika || {};
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Inicializando Avika...");
     

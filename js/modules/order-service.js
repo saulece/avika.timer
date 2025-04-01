@@ -1,4 +1,5 @@
 // order-service.js - Lógica de pedidos y temporizadores
+window.Avika = window.Avika || {};
 Avika.data = {
     currentCategory: '',
     currentDish: '',

@@ -1,259 +1,154 @@
-// order-service.js - Lógica de pedidos y temporizadores
-Avika.data = {
-    currentCategory: '',
-    currentDish: '',
-    currentCustomizations: [],
-    currentService: 'comedor',
-    currentQuantity: 1,
-    isSpecialCombo: false,
+// config.js - Configuración y datos estáticos
+window.Avika = window.Avika || {};
+
+Avika.config = {
+    // Opciones de personalización predeterminadas
+    customizationOptions: {
+        'sin-alga': 'Sin Alga',
+        'extra-picante': 'Extra Picante',
+        'cambio-proteina': 'Cambiar Proteína'
+    },
+
+    // Datos de platillos - Estructura original para mantener compatibilidad
+    dishes: {
+        // ENTRADAS COCINA FRÍA
+        'entrada-fria': [
+            'Baby Squid', 'Tiradito de Atún Togarashi', 'Tiradito de Camarón en salsa de mango', 'Maguro Peruano',
+            'Tostadita Nikkei', 'Tostada de ceviche verde', 'Tostadita Tataki', 'Tostadita Crunchy',
+            'Cocktail Avika', 'Ceviche Limeño', 'Ceviche Peruano',
+            'Sashimi de Robalo', 'Sashimi de Atún', 'Sashimi Mixto', 'Sashimi de Salmón'
+        ],
+        
+        // PLATILLOS COCINA FRÍA (ROLLOS)
+        'frio': [
+            'Kanikama Roll', 'Curry Roll', 'Philadelphia Roll', 'Spicy Roll', 'Aguacate Roll',
+            'Avi Roll', 'Mango Roll', 'Mikuso Roll', 'Acevichado Roll', 'Dragon Roll', 'Avika Roll',
+            'Red Fire Roll', 'Ebi Crunch Roll', 'Teriyaki Crunch Roll', 'Ika Ebi Roll', 'Furai Roll', 'Coco Roll',
+            'TNT Roll', 'Tuna Roll', 'Rocotto Roll', 'Parrillero Roll', 'Rib Eye Roll'
+        ],
+        
+        // ENTRADAS COCINA CALIENTE
+        'entrada-caliente': [
+            'Kushiage', 'Rollitos Kani', 'Toritos Tempura', 'Taquitos Crujientes',
+            'Tacos Nikkei', 'Tacos de Costra de Queso', 'Brocheta Yakitori', 'Ika Ebi Togarashi'
+        ],
+        
+        // PLATILLOS COCINA CALIENTE
+        'caliente': [
+            'Miso Shiro', 'Sopa Udon', 'Sopa Ramen de Cerdo', 'Sopa Mariscos Thai',
+            'Arroz Yakimeshi', 'Arroz Peruano', 'Arroz Wok', 'Arroz Thai con Mariscos',
+            'Teriyaki', 'Yakisoba', 'Nuggets', 'Pechuga Teriyaki', 'Lomo Saltado', 'Rib Eye Grill',
+            'Camarón Nutty', 'Camarón Iwa', 'Pasta de Mar', 'Ebi Chips', 'Pulpo Marine',
+            'Pollo al Wok', 'Camarón al Wok', 'Atún al Wok', 'Salmón al Wok',
+            'Tuna Thai', 'Atún salsa Rocotto', 'Filete Thai Asia', 'Filete Ninjago',
+            'Filete Zakana Thai', 'Salmón Kion', 'Sake New Style', 'Pargo al Ika Ebi'
+        ],
+        
+        // COMBOS
+        'combos': [
+            'Combo Tokio', 'Combo Osaka', 'Combo Bagua', 'Combo Pisco', 'Combo Lima',
+            // Nuevos combos regulares (sólo con botón "Listo")
+            'Combo Kids', 'Combo Thai', 'Combo Nikkei', 'Combo Wok'
+        ]
+    },
+
+    // Lista de combos especiales (doble cocina)
+    specialCombos: ['Combo Tokio', 'Combo Osaka', 'Combo Bagua', 'Combo Pisco', 'Combo Lima'],
+
+    // Nombres de categorías principales
+    categoryNames: {
+        'entrada-fria': 'Entradas Cocina Fría',
+        'frio': 'Platillos Cocina Fría (Rollos)',
+        'entrada-caliente': 'Entradas Cocina Caliente',
+        'caliente': 'Platillos Cocina Caliente',
+        'combos': 'Combos'
+    },
     
-    pendingOrders: [],
-    completedOrders: [],
-    timerInterval: null
-};
-
-Avika.orders = {
-    // Funciones para iniciar y finalizar preparaciones
-    startPreparation: function() {
-        var preparation = {
-            id: Date.now().toString(),
-            dish: Avika.data.currentDish,
-            category: Avika.data.currentCategory,
-            categoryDisplay: Avika.config.categoryNames[Avika.data.currentCategory],
-            quantity: Avika.data.currentQuantity,
-            customizations: Avika.data.currentCustomizations.slice(),
-            serviceType: Avika.data.currentService,
-            notes: document.getElementById('notes-input').value.trim(),
-            startTime: new Date(),
-            startTimeFormatted: Avika.ui.formatTime(new Date()),
-            isSpecialCombo: Avika.data.isSpecialCombo
-        };
-        
-        if (Avika.data.isSpecialCombo && Avika.config.specialCombos.indexOf(Avika.data.currentDish) !== -1) {
-            preparation.hotKitchenFinished = false;
-            preparation.coldKitchenFinished = false;
-        }
-        
-        // Crear una copia para evitar referencias directas
-        Avika.data.pendingOrders.push(JSON.parse(JSON.stringify(preparation)));
-        
-        Avika.ui.updatePendingTable();
-        Avika.storage.guardarDatosLocales();
-        
-        Avika.ui.showNotification(preparation.dish + ' agregado a preparación');
-        
-        Avika.ui.showSection('categories-section');
-    },
-
-    finishHotKitchen: function(id) {
-        var orderIndex = -1;
-        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            if (Avika.data.pendingOrders[i].id === id) {
-                orderIndex = i;
-                break;
+    // NUEVO: Información de subcategorías para mostrar en la interfaz
+    subCategories: {
+        // Subcategorías para entradas frías
+        'entrada-fria': [
+            {
+                name: 'Entradas Frías',
+                items: ['Baby Squid', 'Tiradito de Atún Togarashi', 'Tiradito de Camarón en salsa de mango', 'Maguro Peruano']
+            },
+            {
+                name: 'Tostaditas',
+                items: ['Tostadita Nikkei', 'Tostada de ceviche verde', 'Tostadita Tataki', 'Tostadita Crunchy']
+            },
+            {
+                name: 'Ceviches',
+                items: ['Cocktail Avika', 'Ceviche Limeño', 'Ceviche Peruano']
+            },
+            {
+                name: 'Sashimis',
+                items: ['Sashimi de Robalo', 'Sashimi de Atún', 'Sashimi Mixto', 'Sashimi de Salmón']
             }
-        }
+        ],
         
-        if (orderIndex === -1) return;
-        
-        var order = Avika.data.pendingOrders[orderIndex];
-        var now = new Date();
-        
-        order.hotKitchenFinished = true;
-        order.hotKitchenTime = now;
-        order.hotKitchenTimeFormatted = Avika.ui.formatTime(now);
-        
-        Avika.ui.updatePendingTable();
-        Avika.storage.guardarDatosLocales();
-        Avika.ui.showNotification('Cocina caliente terminada para ' + order.dish);
-        
-        // Si ambas cocinas están terminadas y no es a domicilio, completar el pedido
-        if (order.hotKitchenFinished && order.coldKitchenFinished && order.serviceType !== 'domicilio') {
-            this.finishPreparation(id);
-        }
-        // Para domicilios, ambas cocinas deben estar listas antes de pasar al siguiente paso
-        else if (order.hotKitchenFinished && order.coldKitchenFinished && order.serviceType === 'domicilio') {
-            order.kitchenFinished = true;
-            Avika.ui.updatePendingTable();
-            Avika.storage.guardarDatosLocales();
-        }
-    },
-
-    finishColdKitchen: function(id) {
-        var orderIndex = -1;
-        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            if (Avika.data.pendingOrders[i].id === id) {
-                orderIndex = i;
-                break;
+        // Subcategorías para platillos fríos (rollos)
+        'frio': [
+            {
+                name: 'Rollos Naturales',
+                items: ['Kanikama Roll', 'Curry Roll', 'Philadelphia Roll', 'Spicy Roll', 'Aguacate Roll',
+                        'Avi Roll', 'Mango Roll', 'Mikuso Roll', 'Acevichado Roll', 'Dragon Roll', 'Avika Roll']
+            },
+            {
+                name: 'Rollos Empanizados',
+                items: ['Red Fire Roll', 'Ebi Crunch Roll', 'Teriyaki Crunch Roll', 'Ika Ebi Roll', 'Furai Roll', 'Coco Roll']
+            },
+            {
+                name: 'Rollos Horneados',
+                items: ['TNT Roll', 'Tuna Roll', 'Rocotto Roll', 'Parrillero Roll', 'Rib Eye Roll']
             }
-        }
+        ],
         
-        if (orderIndex === -1) return;
+        // Entradas calientes no tiene subcategorías
+        'entrada-caliente': [],
         
-        var order = Avika.data.pendingOrders[orderIndex];
-        var now = new Date();
-        
-        order.coldKitchenFinished = true;
-        order.coldKitchenTime = now;
-        order.coldKitchenTimeFormatted = Avika.ui.formatTime(now);
-        
-        Avika.ui.updatePendingTable();
-        Avika.storage.guardarDatosLocales();
-        Avika.ui.showNotification('Cocina fría terminada para ' + order.dish);
-        
-        // Si ambas cocinas están terminadas y no es a domicilio, completar el pedido
-        if (order.hotKitchenFinished && order.coldKitchenFinished && order.serviceType !== 'domicilio') {
-            this.finishPreparation(id);
-        }
-        // Para domicilios, ambas cocinas deben estar listas antes de pasar al siguiente paso
-        else if (order.hotKitchenFinished && order.coldKitchenFinished && order.serviceType === 'domicilio') {
-            order.kitchenFinished = true;
-            Avika.ui.updatePendingTable();
-            Avika.storage.guardarDatosLocales();
-        }
-    },
-
-    // Esta función se llama cuando termina la preparación en cocina para un pedido a domicilio
-    finishKitchenForDelivery: function(id) {
-        var orderIndex = -1;
-        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            if (Avika.data.pendingOrders[i].id === id) {
-                orderIndex = i;
-                break;
+        // Subcategorías para platillos calientes
+        'caliente': [
+            {
+                name: 'Sopas',
+                items: ['Miso Shiro', 'Sopa Udon', 'Sopa Ramen de Cerdo', 'Sopa Mariscos Thai']
+            },
+            {
+                name: 'Arroz y Pasta',
+                items: ['Arroz Yakimeshi', 'Arroz Peruano', 'Arroz Wok', 'Arroz Thai con Mariscos',
+                        'Teriyaki', 'Yakisoba']
+            },
+            {
+                name: 'Carne y Pollo',
+                items: ['Nuggets', 'Pechuga Teriyaki', 'Lomo Saltado', 'Rib Eye Grill']
+            },
+            {
+                name: 'Mariscos',
+                items: ['Camarón Nutty', 'Camarón Iwa', 'Pasta de Mar', 'Ebi Chips', 'Pulpo Marine']
+            },
+            {
+                name: 'Al Wok',
+                items: ['Pollo al Wok', 'Camarón al Wok', 'Atún al Wok', 'Salmón al Wok']
+            },
+            {
+                name: 'Pescados',
+                items: ['Tuna Thai', 'Atún salsa Rocotto', 'Filete Thai Asia', 'Filete Ninjago',
+                        'Filete Zakana Thai', 'Salmón Kion', 'Sake New Style', 'Pargo al Ika Ebi']
             }
-        }
+        ],
         
-        if (orderIndex === -1) return;
-        
-        var order = Avika.data.pendingOrders[orderIndex];
-        
-        // Marca la orden como terminada en cocina pero pendiente de entrega
-        order.kitchenFinished = true;
-        order.kitchenFinishedTime = new Date();
-        order.kitchenFinishedTimeFormatted = Avika.ui.formatTime(order.kitchenFinishedTime);
-        
-        Avika.ui.showNotification(order.dish + ' terminado en cocina, pendiente entrega');
-        Avika.ui.updatePendingTable();
-        Avika.storage.guardarDatosLocales();
+        // Combos no tiene subcategorías
+        'combos': []
     },
-
-    // Esta función registra la salida del repartidor
-    markDeliveryDeparture: function(id) {
-        var orderIndex = -1;
-        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            if (Avika.data.pendingOrders[i].id === id) {
-                orderIndex = i;
-                break;
-            }
-        }
-        
-        if (orderIndex === -1) return;
-        
-        var order = Avika.data.pendingOrders[orderIndex];
-        
-        // Registra el tiempo de salida
-        order.deliveryDepartureTime = new Date();
-        order.deliveryDepartureTimeFormatted = Avika.ui.formatTime(order.deliveryDepartureTime);
-        
-        Avika.ui.showNotification('Salida del repartidor registrada para ' + order.dish);
-        Avika.ui.updatePendingTable();
-        Avika.storage.guardarDatosLocales();
+    
+    serviceNames: {
+        'comedor': 'Comedor',
+        'domicilio': 'Domicilio',
+        'para-llevar': 'Ordena y Espera'
     },
-
-    // Esta función registra la entrega al cliente
-    markDeliveryArrival: function(id) {
-        var orderIndex = -1;
-        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            if (Avika.data.pendingOrders[i].id === id) {
-                orderIndex = i;
-                break;
-            }
-        }
-        
-        if (orderIndex === -1) return;
-        
-        var order = Avika.data.pendingOrders[orderIndex];
-        
-        // Registra el tiempo de entrega y completa el pedido
-        order.deliveryArrivalTime = new Date();
-        order.deliveryArrivalTimeFormatted = Avika.ui.formatTime(order.deliveryArrivalTime);
-        
-        // Calcular tiempo total desde inicio hasta entrega
-        var endTime = order.deliveryArrivalTime;
-        var prepTimeMillis = endTime - new Date(order.startTime);
-        var prepTimeSecs = Math.floor(prepTimeMillis / 1000);
-        var prepMins = Math.floor(prepTimeSecs / 60);
-        var prepSecs = prepTimeSecs % 60;
-        
-        var prepTimeFormatted = Avika.ui.padZero(prepMins) + ':' + Avika.ui.padZero(prepSecs) + ' minutos';
-        
-        order.endTime = endTime;
-        order.endTimeFormatted = Avika.ui.formatTime(endTime);
-        order.prepTime = prepTimeFormatted;
-        
-        // También calcular el tiempo específico de entrega (desde salida hasta llegada)
-        var deliveryTimeMillis = endTime - new Date(order.deliveryDepartureTime);
-        var deliveryTimeSecs = Math.floor(deliveryTimeMillis / 1000);
-        var deliveryMins = Math.floor(deliveryTimeSecs / 60);
-        var deliverySecs = deliveryTimeSecs % 60;
-        
-        order.deliveryTime = Avika.ui.padZero(deliveryMins) + ':' + Avika.ui.padZero(deliverySecs) + ' minutos';
-        
-        // Crear una copia profunda del objeto para evitar problemas de referencia
-        var orderCopy = JSON.parse(JSON.stringify(order));
-        
-        // Mover a completados (usando la copia)
-        Avika.data.completedOrders.unshift(orderCopy);
-        
-        // Eliminar de pendientes
-        Avika.data.pendingOrders.splice(orderIndex, 1);
-        
-        Avika.ui.showNotification('¡' + order.dish + ' entregado al cliente! Tiempo total: ' + 
-                      prepTimeFormatted + ', Tiempo de entrega: ' + order.deliveryTime);
-        
-        Avika.ui.updatePendingTable();
-        Avika.ui.updateCompletedTable();
-        Avika.storage.guardarDatosLocales();
-    },
-
-    finishPreparation: function(id) {
-        var orderIndex = -1;
-        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            if (Avika.data.pendingOrders[i].id === id) {
-                orderIndex = i;
-                break;
-            }
-        }
-        
-        if (orderIndex === -1) return;
-        
-        var order = Avika.data.pendingOrders[orderIndex];
-        
-        var endTime = new Date();
-        var prepTimeMillis = endTime - new Date(order.startTime);
-        var prepTimeSecs = Math.floor(prepTimeMillis / 1000);
-        var prepMins = Math.floor(prepTimeSecs / 60);
-        var prepSecs = prepTimeSecs % 60;
-        
-        var prepTimeFormatted = Avika.ui.padZero(prepMins) + ':' + Avika.ui.padZero(prepSecs) + ' minutos';
-        
-        order.endTime = endTime;
-        order.endTimeFormatted = Avika.ui.formatTime(endTime);
-        order.prepTime = prepTimeFormatted;
-        
-        // Crear una copia profunda del objeto para evitar problemas de referencia
-        var orderCopy = JSON.parse(JSON.stringify(order));
-        
-        // Mover a completados (usando la copia)
-        Avika.data.completedOrders.unshift(orderCopy);
-        
-        // Eliminar de pendientes
-        Avika.data.pendingOrders.splice(orderIndex, 1);
-        
-        Avika.ui.showNotification('¡' + order.dish + ' finalizado en ' + prepTimeFormatted + '!');
-        
-        Avika.ui.updatePendingTable();
-        Avika.ui.updateCompletedTable(false); // false para mostrar solo los recientes
-        Avika.storage.guardarDatosLocales();
-    }
+    
+    // Intervalo de actualización de temporizadores (en milisegundos)
+    timerInterval: 1000,
+    
+    // Intervalo de auto-guardado (en milisegundos)
+    autoSaveInterval: 30000
 };

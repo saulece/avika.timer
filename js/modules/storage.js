@@ -1,5 +1,5 @@
 // storage.js - Funciones de guardado/carga de datos
-
+window.Avika = window.Avika || {};
 Avika.storage = {
     lastSavedState: '',
     

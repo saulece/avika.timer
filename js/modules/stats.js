@@ -1,5 +1,5 @@
 // stats.js - Cálculo de estadísticas y exportación
-
+window.Avika = window.Avika || {};
 Avika.stats = {
     // Función para calcular y mostrar promedios por categoría
     calcularPromedios: function() {
