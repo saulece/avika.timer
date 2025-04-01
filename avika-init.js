@@ -179,7 +179,21 @@ document.addEventListener('DOMContentLoaded', function() {
         alert("Error al inicializar la aplicación. Consulta la consola para más detalles.");
     }
 });
+// Botón para ver estadísticas y promedios
+var btnShowStats = document.getElementById('btn-show-stats');
+if (btnShowStats) {
+    btnShowStats.addEventListener('click', function() {
+        Avika.stats.calcularPromedios();
+    });
+}
 
+// Botón para limpiar historial
+var btnClearHistory = document.getElementById('btn-clear-history');
+if (btnClearHistory) {
+    btnClearHistory.addEventListener('click', function() {
+        Avika.storage.limpiarHistorial();
+    });
+}
 // ====== PROBLEMA 2: COMPLETAR UI-CONTROLLER.JS ======
 // Añade estas funciones al archivo ui-controller.js (al final del archivo)
 

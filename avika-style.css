@@ -960,4 +960,38 @@ h2 {
         padding: 10px;
         gap: 8px;
     }
+    /* Añadir estos estilos al final del archivo avika-style.css */
+
+/* Mejoras para tablas en móviles */
+@media (max-width: 768px) {
+    .pending-orders-section {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .pending-orders-section table {
+        min-width: 500px; /* Asegura que la tabla tenga un ancho mínimo para ser legible */
+    }
+    
+    /* Mejora la visualización de los botones de filtrado en móviles */
+    .filter-controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+    
+    .filter-btn {
+        padding: 10px;
+        font-size: 14px;
+        text-align: center;
+    }
+}
+
+/* Estilos específicos para pantallas muy pequeñas (iPhone SE, etc) */
+@media (max-width: 375px) {
+    .filter-controls {
+        grid-template-columns: 1fr;
+    }
+}
 }
