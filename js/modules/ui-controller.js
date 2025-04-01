@@ -393,7 +393,7 @@ selectSubCategory: function(category, subcategory, container) {
         }
     },
     
-    createOrderRow: function(order) {
+    ccreateOrderRow: function(order) {
         var row = document.createElement('tr');
         
         // Celda del platillo
@@ -450,7 +450,7 @@ selectSubCategory: function(category, subcategory, container) {
         actionCell.className = 'action-cell'; // Añadida clase para estilos específicos
         
         // Para combos especiales a domicilio, maneja ambos flujos
-        if (order.isSpecialCombo && order.serviceType === 'domicilio') {
+        if (order.isSpecialCombo && Avika.config.specialCombos.indexOf(order.dish) !== -1 && order.serviceType === 'domicilio') {
             var buttonGroup = document.createElement('div');
             buttonGroup.style.display = 'flex';
             buttonGroup.style.flexDirection = 'column';
@@ -510,7 +510,7 @@ selectSubCategory: function(category, subcategory, container) {
             actionCell.appendChild(buttonGroup);
         }
         // Combos especiales regulares (no a domicilio)
-        else if (order.isSpecialCombo) {
+        else if (order.isSpecialCombo && Avika.config.specialCombos.indexOf(order.dish) !== -1) {
             var buttonGroup = document.createElement('div');
             buttonGroup.style.display = 'flex';
             buttonGroup.style.flexDirection = 'column';
@@ -588,7 +588,7 @@ selectSubCategory: function(category, subcategory, container) {
             
             actionCell.appendChild(buttonGroup);
         }
-        // Pedidos normales
+        // Pedidos normales o combos regulares
         else {
             var finishBtn = document.createElement('button');
             finishBtn.className = 'finish-btn';

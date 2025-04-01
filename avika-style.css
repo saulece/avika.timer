@@ -1005,4 +1005,60 @@ h2 {
     .filter-controls {
         grid-template-columns: 1fr;
     }
+    /* Añade este CSS al final de tu archivo avika-style.css */
+
+/* Mejorar visualización de columna de acciones */
+.pending-orders-section {
+    position: relative; /* Necesario para el posicionamiento sticky */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Fijar la columna de acciones a la derecha */
+.pending-orders-section th:last-child,
+.pending-orders-section td:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 10;
+}
+
+.pending-orders-section th:last-child {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-text);
+    z-index: 11; /* Mayor z-index para el encabezado */
+}
+
+.pending-orders-section td:last-child {
+    background-color: var(--container-bg);
+    box-shadow: -5px 0 5px -2px rgba(0, 0, 0, 0.1); /* Sombra para mejor visualización */
+}
+
+/* Añadir scroll horizontal visible en móviles */
+@media (max-width: 768px) {
+    .pending-orders-section:after {
+        content: "";
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 15px;
+        background: linear-gradient(to right, rgba(255,255,255,0), rgba(0,0,0,0.1));
+        z-index: 9;
+        pointer-events: none;
+    }
+    
+    .pending-orders-section table {
+        margin-right: 0;
+    }
+    
+    /* Mejorar visibilidad del botón de acción en móviles */
+    .finish-btn {
+        white-space: normal; /* Permitir salto de línea en botones */
+        height: auto;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
 }

@@ -46,7 +46,9 @@ Avika.config = {
         
         // COMBOS
         'combos': [
-            'Combo Tokio', 'Combo Osaka', 'Combo Bagua', 'Combo Pisco', 'Combo Lima'
+            'Combo Tokio', 'Combo Osaka', 'Combo Bagua', 'Combo Pisco', 'Combo Lima',
+            // Nuevos combos regulares (sólo con botón "Listo")
+            'Combo Kids', 'Combo Thai', 'Combo Nikkei', 'Combo Wok'
         ]
     },
 
