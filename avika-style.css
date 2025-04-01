@@ -910,3 +910,54 @@ h2 {
         }
     }
 }
+/* Agregar estos estilos al final de tu archivo avika-style.css */
+
+/* Mejoras para subcategorías */
+.subcategories-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 12px;
+    background-color: var(--highlight-bg);
+    border-radius: 8px;
+}
+
+.subcategory-btn {
+    background-color: var(--container-bg);
+    color: var(--text-color);
+    border: 1px solid var(--primary-btn);
+    padding: 12px 16px; /* Aumentado de 8px 12px */
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px; /* Aumentado de 14px */
+    transition: all 0.2s ease;
+    min-width: 120px; /* Asegura un ancho mínimo para facilitar el toque */
+    text-align: center;
+}
+
+.subcategory-btn:hover {
+    background-color: var(--primary-btn);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.subcategory-btn.active {
+    background-color: var(--primary-btn);
+    color: white;
+    font-weight: bold;
+}
+
+/* Mejoras para dispositivos móviles */
+@media (max-width: 768px) {
+    .subcategory-btn {
+        padding: 10px 14px;
+        font-size: 15px;
+        min-width: 100px;
+    }
+    
+    .subcategories-container {
+        padding: 10px;
+        gap: 8px;
+    }
+}

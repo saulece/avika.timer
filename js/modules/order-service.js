@@ -216,44 +216,48 @@ Avika.orders = {
         Avika.storage.guardarDatosLocales();
     },
 
-    finishPreparation: function(id) {
-        var orderIndex = -1;
-        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            if (Avika.data.pendingOrders[i].id === id) {
-                orderIndex = i;
-                break;
-            }
+    // Verifica que este código esté presente en order-service.js en la función finishPreparation
+// Si hay diferencias, actualiza esta sección
+
+finishPreparation: function(id) {
+    var orderIndex = -1;
+    for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+        if (Avika.data.pendingOrders[i].id === id) {
+            orderIndex = i;
+            break;
         }
-        
-        if (orderIndex === -1) return;
-        
-        var order = Avika.data.pendingOrders[orderIndex];
-        
-        var endTime = new Date();
-        var prepTimeMillis = endTime - new Date(order.startTime);
-        var prepTimeSecs = Math.floor(prepTimeMillis / 1000);
-        var prepMins = Math.floor(prepTimeSecs / 60);
-        var prepSecs = prepTimeSecs % 60;
-        
-        var prepTimeFormatted = Avika.ui.padZero(prepMins) + ':' + Avika.ui.padZero(prepSecs) + ' minutos';
-        
-        order.endTime = endTime;
-        order.endTimeFormatted = Avika.ui.formatTime(endTime);
-        order.prepTime = prepTimeFormatted;
-        
-        // Crear una copia profunda del objeto para evitar problemas de referencia
-        var orderCopy = JSON.parse(JSON.stringify(order));
-        
-        // Mover a completados (usando la copia)
-        Avika.data.completedOrders.unshift(orderCopy);
-        
-        // Eliminar de pendientes
-        Avika.data.pendingOrders.splice(orderIndex, 1);
-        
-        Avika.ui.showNotification('¡' + order.dish + ' finalizado en ' + prepTimeFormatted + '!');
-        
-        Avika.ui.updatePendingTable();
-        Avika.ui.updateCompletedTable();
-        Avika.storage.guardarDatosLocales();
     }
+    
+    if (orderIndex === -1) return;
+    
+    var order = Avika.data.pendingOrders[orderIndex];
+    
+    var endTime = new Date();
+    var prepTimeMillis = endTime - new Date(order.startTime);
+    var prepTimeSecs = Math.floor(prepTimeMillis / 1000);
+    var prepMins = Math.floor(prepTimeSecs / 60);
+    var prepSecs = prepTimeSecs % 60;
+    
+    var prepTimeFormatted = Avika.ui.padZero(prepMins) + ':' + Avika.ui.padZero(prepSecs) + ' minutos';
+    
+    order.endTime = endTime;
+    order.endTimeFormatted = Avika.ui.formatTime(endTime);
+    order.prepTime = prepTimeFormatted;
+    
+    // Crear una copia profunda del objeto para evitar problemas de referencia
+    var orderCopy = JSON.parse(JSON.stringify(order));
+    
+    // Mover a completados (usando la copia)
+    Avika.data.completedOrders.unshift(orderCopy);
+    
+    // Eliminar de pendientes
+    Avika.data.pendingOrders.splice(orderIndex, 1);
+    
+    Avika.ui.showNotification('¡' + order.dish + ' finalizado en ' + prepTimeFormatted + '!');
+    
+    // Asegúrate de que estas dos líneas estén presentes
+    Avika.ui.updatePendingTable();
+    Avika.ui.updateCompletedTable(false); // false para mostrar solo los recientes
+    Avika.storage.guardarDatosLocales();
+}
 };
