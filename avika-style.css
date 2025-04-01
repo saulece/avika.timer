@@ -910,9 +910,16 @@ h2 {
         }
     }
 }
-/* Agregar estos estilos al final de tu archivo avika-style.css */
 
-/* Mejoras para subcategorías */
+/* Estilos de main.js */
+.finish-btn.delivery {
+    background-color: #f39c12;
+}
+.finish-btn.delivery-arrived {
+    background-color: #3498db;
+}
+
+/* Estilos para subcategorías */
 .subcategories-container {
     display: flex;
     flex-wrap: wrap;
@@ -948,6 +955,14 @@ h2 {
     font-weight: bold;
 }
 
+/* Contenedor para los botones de platillos */
+.dishes-buttons-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
 /* Mejoras para dispositivos móviles */
 @media (max-width: 768px) {
     .subcategory-btn {
@@ -960,10 +975,7 @@ h2 {
         padding: 10px;
         gap: 8px;
     }
-    /* Añadir estos estilos al final del archivo avika-style.css */
-
-/* Mejoras para tablas en móviles */
-@media (max-width: 768px) {
+    
     .pending-orders-section {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
@@ -993,5 +1005,4 @@ h2 {
     .filter-controls {
         grid-template-columns: 1fr;
     }
-}
 }

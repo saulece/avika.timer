@@ -70,12 +70,16 @@
                 </table>
                 <button class="back-btn" id="btn-export">Exportar datos</button>
             </div>
+        </div>
         
         <!-- Sección de platillos -->
-        <div id="dishes-section">
+        <div id="dishes-section" style="display: none;">
             <h2 id="selected-category-title">Categoría</h2>
-            <div id="dishes-container" class="dishes-container">
+            <div id="dishes-container" class="dishes-container" style="display: block;">
                 <!-- Se llenará con JavaScript -->
+                <div id="debug-info" style="margin-top: 20px; padding: 10px; background-color: #f9f9f9; border: 1px solid #ddd;">
+                    <p>Si no ves los platillos, actualiza la página con Ctrl+F5</p>
+                </div>
             </div>
             
             <button class="back-btn" id="btn-back-to-categories">Volver a Categorías</button>
