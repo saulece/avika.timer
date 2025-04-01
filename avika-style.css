@@ -1161,4 +1161,63 @@ h2 {
         padding: 6px 8px !important;
     }
 }
+/* Solución para columna de acción fija */
+
+/* Asegurar que la tabla tiene layout fijo y posición relativa para el posicionamiento */
+.pending-orders-section table {
+    table-layout: fixed;
+    width: 100%;
+    position: relative;
+    border-collapse: collapse;
+  }
+  
+  /* Estilos específicos para la columna de Acción (última columna) */
+  .pending-orders-section th:last-child,
+  .pending-orders-section td:last-child {
+    position: sticky !important;
+    right: 0 !important;
+    z-index: 20 !important; /* Mayor que cualquier otro elemento */
+    min-width: 100px;
+    box-shadow: -4px 0 5px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Asegurar que el header de Acción tiene el color correcto */
+  .pending-orders-section th:last-child {
+    background-color: var(--table-header-bg) !important;
+    color: var(--table-header-text) !important;
+    z-index: 21 !important; /* Mayor que las celdas normales */
+  }
+  
+  /* Asegurar que las celdas de Acción tienen el fondo correcto */
+  .pending-orders-section td:last-child {
+    background-color: var(--container-bg) !important;
+  }
+  
+  /* Evitar que el color de fondo cambie al hacer hover */
+  .pending-orders-section tr:hover td:last-child {
+    background-color: var(--container-bg) !important;
+  }
+  
+  /* Hacer que el contenedor de la tabla tenga overflow visible */
+  .pending-orders-section {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Mejoras para dispositivos móviles */
+  @media (max-width: 768px) {
+    .pending-orders-section th:last-child,
+    .pending-orders-section td:last-child {
+      min-width: 90px;
+      padding: 6px;
+    }
+    
+    .finish-btn {
+      padding: 6px 8px;
+      font-size: 13px;
+      white-space: normal;
+      height: auto;
+      min-height: 40px;
+    }
+  }
 }
