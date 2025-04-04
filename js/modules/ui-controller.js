@@ -568,7 +568,7 @@ Avika.ui = {
                     buttonGroup.style.gap = '5px';
                     
                     // Si todos los platillos están listos pero no ha salido el repartidor
-                    if ((allTicketItemsFinished || order.allItemsFinished || order.readyForDelivery) && !order.deliveryDepartureTime) {
+                    if ((allTicketItemsFinished || order.allItemsFinished || order.readyForDelivery || order.allItemsReady) && !order.deliveryDepartureTime) {
                         var departureBtn = document.createElement('button');
                         departureBtn.className = 'finish-btn delivery';
                         departureBtn.textContent = 'Salida del Repartidor';
@@ -592,7 +592,7 @@ Avika.ui = {
                         buttonGroup.appendChild(arrivalBtn);
                     }
                     // Si no todos los platillos están listos, mostrar estado
-                    else if (!allTicketItemsFinished && !order.allItemsFinished && !order.readyForDelivery) {
+                    else if (!allTicketItemsFinished && !order.allItemsFinished && !order.readyForDelivery && !order.allItemsReady) {
                         var ticketLabel = document.createElement('span');
                         ticketLabel.className = 'ticket-status';
                         ticketLabel.textContent = 'En preparación';
@@ -719,7 +719,7 @@ Avika.ui = {
                 actionCell.className = 'action-cell';
                 
                 // Mostrar acción de salida/entrega en el nivel de ticket si todos los platillos están listos
-                if (allTicketItemsFinished || order.allItemsFinished || order.readyForDelivery) {
+                if (allTicketItemsFinished || order.allItemsFinished || order.readyForDelivery || order.allItemsReady) {
                     // Si es domicilio o para llevar, mostrar botones correspondientes
                     if ((order.serviceType === 'domicilio' || order.serviceType === 'para-llevar')) {
                         var ticketBtnGroup = document.createElement('div');

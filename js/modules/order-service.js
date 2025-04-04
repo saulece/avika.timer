@@ -191,6 +191,13 @@ Avika.orders = {
                     // Registra el tiempo de salida para cada platillo del ticket
                     item.deliveryDepartureTime = departureTime;
                     item.deliveryDepartureTimeFormatted = departureTimeFormatted;
+                    
+                    // Marcar como listo para entrega, estas propiedades son usadas por la UI
+                    // para determinar si mostrar el botón de salida
+                    item.readyForDelivery = true;
+                    item.allItemsFinished = true;
+                    item.allItemsReady = true;
+                    
                     ticketDishCount++;
                 }
             }
@@ -465,11 +472,14 @@ Avika.orders = {
                 for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
                     var item = Avika.data.pendingOrders[i];
                     if (item.ticketId === order.ticketId) {
+                        // Marcar todos los platillos como listos para la entrega
                         item.allItemsFinished = true;
                         
                         // Si es domicilio o para llevar, marcar como listo para salida
                         if (item.serviceType === 'domicilio' || item.serviceType === 'para-llevar') {
                             item.readyForDelivery = true;
+                            // Esto fuerza a que se muestre el botón de salida del repartidor
+                            item.allItemsReady = true;
                         }
                     }
                 }
