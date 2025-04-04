@@ -1038,3 +1038,178 @@ h2 {
         padding: 6px 8px;
     }
 }
+
+/* Estilos para modales de tickets */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-content {
+    background-color: #f8f8f8;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.close-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-modal:hover {
+    color: #333;
+}
+
+/* Estilos para el modal de ticket */
+.ticket-input-group {
+    margin-bottom: 15px;
+}
+
+.ticket-input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.ticket-time {
+    padding: 8px;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.ticket-items-container {
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.ticket-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ticket-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+}
+
+.ticket-item-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.ticket-item-name {
+    font-weight: bold;
+}
+
+.ticket-item-category {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.ticket-item-notes {
+    font-size: 0.85em;
+    color: #888;
+    font-style: italic;
+}
+
+.ticket-item-remove {
+    background-color: #ff4757;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ticket-service-selection,
+.ticket-notes {
+    margin-bottom: 15px;
+}
+
+.ticket-notes textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    height: 60px;
+}
+
+.ticket-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Estilos para modal de selección de platillo */
+.category-selection,
+.dish-selection,
+.item-quantity,
+.item-notes {
+    margin-bottom: 15px;
+}
+
+.category-selection h3,
+.dish-selection h3,
+.item-quantity h3,
+.item-notes h3 {
+    margin-bottom: 10px;
+}
+
+.dishes-container {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+.item-notes textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    height: 60px;
+}
+
+.item-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Botones seleccionados */
+.category-btn.selected,
+.dish-btn.selected {
+    background-color: #4cd137;
+    color: white;
+}

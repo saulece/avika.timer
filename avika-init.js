@@ -104,6 +104,14 @@ document.addEventListener('DOMContentLoaded', function() {
             Avika.ui.showSection('categories-section');
         });
         
+        // Botón para nuevo ticket
+        var btnNewTicket = document.getElementById('btn-new-ticket');
+        if (btnNewTicket) {
+            btnNewTicket.addEventListener('click', function() {
+                Avika.ui.enableTicketMode();
+            });
+        }
+        
         // Botones de filtrado para historial
         var btnShowAllHistory = document.getElementById('btn-show-all-history');
         var btnShowRecent = document.getElementById('btn-show-recent');
