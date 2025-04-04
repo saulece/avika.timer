@@ -404,5 +404,63 @@ Avika.orders = {
         Avika.ui.updatePendingTable();
         Avika.ui.updateCompletedTable();
         Avika.storage.guardarDatosLocales();
+    },
+
+    // Esta función marca como terminado un platillo individual dentro de un ticket
+    finishIndividualItem: function(id) {
+        var orderIndex = -1;
+        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+            if (Avika.data.pendingOrders[i].id === id) {
+                orderIndex = i;
+                break;
+            }
+        }
+        
+        if (orderIndex === -1) return;
+        
+        var order = Avika.data.pendingOrders[orderIndex];
+        
+        // Marcar el platillo como terminado
+        order.finished = true;
+        order.finishTime = new Date();
+        order.finishTimeFormatted = Avika.ui.formatTime(order.finishTime);
+        
+        // Calcular el tiempo de preparación individual
+        var prepTimeMillis = order.finishTime - new Date(order.startTime);
+        var prepTimeSecs = Math.floor(prepTimeMillis / 1000);
+        var prepMins = Math.floor(prepTimeSecs / 60);
+        var prepSecs = prepTimeSecs % 60;
+        
+        order.individualPrepTime = Avika.ui.padZero(prepMins) + ':' + Avika.ui.padZero(prepSecs) + ' minutos';
+        
+        Avika.ui.showNotification(order.dish + ' terminado individualmente en ' + order.individualPrepTime);
+        
+        // Si es parte de un ticket, verificar si todos los platillos están terminados
+        if (order.ticketId) {
+            var allTicketItemsFinished = true;
+            var ticketItems = [];
+            
+            for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                var item = Avika.data.pendingOrders[i];
+                if (item.ticketId === order.ticketId) {
+                    ticketItems.push(item);
+                    if (item.isSpecialCombo) {
+                        if (!item.hotKitchenFinished || !item.coldKitchenFinished) {
+                            allTicketItemsFinished = false;
+                        }
+                    } else if (!item.finished) {
+                        allTicketItemsFinished = false;
+                    }
+                }
+            }
+            
+            // Si todos los platillos están listos, notificar al usuario
+            if (allTicketItemsFinished) {
+                Avika.ui.showNotification('Todos los platillos del ticket están listos. Puede completar el ticket ahora.');
+            }
+        }
+        
+        Avika.ui.updatePendingTable();
+        Avika.storage.guardarDatosLocales();
     }
 };

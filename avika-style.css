@@ -1231,6 +1231,50 @@ h2 {
     font-size: 0.9em;
 }
 
+.ticket-header {
+    display: flex;
+    align-items: center;
+}
+
+.expand-ticket-btn {
+    background: none;
+    border: none;
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+    cursor: pointer;
+    color: #2980b9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 5px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.expand-ticket-btn:hover {
+    background-color: rgba(41, 128, 185, 0.1);
+}
+
+.ticket-item-row {
+    background-color: #f8f8ff;
+}
+
+.ticket-child-cell {
+    padding-left: 25px !important;
+}
+
+.ticket-child-name {
+    font-weight: normal;
+    color: #333;
+}
+
+.done-status {
+    color: #2ecc71;
+    font-weight: bold;
+    font-style: italic;
+}
+
 /* Mejoras para selector de hora simple */
 .simple-time-picker {
     display: flex;
