@@ -140,6 +140,11 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
+        // Botón para desbloquear tickets atorados
+        document.getElementById('btn-force-complete').onclick = function() {
+            Avika.ui.showForceCompleteModal();
+        };
+        
         console.log("Botones de acción inicializados correctamente");
     }
     

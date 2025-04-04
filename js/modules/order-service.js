@@ -444,13 +444,14 @@ Avika.orders = {
         
         // Si es parte de un ticket, verificar si todos los platillos están terminados
         if (order.ticketId) {
+            var ticketId = order.ticketId;
             var allTicketItemsFinished = true;
             var ticketItems = [];
             
             // Recopilar todos los platillos del mismo ticket
             for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
                 var item = Avika.data.pendingOrders[i];
-                if (item.ticketId === order.ticketId) {
+                if (item.ticketId === ticketId) {
                     ticketItems.push(item);
                     
                     // Verificar si este platillo está terminado
@@ -471,15 +472,17 @@ Avika.orders = {
                 // Actualizar el estado de todos los platillos del ticket para indicar que están listos
                 for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
                     var item = Avika.data.pendingOrders[i];
-                    if (item.ticketId === order.ticketId) {
-                        // Marcar todos los platillos como listos para la entrega
+                    if (item.ticketId === ticketId) {
+                        // Marcar todos los platillos como listos para la entrega - asegurarnos que todas
+                        // las propiedades estén establecidas correctamente
                         item.allItemsFinished = true;
+                        item.finished = true;
+                        item.kitchenFinished = true;
+                        item.allItemsReady = true;
                         
                         // Si es domicilio o para llevar, marcar como listo para salida
                         if (item.serviceType === 'domicilio' || item.serviceType === 'para-llevar') {
                             item.readyForDelivery = true;
-                            // Esto fuerza a que se muestre el botón de salida del repartidor
-                            item.allItemsReady = true;
                         }
                     }
                 }
@@ -488,5 +491,13 @@ Avika.orders = {
         
         Avika.ui.updatePendingTable();
         Avika.storage.guardarDatosLocales();
+    },
+
+    // Función para limpiar el historial de pedidos completados
+    clearCompletedOrders: function() {
+        Avika.data.completedOrders = [];
+        Avika.ui.updateCompletedTable();
+        Avika.storage.guardarDatosLocales();
+        Avika.ui.showNotification('Historial de platillos terminados limpiado correctamente');
     }
 };

@@ -1061,6 +1061,8 @@ h2 {
     max-width: 600px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .close-modal {
@@ -1404,4 +1406,50 @@ h2 {
 
 .ticket-child-cell {
     padding-left: 25px !important;
+}
+
+/* Estilos para el modal de desbloquear tickets */
+.ticket-list-container {
+    max-height: 400px;
+    overflow-y: auto;
+    margin: 10px 0;
+}
+
+.force-ticket-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.ticket-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.ticket-id {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.force-complete-btn {
+    background-color: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.force-complete-btn:hover {
+    background-color: #ff5252;
+}
+
+/* Estilos para el botón de limpiar historial */
+#clear-history-container {
+    margin: 15px 0;
 }
