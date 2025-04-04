@@ -1384,3 +1384,24 @@ h2 {
         font-size: 14px;
     }
 }
+
+.ticket-ready-status {
+    color: #2ecc71;
+    font-weight: bold;
+    margin-left: 8px;
+    font-size: 0.9em;
+}
+
+.finished-time {
+    color: #2ecc71 !important;
+    font-style: italic;
+}
+
+.ticket-child-name {
+    font-weight: normal;
+    color: #333;
+}
+
+.ticket-child-cell {
+    padding-left: 25px !important;
+}
