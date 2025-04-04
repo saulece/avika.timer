@@ -433,6 +433,25 @@ Avika.ui = {
             }
         }
         
+        // Primero actualizar el estado completo de los tickets
+        for (var ticketId in ticketGroups) {
+            var ticketItems = ticketGroups[ticketId];
+            
+            // Verificar si todos los platillos del ticket están terminados
+            var allTicketItemsFinished = ticketItems.every(function(item) {
+                if (item.isSpecialCombo) {
+                    return item.hotKitchenFinished && item.coldKitchenFinished;
+                } else {
+                    return item.finished;
+                }
+            });
+            
+            // Actualizar la propiedad allTicketItemsFinished en todos los platillos del ticket
+            for (var i = 0; i < ticketItems.length; i++) {
+                ticketItems[i].allTicketItemsFinished = allTicketItemsFinished;
+            }
+        }
+        
         // Procesar tickets primero
         for (var ticketId in ticketGroups) {
             if (!processedTickets[ticketId]) { // Evitar duplicados
@@ -603,15 +622,41 @@ Avika.ui = {
                     // Si todos los platillos están listos pero no ha salido el repartidor
                     // Verificar explícitamente allTicketItemsFinished que indica que TODOS los platillos están listos
                     if (allTicketItemsFinished && !order.deliveryDepartureTime) {
-                        var departureBtn = document.createElement('button');
-                        departureBtn.className = 'finish-btn delivery';
-                        departureBtn.textContent = 'Salida del Repartidor';
-                        departureBtn.onclick = (function(orderId) {
-                            return function() {
-                                Avika.orders.markDeliveryDeparture(orderId);
-                            };
-                        })(order.id);
-                        buttonGroup.appendChild(departureBtn);
+                        // Verificación adicional de que realmente todos los platillos estén terminados
+                        var reallyAllFinished = true;
+                        for (var i = 0; i < ticketItems.length; i++) {
+                            var ti = ticketItems[i];
+                            if (ti.isSpecialCombo && (!ti.hotKitchenFinished || !ti.coldKitchenFinished)) {
+                                reallyAllFinished = false;
+                                break;
+                            } else if (!ti.isSpecialCombo && !ti.finished) {
+                                reallyAllFinished = false;
+                                break;
+                            }
+                        }
+                        
+                        if (reallyAllFinished) {
+                            var departureBtn = document.createElement('button');
+                            departureBtn.className = 'finish-btn delivery';
+                            departureBtn.textContent = 'Salida del Repartidor';
+                            departureBtn.onclick = (function(orderId) {
+                                return function() {
+                                    Avika.orders.markDeliveryDeparture(orderId);
+                                };
+                            })(order.id);
+                            buttonGroup.appendChild(departureBtn);
+                        } else {
+                            // Si la verificación extra muestra que no todos están listos
+                            var ticketLabel = document.createElement('span');
+                            ticketLabel.className = 'ticket-status';
+                            ticketLabel.textContent = 'En preparación';
+                            buttonGroup.appendChild(ticketLabel);
+                            
+                            // Corregir el estado general
+                            for (var i = 0; i < ticketItems.length; i++) {
+                                ticketItems[i].allTicketItemsFinished = false;
+                            }
+                        }
                     }
                     // Si ya salió el repartidor pero no se ha entregado
                     else if (order.deliveryDepartureTime && !order.deliveryArrivalTime) {
@@ -1319,7 +1364,12 @@ Avika.ui = {
             
             // Evento para guardar ticket
             document.getElementById('btn-save-ticket').onclick = function() {
-                Avika.ui.saveTicket();
+                // Prevenir múltiples clics
+                this.disabled = true;
+                // Usar timeout para asegurar que el botón se actualiza visualmente antes de continuar
+                setTimeout(function() {
+                    Avika.ui.saveTicket();
+                }, 50);
             };
             
             // Evento para cancelar
@@ -1645,6 +1695,12 @@ Avika.ui = {
     },
     
     saveTicket: function() {
+        // Deshabilitar botón inmediatamente para evitar múltiples envíos
+        var saveButton = document.getElementById('btn-save-ticket');
+        if (saveButton) {
+            saveButton.disabled = true;
+        }
+        
         // Obtener datos del ticket
         var ticketTime = new Date();
         var hour = parseInt(document.getElementById('ticket-hour').value);
@@ -1661,6 +1717,9 @@ Avika.ui = {
         // Validar que haya una fecha válida
         if (isNaN(ticketTime.getTime())) {
             this.showNotification('Por favor ingrese una hora válida');
+            if (saveButton) {
+                saveButton.disabled = false; // Re-habilitar el botón si hay error
+            }
             return;
         }
         
@@ -1682,7 +1741,9 @@ Avika.ui = {
                 startTime: ticketTime,
                 startTimeFormatted: Avika.ui.formatTime(ticketTime),
                 isSpecialCombo: item.isSpecialCombo,
-                isFromTicket: true
+                isFromTicket: true,
+                finished: false, // Asegurarnos que comienza como no terminado
+                allTicketItemsFinished: false // Inicializar como no terminado
             };
             
             if (item.isSpecialCombo) {
@@ -1701,8 +1762,11 @@ Avika.ui = {
         // Mostrar notificación
         this.showNotification('Ticket agregado con ' + this.state.ticketItems.length + ' platillos');
         
-        // Cerrar modal
-        document.getElementById('ticket-modal').style.display = 'none';
+        // Cerrar modal - Primero verificar que todavía existe
+        var modal = document.getElementById('ticket-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
         
         // Restablecer estado
         this.state.ticketMode = false;
