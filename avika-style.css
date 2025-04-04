@@ -1213,3 +1213,130 @@ h2 {
     background-color: #4cd137;
     color: white;
 }
+
+/* Estilos para tickets en tabla de ordenes */
+.ticket-group-header {
+    background-color: #eef7ff;
+    border-left: 3px solid #4cd137;
+}
+
+.ticket-header-cell {
+    font-weight: bold;
+    color: #2980b9;
+}
+
+.ticket-status {
+    font-style: italic;
+    color: #777;
+    font-size: 0.9em;
+}
+
+/* Mejoras para selector de hora simple */
+.simple-time-picker {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.time-select {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    width: auto;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 30px;
+}
+
+.time-select-label {
+    color: #666;
+    margin-left: 5px;
+}
+
+/* Estilos para interfaz móvil amigable */
+.mobile-friendly-select {
+    width: 100%;
+}
+
+.selection-step {
+    width: 100%;
+    padding: 10px 0;
+    margin: 0;
+}
+
+.step-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.step-header h3 {
+    margin: 0;
+    flex-grow: 1;
+}
+
+.back-to-category,
+.back-to-dish {
+    background-color: transparent;
+    border: none;
+    color: #2980b9;
+    font-size: 16px;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.back-to-category:hover,
+.back-to-dish:hover {
+    color: #3498db;
+    text-decoration: underline;
+}
+
+/* Mejoras para dispositivos móviles */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 90%;
+        margin: 10% auto;
+        max-width: none;
+    }
+    
+    .simple-time-picker {
+        flex-wrap: wrap;
+    }
+    
+    .time-select {
+        flex-grow: 1;
+        min-width: 100px;
+    }
+    
+    .category-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .ticket-items-container {
+        max-height: 200px;
+    }
+    
+    .dishes-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        max-height: 300px;
+    }
+    
+    .dish-btn {
+        height: auto;
+        padding: 15px 10px;
+        text-align: center;
+        font-size: 14px;
+    }
+}
