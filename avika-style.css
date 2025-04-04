@@ -323,26 +323,51 @@ section {
     border-color: var(--primary-btn);
 }
 
-/* Botones de acción - MODIFICADO PARA MOSTRAR EN LA MISMA LINEA */
+/* Estilos generales para botones de acción */
 .action-btns {
     display: flex;
-    gap: 10px; /* Reducido de 15px */
-    margin-top: 15px; /* Reducido de 25px */
-    position: sticky; /* NUEVO: Fijar en la parte inferior */
+    gap: 10px;
+    margin-top: 10px;
+    justify-content: flex-start; /* Alinea los botones a la izquierda */
+    position: sticky; /* Para mantener fijos los botones al hacer scroll */
     bottom: 10px;
     background-color: var(--container-bg);
     padding: 10px 0;
     z-index: 100;
 }
 
+/* En modales, usar modal-action-btns para tener un orden específico */
+.modal-action-btns {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+    gap: 10px;
+    position: static; /* Anular posición sticky para botones en modales */
+    padding: 0;
+}
+
+.modal-action-btns .start-btn {
+    order: -1; /* Hace que aparezca primero */
+}
+
+/* Para la sección de ticket, mantener estructura de columna */
+.ticket-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Estilos específicos para botones */
 .action-btn {
-    flex: 1;
-    padding: 12px; /* Reducido de 14px */
-    font-size: 16px;
+    background-color: #6495ED;
+    color: white;
     border: none;
-    border-radius: 8px;
+    padding: 10px 15px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color var(--transition-speed), 
+    font-size: 14px;
+    transition: background-color 0.3s ease, 
                 transform 0.2s,
                 box-shadow 0.2s;
     box-shadow: 0 2px 4px var(--shadow-color);
@@ -1169,7 +1194,7 @@ h2 {
 
 .ticket-buttons {
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
     gap: 10px;
     margin-top: 20px;
 }
@@ -1452,4 +1477,15 @@ h2 {
 /* Estilos para el botón de limpiar historial */
 #clear-history-container {
     margin: 15px 0;
+}
+
+.modal-action-btns {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+    gap: 10px;
+}
+
+.modal-action-btns .start-btn {
+    order: -1; /* Hace que aparezca primero */
 }

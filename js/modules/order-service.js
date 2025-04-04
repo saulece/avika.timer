@@ -130,6 +130,7 @@ Avika.orders = {
         
         // Marca la orden como terminada en cocina pero pendiente de entrega
         order.kitchenFinished = true;
+        order.finished = true; // Marcar como terminado
         order.kitchenFinishedTime = new Date();
         order.kitchenFinishedTimeFormatted = Avika.ui.formatTime(order.kitchenFinishedTime);
         
@@ -152,9 +153,35 @@ Avika.orders = {
                 }
             }
             
-            // Si todos los platillos del ticket están listos, mostrar notificación
+            // Si todos los platillos del ticket están listos, actualizar el estado del ticket completo
             if (allTicketItemsFinished) {
-                Avika.ui.showNotification('Ticket completo listo en cocina');
+                Avika.ui.showNotification('Ticket completo listo en cocina. Listo para salida del repartidor.');
+                
+                // Actualizar todos los platillos del ticket para indicar que todo el ticket está listo
+                for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                    var item = Avika.data.pendingOrders[i];
+                    if (item.ticketId === order.ticketId) {
+                        item.allItemsFinished = true;
+                        item.finished = true;
+                        item.kitchenFinished = true;
+                        
+                        // Si es domicilio o para llevar, marcar como listo para salida
+                        if (item.serviceType === 'domicilio' || item.serviceType === 'para-llevar') {
+                            item.readyForDelivery = true;
+                        }
+                    }
+                }
+            } else {
+                // Si no todos los platillos están listos, asegurarnos de mantener el estado correcto
+                for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                    var item = Avika.data.pendingOrders[i];
+                    if (item.ticketId === order.ticketId) {
+                        item.allItemsFinished = false;
+                        item.readyForDelivery = false;
+                        item.allItemsReady = false;
+                    }
+                }
+                Avika.ui.showNotification(order.dish + ' terminado en cocina, pero aún faltan más platillos del ticket.');
             }
         } else {
             Avika.ui.showNotification(order.dish + ' terminado en cocina, pendiente entrega');
@@ -473,17 +500,27 @@ Avika.orders = {
                 for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
                     var item = Avika.data.pendingOrders[i];
                     if (item.ticketId === ticketId) {
-                        // Marcar todos los platillos como listos para la entrega - asegurarnos que todas
-                        // las propiedades estén establecidas correctamente
+                        // Marcar todos los platillos como listos para la entrega
                         item.allItemsFinished = true;
                         item.finished = true;
                         item.kitchenFinished = true;
-                        item.allItemsReady = true;
                         
                         // Si es domicilio o para llevar, marcar como listo para salida
                         if (item.serviceType === 'domicilio' || item.serviceType === 'para-llevar') {
                             item.readyForDelivery = true;
+                            // Solo en este caso, cuando TODOS los platillos del ticket están terminados
+                            item.allItemsReady = true; 
                         }
+                    }
+                }
+            } else {
+                // Si no todos los platillos están listos, asegurarnos que NO se active el botón de salida
+                for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                    var item = Avika.data.pendingOrders[i];
+                    if (item.ticketId === ticketId) {
+                        item.allItemsFinished = false;
+                        item.readyForDelivery = false;
+                        item.allItemsReady = false;
                     }
                 }
             }

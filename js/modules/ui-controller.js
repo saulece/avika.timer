@@ -568,9 +568,8 @@ Avika.ui = {
                     buttonGroup.style.gap = '5px';
                     
                     // Si todos los platillos están listos pero no ha salido el repartidor
-                    // Al menos uno de estos flags debe ser true y no debe tener hora de salida
-                    if (!order.deliveryDepartureTime && 
-                        (allTicketItemsFinished || order.allItemsFinished || order.readyForDelivery || order.allItemsReady || order.kitchenFinished)) {
+                    // Estrictamente requerir que todos los platillos estén terminados (allTicketItemsFinished)
+                    if (allTicketItemsFinished && !order.deliveryDepartureTime) {
                         var departureBtn = document.createElement('button');
                         departureBtn.className = 'finish-btn delivery';
                         departureBtn.textContent = 'Salida del Repartidor';
@@ -594,7 +593,7 @@ Avika.ui = {
                         buttonGroup.appendChild(arrivalBtn);
                     }
                     // Si no todos los platillos están listos, mostrar estado
-                    else if (!allTicketItemsFinished && !order.allItemsFinished && !order.readyForDelivery && !order.allItemsReady && !order.kitchenFinished) {
+                    else if (!allTicketItemsFinished) {
                         var ticketLabel = document.createElement('span');
                         ticketLabel.className = 'ticket-status';
                         ticketLabel.textContent = 'En preparación';
@@ -721,7 +720,7 @@ Avika.ui = {
                 actionCell.className = 'action-cell';
                 
                 // Mostrar acción de salida/entrega en el nivel de ticket si todos los platillos están listos
-                if (allTicketItemsFinished || order.allItemsFinished || order.readyForDelivery || order.allItemsReady || order.kitchenFinished) {
+                if (allTicketItemsFinished) {
                     // Si es domicilio o para llevar, mostrar botones correspondientes
                     if ((order.serviceType === 'domicilio' || order.serviceType === 'para-llevar')) {
                         var ticketBtnGroup = document.createElement('div');
@@ -1263,8 +1262,10 @@ Avika.ui = {
                     
                     <div class="ticket-buttons">
                         <button id="btn-add-ticket-item" class="action-btn">Agregar platillo</button>
-                        <button id="btn-save-ticket" class="action-btn start-btn" disabled>Guardar ticket</button>
-                        <button id="btn-cancel-ticket" class="action-btn cancel-btn">Cancelar</button>
+                        <div class="modal-action-btns">
+                            <button id="btn-save-ticket" class="action-btn start-btn" disabled>Guardar ticket</button>
+                            <button id="btn-cancel-ticket" class="action-btn cancel-btn">Cancelar</button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1409,8 +1410,10 @@ Avika.ui = {
                             </div>
                             
                             <div class="item-buttons">
-                                <button id="btn-add-to-ticket" class="action-btn start-btn">Agregar al ticket</button>
-                                <button id="btn-cancel-item" class="action-btn cancel-btn">Cancelar</button>
+                                <div class="modal-action-btns">
+                                    <button id="btn-add-to-ticket" class="action-btn start-btn">Agregar al ticket</button>
+                                    <button id="btn-cancel-item" class="action-btn cancel-btn">Cancelar</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1707,7 +1710,7 @@ Avika.ui = {
             }
         }
         
-        this.showNotification('Ticket desbloqueado: ' + ticketItems.length + ' platillos listos para completar');
+        this.showNotification('Ticket desbloqueado de emergencia: ' + ticketItems.length + ' platillos marcados como terminados. Esto solo debe usarse en casos excepcionales.');
         this.updatePendingTable();
         Avika.storage.guardarDatosLocales();
     },
@@ -1724,7 +1727,8 @@ Avika.ui = {
                 <div class="modal-content">
                     <span class="close-modal">&times;</span>
                     <h2>Desbloquear Ticket</h2>
-                    <p>Seleccione el ticket que desea desbloquear:</p>
+                    <p>Esta función es para situaciones excepcionales donde un ticket quedó "atorado" por algún error.</p>
+                    <p>Solo debe usarse cuando por alguna razón no fue posible marcar todos los platillos como terminados normalmente.</p>
                     <div id="ticket-list" class="ticket-list-container"></div>
                 </div>
             `;
