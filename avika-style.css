@@ -346,10 +346,6 @@ section {
     padding: 0;
 }
 
-.modal-action-btns .start-btn {
-    order: -1; /* Hace que aparezca primero */
-}
-
 /* Para la sección de ticket, mantener estructura de columna */
 .ticket-buttons {
     display: flex;
@@ -1484,8 +1480,4 @@ h2 {
     justify-content: flex-end;
     margin-top: 15px;
     gap: 10px;
-}
-
-.modal-action-btns .start-btn {
-    order: -1; /* Hace que aparezca primero */
 }

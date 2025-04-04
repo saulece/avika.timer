@@ -134,6 +134,12 @@ Avika.orders = {
         order.kitchenFinishedTime = new Date();
         order.kitchenFinishedTimeFormatted = Avika.ui.formatTime(order.kitchenFinishedTime);
         
+        // Si no tiene tiempo de finalización, establecerlo ahora
+        if (!order.finishTime) {
+            order.finishTime = new Date();
+            order.finishTimeFormatted = Avika.ui.formatTime(order.finishTime);
+        }
+        
         // Si es parte de un ticket, verificar si todos los platillos están listos
         if (order.ticketId) {
             var allTicketItemsFinished = true;
@@ -141,7 +147,7 @@ Avika.orders = {
                 var item = Avika.data.pendingOrders[i];
                 if (item.ticketId === order.ticketId) {
                     // Para platillos normales
-                    if (!item.isSpecialCombo && !item.kitchenFinished) {
+                    if (!item.isSpecialCombo && !item.finished) {
                         allTicketItemsFinished = false;
                         break;
                     }
@@ -161,6 +167,7 @@ Avika.orders = {
                 for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
                     var item = Avika.data.pendingOrders[i];
                     if (item.ticketId === order.ticketId) {
+                        item.allTicketItemsFinished = true;
                         item.allItemsFinished = true;
                         item.finished = true;
                         item.kitchenFinished = true;
@@ -176,9 +183,9 @@ Avika.orders = {
                 for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
                     var item = Avika.data.pendingOrders[i];
                     if (item.ticketId === order.ticketId) {
+                        item.allTicketItemsFinished = false;
                         item.allItemsFinished = false;
                         item.readyForDelivery = false;
-                        item.allItemsReady = false;
                     }
                 }
                 Avika.ui.showNotification(order.dish + ' terminado en cocina, pero aún faltan más platillos del ticket.');
@@ -219,11 +226,21 @@ Avika.orders = {
                     item.deliveryDepartureTime = departureTime;
                     item.deliveryDepartureTimeFormatted = departureTimeFormatted;
                     
-                    // Marcar como listo para entrega, estas propiedades son usadas por la UI
-                    // para determinar si mostrar el botón de salida
-                    item.readyForDelivery = true;
+                    // Verificar si todos los platillos están realmente terminados
+                    if (!item.finished) {
+                        if (item.isSpecialCombo) {
+                            item.hotKitchenFinished = true;
+                            item.coldKitchenFinished = true;
+                        }
+                        item.finished = true;
+                        item.finishTime = departureTime;
+                        item.finishTimeFormatted = departureTimeFormatted;
+                    }
+                    
+                    // Marcar definitivamente como listo para entrega
+                    item.allTicketItemsFinished = true;
                     item.allItemsFinished = true;
-                    item.allItemsReady = true;
+                    item.readyForDelivery = true;
                     
                     ticketDishCount++;
                 }
@@ -501,6 +518,7 @@ Avika.orders = {
                     var item = Avika.data.pendingOrders[i];
                     if (item.ticketId === ticketId) {
                         // Marcar todos los platillos como listos para la entrega
+                        item.allTicketItemsFinished = true;
                         item.allItemsFinished = true;
                         item.finished = true;
                         item.kitchenFinished = true;
@@ -508,8 +526,6 @@ Avika.orders = {
                         // Si es domicilio o para llevar, marcar como listo para salida
                         if (item.serviceType === 'domicilio' || item.serviceType === 'para-llevar') {
                             item.readyForDelivery = true;
-                            // Solo en este caso, cuando TODOS los platillos del ticket están terminados
-                            item.allItemsReady = true; 
                         }
                     }
                 }
@@ -518,9 +534,9 @@ Avika.orders = {
                 for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
                     var item = Avika.data.pendingOrders[i];
                     if (item.ticketId === ticketId) {
+                        item.allTicketItemsFinished = false;
                         item.allItemsFinished = false;
                         item.readyForDelivery = false;
-                        item.allItemsReady = false;
                     }
                 }
             }
