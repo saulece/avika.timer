@@ -402,6 +402,8 @@ Avika.orders = {
                     allTicketItemsFinished = false;
                     break;
                 } else if (!item.isSpecialCombo && !item.finished && item.id !== id) {
+                    // Para platillos normales, verificar si están terminados, pero excluir el platillo actual
+                    // ya que la propiedad 'finished' podría no estar actualizada aún
                     allTicketItemsFinished = false;
                     break;
                 }
@@ -586,7 +588,7 @@ Avika.orders = {
                 
                 // Si todos los platillos del ticket están listos y es servicio de comedor,
                 // automáticamente completar el ticket (mover a completados)
-                if (order.serviceType === 'comedor') {
+                if (order.serviceType === 'comedor' || order.serviceType === 'para-llevar') {
                     // Usamos el ID de cualquier platillo del ticket para llamar a finishPreparation
                     // que se encargará de mover todos los platillos del ticket a completados
                     this.finishPreparation(order.id);

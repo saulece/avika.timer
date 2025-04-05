@@ -638,22 +638,30 @@ Avika.ui = {
         }
         // Para platillos normales no a domicilio, mostrar botón de listo
         else if (!order.deliveryDepartureTime) {
-            var doneBtn = document.createElement('button');
-            doneBtn.className = 'action-btn';
-            doneBtn.textContent = 'Listo';
-            
-            // Si es parte de un ticket, usar finishIndividualItem en lugar de finishPreparation
-            if (order.ticketId) {
-                doneBtn.onclick = function() {
-                    Avika.orders.finishIndividualItem(order.id);
-                };
+            // Si es parte de un ticket y ya está terminado, mostrar "Esperando otros platillos"
+            if (order.ticketId && order.finished) {
+                var statusText = document.createElement('span');
+                statusText.className = 'status-text';
+                statusText.textContent = 'Esperando otros platillos';
+                actionsCell.appendChild(statusText);
             } else {
-                doneBtn.onclick = function() {
-                    Avika.orders.finishPreparation(order.id);
-                };
+                var doneBtn = document.createElement('button');
+                doneBtn.className = 'action-btn';
+                doneBtn.textContent = 'Listo';
+                
+                // Si es parte de un ticket, usar finishIndividualItem en lugar de finishPreparation
+                if (order.ticketId) {
+                    doneBtn.onclick = function() {
+                        Avika.orders.finishIndividualItem(order.id);
+                    };
+                } else {
+                    doneBtn.onclick = function() {
+                        Avika.orders.finishPreparation(order.id);
+                    };
+                }
+                
+                actionsCell.appendChild(doneBtn);
             }
-            
-            actionsCell.appendChild(doneBtn);
         }
         
         row.appendChild(actionsCell);
@@ -797,30 +805,43 @@ Avika.ui = {
         var timerCells = document.getElementById('pending-body').querySelectorAll('.timer-cell');
         
         for (var i = 0; i < timerCells.length; i++) {
-            if (i >= Avika.data.pendingOrders.length) return;
-            
-            var order = Avika.data.pendingOrders[i];
             var timerCell = timerCells[i];
+            var orderId = timerCell.getAttribute('data-id');
+            
+            if (!orderId) continue;
+            
+            // Buscar la orden por ID
+            var order = null;
+            for (var j = 0; j < Avika.data.pendingOrders.length; j++) {
+                if (Avika.data.pendingOrders[j].id === orderId) {
+                    order = Avika.data.pendingOrders[j];
+                    break;
+                }
+            }
+            
+            // Si no se encontró la orden, continuar con la siguiente
+            if (!order) continue;
             
             var now = new Date();
             var elapsedMillis = now - new Date(order.startTime);
             var elapsedSeconds = Math.floor(elapsedMillis / 1000);
             
-            var minutes = Math.floor(elapsedSeconds / 60);
+            var hours = Math.floor(elapsedSeconds / 3600);
+            var minutes = Math.floor((elapsedSeconds % 3600) / 60);
             var seconds = elapsedSeconds % 60;
             
-            timerCell.textContent = this.padZero(minutes) + ':' + this.padZero(seconds);
+            timerCell.textContent = this.padZero(hours) + ':' + this.padZero(minutes) + ':' + this.padZero(seconds);
             
             // Añadir clases de advertencia según el tiempo transcurrido
             timerCell.classList.remove('warning', 'alert');
             
             // Más de 10 minutos: advertencia
-            if (minutes >= 10) {
+            if (minutes >= 10 || hours > 0) {
                 timerCell.classList.add('warning');
             }
             
             // Más de 15 minutos: alerta
-            if (minutes >= 15) {
+            if (minutes >= 15 || hours > 0) {
                 timerCell.classList.add('alert');
             }
         }
@@ -1242,10 +1263,41 @@ Avika.ui = {
             saveButton.disabled = true;
         }
         
+        // Validar que haya platillos en el ticket
+        if (!this.state.ticketItems || this.state.ticketItems.length === 0) {
+            this.showNotification('El ticket debe contener al menos un platillo');
+            if (saveButton) {
+                saveButton.disabled = false;
+            }
+            return;
+        }
+        
         // Obtener datos del ticket
         var ticketTime = new Date();
-        var hour = parseInt(document.getElementById('ticket-hour').value);
-        var minute = parseInt(document.getElementById('ticket-minute').value);
+        
+        // Obtener hora seleccionada con validación
+        var hourElement = document.getElementById('ticket-hour');
+        var minuteElement = document.getElementById('ticket-minute');
+        
+        if (!hourElement || !minuteElement) {
+            this.showNotification('Error al obtener la hora seleccionada');
+            if (saveButton) {
+                saveButton.disabled = false;
+            }
+            return;
+        }
+        
+        var hour = parseInt(hourElement.value);
+        var minute = parseInt(minuteElement.value);
+        
+        // Validar valores
+        if (isNaN(hour) || hour < 0 || hour > 23 || isNaN(minute) || minute < 0 || minute > 59) {
+            this.showNotification('Por favor ingrese valores válidos para la hora');
+            if (saveButton) {
+                saveButton.disabled = false;
+            }
+            return;
+        }
         
         // Establecer hora y minutos
         ticketTime.setHours(hour);
@@ -1253,7 +1305,7 @@ Avika.ui = {
         ticketTime.setSeconds(0);
         
         var ticketService = this.state.ticketService || 'comedor';
-        var ticketNotes = document.getElementById('ticket-notes-input').value;
+        var ticketNotes = document.getElementById('ticket-notes-input')?.value || '';
         
         // Validar que haya una fecha válida
         if (isNaN(ticketTime.getTime())) {
@@ -1267,51 +1319,63 @@ Avika.ui = {
         // Generar un ID de ticket único para agrupar los platillos
         var ticketId = 'ticket-' + Date.now();
         
-        // Procesar cada item del ticket
-        this.state.ticketItems.forEach(function(item) {
-            var preparation = {
-                id: Date.now().toString() + Math.floor(Math.random() * 1000),
-                ticketId: ticketId, // Añadir ID del ticket para agrupar
-                dish: item.dish,
-                category: item.category,
-                categoryDisplay: Avika.config.categoryNames[item.category],
-                quantity: item.quantity,
-                customizations: [],
-                serviceType: ticketService,
-                notes: item.notes + (ticketNotes ? ' | ' + ticketNotes : ''),
-                startTime: ticketTime,
-                startTimeFormatted: Avika.ui.formatTime(ticketTime),
-                isSpecialCombo: item.isSpecialCombo,
-                isFromTicket: true,
-                finished: false, // Asegurarnos que comienza como no terminado
-                allTicketItemsFinished: false // Inicializar como no terminado
-            };
+        try {
+            // Procesar cada item del ticket
+            this.state.ticketItems.forEach(function(item) {
+                var preparation = {
+                    id: Date.now().toString() + Math.floor(Math.random() * 1000),
+                    ticketId: ticketId, // Añadir ID del ticket para agrupar
+                    dish: item.dish,
+                    category: item.category,
+                    categoryDisplay: Avika.config.categoryNames[item.category],
+                    quantity: item.quantity,
+                    customizations: [],
+                    serviceType: ticketService,
+                    notes: item.notes + (ticketNotes ? ' | ' + ticketNotes : ''),
+                    startTime: ticketTime,
+                    startTimeFormatted: Avika.ui.formatTime(ticketTime),
+                    isSpecialCombo: item.isSpecialCombo,
+                    isFromTicket: true,
+                    finished: false, // Asegurarnos que comienza como no terminado
+                    allTicketItemsFinished: false // Inicializar como no terminado
+                };
+                
+                if (item.isSpecialCombo) {
+                    preparation.hotKitchenFinished = false;
+                    preparation.coldKitchenFinished = false;
+                }
+                
+                // Crear una copia para evitar referencias directas
+                Avika.data.pendingOrders.push(JSON.parse(JSON.stringify(preparation)));
+            });
             
-            if (item.isSpecialCombo) {
-                preparation.hotKitchenFinished = false;
-                preparation.coldKitchenFinished = false;
+            // Actualizar la UI
+            Avika.ui.updatePendingTable();
+            Avika.storage.guardarDatosLocales();
+            
+            // Mostrar notificación
+            this.showNotification('Ticket agregado con ' + this.state.ticketItems.length + ' platillos');
+            
+            // Cerrar modal - Primero verificar que todavía existe
+            var modal = document.getElementById('ticket-modal');
+            if (modal) {
+                modal.style.display = 'none';
             }
             
-            // Crear una copia para evitar referencias directas
-            Avika.data.pendingOrders.push(JSON.parse(JSON.stringify(preparation)));
-        });
-        
-        // Actualizar la UI
-        Avika.ui.updatePendingTable();
-        Avika.storage.guardarDatosLocales();
-        
-        // Mostrar notificación
-        this.showNotification('Ticket agregado con ' + this.state.ticketItems.length + ' platillos');
-        
-        // Cerrar modal - Primero verificar que todavía existe
-        var modal = document.getElementById('ticket-modal');
-        if (modal) {
-            modal.style.display = 'none';
+            // Restablecer estado
+            this.state.ticketMode = false;
+            this.state.ticketItems = [];
+            
+        } catch (error) {
+            // Capturar cualquier error y mostrar una notificación
+            console.error('Error al guardar ticket:', error);
+            this.showNotification('Error al guardar ticket: ' + (error.message || 'Error desconocido'));
+            
+            // Re-habilitar el botón si hay error
+            if (saveButton) {
+                saveButton.disabled = false;
+            }
         }
-        
-        // Restablecer estado
-        this.state.ticketMode = false;
-        this.state.ticketItems = [];
     },
     
     cancelTicket: function() {
