@@ -696,11 +696,23 @@ Avika.ui = {
         var completedBody = document.getElementById('completed-body');
         completedBody.innerHTML = '';
         
+        // Añadir clase para vista compacta en móviles
+        if (window.innerWidth <= 768) {
+            completedBody.parentElement.parentElement.classList.add('compact-completed-view');
+        } else {
+            completedBody.parentElement.parentElement.classList.remove('compact-completed-view');
+        }
+        
         var displayOrders = showAll ? Avika.data.completedOrders : Avika.data.completedOrders.slice(0, 5);
         
         for (var i = 0; i < displayOrders.length; i++) {
             var order = displayOrders[i];
             var row = document.createElement('tr');
+            
+            // Añadir clase para destacar filas alternas
+            if (i % 2 === 0) {
+                row.classList.add('highlight-row');
+            }
             
             // Celda del platillo
             var dishCell = document.createElement('td');
@@ -717,44 +729,109 @@ Avika.ui = {
             endCell.textContent = order.endTimeFormatted;
             row.appendChild(endCell);
             
-            // Celda de tiempo total
+            // Celda de tiempo total con badge visual
             var timeCell = document.createElement('td');
-            timeCell.textContent = order.prepTime;
+            
+            // Convertir tiempo de preparación a segundos para clasificarlo
+            var prepTimeParts = order.prepTime.split(':');
+            var totalSeconds = parseInt(prepTimeParts[0]) * 60 + parseInt(prepTimeParts[1]);
+            
+            // Crear badge con color según el tiempo
+            var timeBadge = document.createElement('span');
+            timeBadge.className = 'time-badge';
+            timeBadge.textContent = order.prepTime;
+            
+            // Clasificar tiempo y asignar clase
+            if (totalSeconds < 180) { // Menos de 3 minutos
+                timeBadge.classList.add('excellent');
+            } else if (totalSeconds < 300) { // Menos de 5 minutos
+                timeBadge.classList.add('good');
+            } else if (totalSeconds < 480) { // Menos de 8 minutos
+                timeBadge.classList.add('warning');
+            } else { // 8 minutos o más
+                timeBadge.classList.add('bad');
+            }
+            
+            timeCell.appendChild(timeBadge);
             row.appendChild(timeCell);
             
-            // Celda de detalles
+            // Celda de detalles con formato mejorado
             var detailsCell = document.createElement('td');
-            var details = Avika.config.serviceNames[order.serviceType] + ', ' + Avika.config.categoryNames[order.category];
+            
+            // Añadir tipo de servicio con distintivo visual
+            var serviceSpan = document.createElement('span');
+            serviceSpan.className = 'ticket-info';
+            serviceSpan.textContent = Avika.config.serviceNames[order.serviceType];
+            detailsCell.appendChild(serviceSpan);
+            
+            // Añadir categoría
+            var categoryText = document.createElement('span');
+            categoryText.textContent = ', ' + Avika.config.categoryNames[order.category];
+            detailsCell.appendChild(categoryText);
             
             if (order.isSpecialCombo) {
-                details += ' (Combo Especial)';
+                var specialBadge = document.createElement('span');
+                specialBadge.className = 'ticket-info';
+                specialBadge.style.backgroundColor = '#ffebee';
+                specialBadge.style.color = '#c62828';
+                specialBadge.style.marginLeft = '5px';
+                specialBadge.textContent = 'Combo Especial';
+                detailsCell.appendChild(specialBadge);
             }
             
+            // Añadir personalizaciones si existen
             if (order.customizations && order.customizations.length > 0) {
-                details += ', ' + order.customizations.map(function(code) {
+                var noteSpan = document.createElement('span');
+                noteSpan.className = 'notes';
+                noteSpan.textContent = 'Personalización: ' + order.customizations.map(function(code) {
                     return Avika.config.customizationOptions[code] || code;
                 }).join(', ');
+                detailsCell.appendChild(noteSpan);
             }
             
+            // Añadir notas si existen
             if (order.notes) {
-                details += ' - ' + order.notes;
+                var notesSpan = document.createElement('span');
+                notesSpan.className = 'notes';
+                notesSpan.textContent = 'Notas: ' + order.notes;
+                detailsCell.appendChild(notesSpan);
             }
             
-            if (order.deliveryDepartureTimeFormatted) {
-                details += ' | Salida: ' + order.deliveryDepartureTimeFormatted;
-            }
-            
-            if (order.deliveryArrivalTimeFormatted) {
-                details += ' | Entrega: ' + order.deliveryArrivalTimeFormatted;
+            // Añadir información de tiempos de entrega si existen
+            if (order.deliveryDepartureTimeFormatted || order.deliveryArrivalTimeFormatted) {
+                var deliveryInfo = document.createElement('div');
+                deliveryInfo.style.marginTop = '5px';
                 
-                if (order.deliveryTime) {
-                    details += ' | Tiempo de entrega: ' + order.deliveryTime;
+                if (order.deliveryDepartureTimeFormatted) {
+                    var departureSpan = document.createElement('span');
+                    departureSpan.className = 'ticket-info';
+                    departureSpan.style.backgroundColor = '#fff3e0';
+                    departureSpan.style.color = '#e65100';
+                    departureSpan.textContent = 'Salida: ' + order.deliveryDepartureTimeFormatted;
+                    deliveryInfo.appendChild(departureSpan);
                 }
+                
+                if (order.deliveryArrivalTimeFormatted) {
+                    var arrivalSpan = document.createElement('span');
+                    arrivalSpan.className = 'ticket-info';
+                    arrivalSpan.style.backgroundColor = '#e8f5e9';
+                    arrivalSpan.style.color = '#2e7d32';
+                    arrivalSpan.style.marginLeft = order.deliveryDepartureTimeFormatted ? '5px' : '0';
+                    arrivalSpan.textContent = 'Entrega: ' + order.deliveryArrivalTimeFormatted;
+                    deliveryInfo.appendChild(arrivalSpan);
+                    
+                    if (order.deliveryTime) {
+                        var timeSpan = document.createElement('span');
+                        timeSpan.className = 'notes';
+                        timeSpan.textContent = 'Tiempo de entrega: ' + order.deliveryTime;
+                        deliveryInfo.appendChild(timeSpan);
+                    }
+                }
+                
+                detailsCell.appendChild(deliveryInfo);
             }
             
-            detailsCell.textContent = details;
             row.appendChild(detailsCell);
-            
             completedBody.appendChild(row);
         }
         

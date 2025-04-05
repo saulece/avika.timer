@@ -138,10 +138,10 @@ section {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
     margin: 10px auto;
     max-width: 700px;
-    padding: 10px;
+    padding: 8px;
     background-color: var(--highlight-bg);
     border-radius: 8px;
     box-shadow: 0 1px 3px var(--shadow-color);
@@ -151,8 +151,8 @@ section {
     background-color: var(--primary-btn);
     color: var(--primary-btn-text);
     border: none;
-    padding: 8px 12px;
-    font-size: 0.9rem;
+    padding: 6px 10px;
+    font-size: 0.85rem;
     border-radius: 4px;
     cursor: pointer;
     text-align: center;
@@ -161,13 +161,13 @@ section {
     width: auto;
     height: auto;
     transition: background-color var(--transition-speed), transform 0.2s;
-    box-shadow: 0 2px 4px var(--shadow-color);
+    box-shadow: 0 1px 2px var(--shadow-color);
     display: inline-block;
 }
 
 .category-btn:hover {
     background-color: var(--btn-hover);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
 .category-btn:active {
@@ -917,154 +917,423 @@ h2 {
 /* Ajustes para dispositivos móviles */
 @media (max-width: 768px) {
     body {
-        padding: 10px;
+        padding: 5px;
     }
     
     header h1 {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
     }
     
-    .category-container {
-        grid-template-columns: 1fr 1fr;
+    .header-controls {
+        gap: 5px;
     }
     
-    .category-btn {
-        height: 70px;
-        font-size: 16px;
-        padding: 10px;
+    .icon-btn {
+        font-size: 1rem;
+        width: 30px;
+        height: 30px;
     }
     
-    .dish-btn {
-        min-width: 130px;
-        padding: 10px;
-    }
-    
-    .action-btns {
-        flex-direction: row;
-    }
-    
-    table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-    
-    th, td {
-        padding: 8px;
-    }
-    
-    .timer-cell {
-        font-size: 16px;
-    }
-    
-    #notification {
-        max-width: 90%;
-        left: 50%;
-        transform: translateX(-50%);
-        right: auto;
-    }
-    
-    .add-dish-form {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    /* Ajustes para tablas en móviles */
     .pending-orders-section {
         padding: 10px;
+        margin-bottom: 15px;
     }
     
+    .pending-orders-section h2 {
+        font-size: 1.1rem;
+        padding: 8px 10px;
+        margin: -10px -10px 10px -10px;
+    }
+    
+    /* Ajustamos tabla para móviles */
     .pending-orders-section th,
     .pending-orders-section td {
-        padding: 6px;
+        padding: 5px;
+        font-size: 0.85rem;
+    }
+    
+    /* Optimización de botones en tabla */
+    .finish-btn {
+        padding: 5px 6px;
+        font-size: 0.8rem;
+        min-height: 32px;
+        margin-bottom: 3px;
+    }
+    
+    /* Botones de filtro más compactos */
+    .filter-controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5px;
+        margin-bottom: 10px;
+    }
+    
+    .filter-btn {
+        padding: 6px 8px;
+        font-size: 0.8rem;
+        text-align: center;
+    }
+    
+    /* Optimización de espacio para la sección de acciones */
+    .action-btns {
+        flex-wrap: wrap;
+        gap: 5px;
+        margin: 5px 0;
+        padding: 5px 0;
+    }
+    
+    .action-btn {
+        padding: 6px 8px;
+        font-size: 0.8rem;
+    }
+    
+    /* Ajuste para categorías */
+    #categories-section {
+        padding: 10px;
+    }
+    
+    /* Mejora para visualizar la tabla en móviles */
+    .pending-orders-section table {
+        font-size: 0.85rem;
+    }
+    
+    /* Ajustar espaciado de la tabla */
+    #completed-body td {
+        padding: 4px;
+        font-size: 0.8rem;
+    }
+    
+    /* Optimización de columnas para móviles */
+    .pending-orders-section th:nth-child(1),
+    .pending-orders-section td:nth-child(1) {
+        width: 20%;
+    }
+    
+    .pending-orders-section th:nth-child(2),
+    .pending-orders-section td:nth-child(2) {
+        width: 15%;
+    }
+    
+    .pending-orders-section th:nth-child(3),
+    .pending-orders-section td:nth-child(3) {
+        width: 15%;
+    }
+    
+    .pending-orders-section th:nth-child(4),
+    .pending-orders-section td:nth-child(4) {
+        width: 30%;
     }
     
     .pending-orders-section th:last-child,
     .pending-orders-section td:last-child {
-        min-width: 100px;
-        width: 100px;
-    }
-    
-    .finish-btn {
-        padding: 6px 8px;
-        font-size: 13px;
-    }
-    
-    .subcategory-btn {
-        padding: 10px 14px;
-        font-size: 15px;
-        min-width: 100px;
-    }
-    
-    .subcategories-container {
-        padding: 10px;
-        gap: 8px;
-    }
-    
-    /* Mejora la visualización de los botones de filtrado en móviles */
-    .filter-controls {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        margin-bottom: 15px;
-    }
-    
-    .filter-btn {
-        padding: 10px;
-        font-size: 14px;
-        text-align: center;
+        min-width: 60px;
+        width: 60px;
     }
 }
 
 /* Ajustes específicos para pantallas muy pequeñas */
 @media (max-width: 480px) {
     .category-container {
-        grid-template-columns: 1fr;
+        padding: 5px;
+        gap: 3px;
     }
     
-    .dishes-container {
+    .category-btn {
+        padding: 5px 8px;
+        font-size: 0.8rem;
+        border-radius: 3px;
+    }
+    
+    /* Hacemos la tabla de completados más compacta */
+    .pending-orders-section {
+        padding: 5px;
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .pending-orders-section h2 {
+        font-size: 1rem;
+        padding: 6px 8px;
+        margin: -5px -5px 8px -5px;
+    }
+    
+    /* Ocultar algunas columnas en pantallas muy pequeñas */
+    .pending-orders-section th:nth-child(4),
+    .pending-orders-section td:nth-child(4) {
+        display: none;
+    }
+    
+    /* Optimizar aún más los botones */
+    .finish-btn {
+        padding: 3px;
+        font-size: 0.7rem;
+        min-height: 24px;
+        margin-bottom: 2px;
+    }
+    
+    /* Reorganizar botones de acción */
+    .action-btns {
         justify-content: center;
     }
     
-    .dish-btn {
-        width: 100%;
+    .action-btn {
+        flex: 1 1 auto;
+        max-width: 45%;
+        padding: 5px;
+        font-size: 0.75rem;
+        text-align: center;
+    }
+    
+    /* Optimizar espacio en modales */
+    .modal-content {
+        width: 95%;
+        padding: 10px;
+    }
+    
+    /* Mejorar visualización de tooltips */
+    .tooltip {
+        font-size: 0.75rem;
+        max-width: 200px;
+        padding: 5px 8px;
+    }
+    
+    /* Optimización extrema para pantallas pequeñas */
+    .pending-orders-section table {
+        font-size: 0.75rem;
+    }
+    
+    .pending-orders-section th {
+        padding: 4px;
+        font-size: 0.75rem;
+    }
+    
+    .pending-orders-section td {
+        padding: 3px;
+    }
+    
+    /* Optimización extrema para pantallas pequeñas */
+    .pending-orders-section th:nth-child(3),
+    .pending-orders-section td:nth-child(3) {
+        width: 15%;
+    }
+    
+    /* Ocultar texto menos importante */
+    .notes {
+        display: none;
+    }
+    
+    /* Reducir espaciado entre badges */
+    .ticket-info {
+        margin-top: 2px;
+        padding: 2px 4px;
+        font-size: 0.7rem;
+    }
+    
+    .preparation-section {
+        padding: 10px;
+        margin-top: 10px;
+    }
+    
+    .compact-form-container {
+        gap: 6px;
+    }
+    
+    .option-group {
+        margin-bottom: 8px;
+    }
+    
+    .option-title {
+        font-size: 0.95rem;
+        margin-bottom: 3px;
     }
     
     .option-btns {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: space-between;
+        gap: 5px;
     }
     
     .option-btn {
+        padding: 6px 8px;
+        font-size: 0.8rem;
+        border-radius: 4px;
+        flex: 1 1 45%;
         text-align: center;
-        flex: 0 0 48%;
-        margin-bottom: 4px;
     }
     
-    .pending-orders-section th:last-child,
-    .pending-orders-section td:last-child {
-        min-width: 90px;
-        width: 90px;
+    /* Botones de cantidad más pequeños */
+    .qty-btn {
+        width: 25px;
+        height: 25px;
+        font-size: 16px;
+    }
+    
+    .qty-display {
+        font-size: 16px;
+        min-width: 30px;
+    }
+    
+    /* Reducir altura del área de notas */
+    .notes-input {
+        min-height: 40px;
+        padding: 8px;
+        font-size: 0.85rem;
+    }
+    
+    /* Mejorar botones de acción */
+    .action-btns {
+        flex-wrap: wrap;
+        justify-content: space-between;
+        padding: 5px 0;
+    }
+    
+    .action-btn {
+        padding: 8px;
+        font-size: 0.8rem;
+        flex: 1 1 30%;
+        min-width: 0;
+        text-align: center;
+    }
+    
+    /* Asegurar que el botón de inicio destaque */
+    .start-btn {
+        order: -1;
+        flex: 1 1 100%;
+        margin-bottom: 5px;
     }
 }
 
-/* Ajustes para pantallas extra pequeñas */
-@media (max-width: 375px) {
-    .filter-controls {
-        grid-template-columns: 1fr;
+/* Optimización para pantallas extremadamente pequeñas */
+@media (max-width: 350px) {
+    .pending-orders-section th:nth-child(2),
+    .pending-orders-section td:nth-child(2) {
+        display: none;
     }
     
-    .pending-orders-section th:last-child,
-    .pending-orders-section td:last-child {
-        min-width: 90px;
-        width: 90px;
+    .pending-orders-section th:first-child,
+    .pending-orders-section td:first-child {
+        width: 40%;
     }
     
     .finish-btn {
-        font-size: 12px;
-        padding: 6px 8px;
+        font-size: 0.65rem;
+        padding: 2px;
+        min-height: 22px;
     }
+}
+
+/* Mejoras específicas para tablas en dispositivos móviles */
+@media (max-width: 768px) {
+    /* Ocultar columnas menos importantes en modo retrato */
+    @media (orientation: portrait) {
+        /* Estilos para reorganizar tabla */
+        .pending-orders-section table {
+            table-layout: fixed;
+        }
+        
+        /* Reorganizar columnas para priorizar información crucial */
+        .pending-orders-section th:nth-child(1),
+        .pending-orders-section td:nth-child(1) {
+            width: 35%;
+        }
+        
+        .pending-orders-section th:nth-child(2),
+        .pending-orders-section td:nth-child(2),
+        .pending-orders-section th:nth-child(3),
+        .pending-orders-section td:nth-child(3) {
+            width: 25%;
+        }
+        
+        /* Mejora para visualización en tabla de completados */
+        #completed-body tr {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-bottom: 1px solid var(--border-color);
+            padding: 5px 0;
+        }
+        
+        #completed-body td {
+            border: none;
+            padding: 3px;
+        }
+        
+        /* Destacar información importante */
+        #completed-body td:nth-child(1) {
+            grid-column: 1 / 3;
+            font-weight: bold;
+            background-color: #f5f5f5;
+        }
+        
+        #completed-body td:nth-child(5) {
+            grid-column: 1 / 3;
+            font-style: italic;
+        }
+    }
+}
+
+/* Vista compacta para la tabla de platillos completados */
+.compact-completed-view #completed-body tr {
+    border-bottom: 1px solid #eee;
+}
+
+.compact-completed-view #completed-body td {
+    padding: 3px 4px;
+    font-size: 0.8rem;
+}
+
+/* Distintivos visuales para elementos destacados */
+#completed-body .highlight-row {
+    background-color: #f8f8ff;
+}
+
+#completed-body .highlight-row td:first-child {
+    border-left: 3px solid var(--primary-btn);
+}
+
+/* Mejoras para la tabla de platillos completados */
+#completed-body td {
+    font-size: 0.85rem;
+    padding: 4px 6px;
+    line-height: 1.2;
+}
+
+#completed-body td:nth-child(5) {
+    font-size: 0.8rem;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+}
+
+/* Añadimos estilos específicos para resaltar información importante */
+#completed-body td:nth-child(4) {
+    font-weight: bold;
+}
+
+.time-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.time-badge.excellent {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.time-badge.good {
+    background-color: #e3f2fd;
+    color: #1565c0;
+}
+
+.time-badge.warning {
+    background-color: #fff3e0;
+    color: #e65100;
+}
+
+.time-badge.bad {
+    background-color: #ffebee;
+    color: #c62828;
 }
 
 /* Estilos para modales de tickets */
@@ -1105,601 +1374,63 @@ h2 {
     color: #333;
 }
 
-/* Estilos para el modal de ticket */
-.ticket-input-group {
-    margin-bottom: 15px;
-}
-
-.ticket-input-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-.ticket-time {
-    padding: 8px;
-    width: 100%;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.ticket-items-container {
-    margin: 15px 0;
-    padding: 10px;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.ticket-items-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.ticket-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px;
-    background-color: #f0f0f0;
-    border-radius: 4px;
-}
-
-.ticket-item-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.ticket-item-name {
-    font-weight: bold;
-}
-
-.ticket-item-category {
-    font-size: 0.9em;
-    color: #666;
-}
-
-.ticket-item-notes {
-    font-size: 0.85em;
-    color: #888;
-    font-style: italic;
-}
-
-.ticket-item-remove {
-    background-color: #ff4757;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 25px;
-    height: 25px;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.ticket-service-selection,
-.ticket-notes {
-    margin-bottom: 15px;
-}
-
-.ticket-notes textarea {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    height: 60px;
-}
-
-.ticket-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-/* Estilos para modal de selección de platillo */
-.category-selection,
-.dish-selection,
-.item-quantity,
-.item-notes {
-    margin-bottom: 15px;
-}
-
-.category-selection h3,
-.dish-selection h3,
-.item-quantity h3,
-.item-notes h3 {
-    margin-bottom: 10px;
-}
-
-.dishes-container {
-    max-height: 200px;
-    overflow-y: auto;
-    margin-bottom: 15px;
-}
-
-.item-notes textarea {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    height: 60px;
-}
-
-.item-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
-/* Botones seleccionados */
-.category-btn.selected,
-.dish-btn.selected {
-    background-color: #4cd137;
-    color: white;
-}
-
-/* Estilos para tickets en tabla de ordenes */
-.ticket-group-header {
-    background-color: #eef7ff;
-    border-left: 3px solid #4cd137;
-}
-
-.ticket-header-cell {
-    font-weight: bold;
-    color: #2980b9;
-}
-
-.ticket-status {
-    font-style: italic;
-    color: #777;
-    font-size: 0.9em;
-}
-
-.ticket-header {
-    display: flex;
-    align-items: center;
-}
-
-.expand-ticket-btn {
-    background: none;
-    border: none;
-    width: 24px;
-    height: 24px;
-    font-size: 14px;
-    cursor: pointer;
-    color: #2980b9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 5px;
-    border-radius: 50%;
-    transition: background-color 0.2s;
-}
-
-.expand-ticket-btn:hover {
-    background-color: rgba(41, 128, 185, 0.1);
-}
-
-.ticket-item-row {
-    background-color: #f8f8ff;
-}
-
-.ticket-child-cell {
-    padding-left: 25px !important;
-}
-
-.ticket-child-name {
-    font-weight: normal;
-    color: #333;
-}
-
-.done-status {
-    color: #2ecc71;
-    font-weight: bold;
-    font-style: italic;
-}
-
-/* Mejoras para selector de hora simple */
-.simple-time-picker {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-top: 5px;
-}
-
-.time-select {
-    padding: 8px;
-    font-size: 16px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: #fff;
-    width: auto;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    padding-right: 30px;
-}
-
-.time-select-label {
-    color: #666;
-    margin-left: 5px;
-}
-
-/* Estilos para interfaz móvil amigable */
-.mobile-friendly-select {
-    width: 100%;
-}
-
-.selection-step {
-    width: 100%;
-    padding: 10px 0;
-    margin: 0;
-}
-
-.step-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.step-header h3 {
-    margin: 0;
-    flex-grow: 1;
-}
-
-.back-to-category,
-.back-to-dish {
-    background-color: transparent;
-    border: none;
-    color: #2980b9;
-    font-size: 16px;
-    padding: 5px 10px;
-    cursor: pointer;
-    margin-right: 10px;
-}
-
-.back-to-category:hover,
-.back-to-dish:hover {
-    color: #3498db;
-    text-decoration: underline;
-}
-
-/* Mejoras para dispositivos móviles */
+/* Optimizaciones para modales en dispositivos móviles */
 @media (max-width: 768px) {
     .modal-content {
         width: 90%;
+        padding: 15px;
+        margin: 5% auto;
+        max-height: 85vh;
+    }
+    
+    .help-section {
+        padding: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .help-section h3 {
+        font-size: 1rem;
+    }
+    
+    .help-section ol,
+    .help-section ul {
+        margin-left: 15px;
+    }
+    
+    .help-section li {
+        font-size: 0.9rem;
+        margin-bottom: 3px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        width: 95%;
+        padding: 12px;
         margin: 10% auto;
-        max-width: none;
     }
     
-    .simple-time-picker {
-        flex-wrap: wrap;
+    .help-section {
+        padding: 8px;
+        margin-bottom: 12px;
     }
     
-    .time-select {
-        flex-grow: 1;
-        min-width: 100px;
+    .help-section h3 {
+        font-size: 0.95rem;
+        margin-bottom: 8px;
     }
     
-    .category-container {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
+    .help-section ol,
+    .help-section ul {
+        margin-left: 12px;
     }
     
-    .ticket-items-container {
-        max-height: 200px;
+    .help-section li {
+        font-size: 0.85rem;
+        line-height: 1.3;
     }
     
-    .dishes-container {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-        max-height: 300px;
+    .close-modal {
+        font-size: 24px;
     }
-    
-    .dish-btn {
-        height: auto;
-        padding: 15px 10px;
-        text-align: center;
-        font-size: 14px;
-    }
-}
-
-.ticket-ready-status {
-    color: #2ecc71;
-    font-weight: bold;
-    margin-left: 8px;
-    font-size: 0.9em;
-}
-
-.finished-time {
-    color: #2ecc71 !important;
-    font-style: italic;
-}
-
-.ticket-child-name {
-    font-weight: normal;
-    color: #333;
-}
-
-.ticket-child-cell {
-    padding-left: 25px !important;
-}
-
-/* Estilos para el modal de desbloquear tickets */
-.ticket-list-container {
-    max-height: 400px;
-    overflow-y: auto;
-    margin: 10px 0;
-}
-
-.force-ticket-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    margin: 5px 0;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.ticket-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.ticket-id {
-    font-weight: bold;
-    margin-bottom: 4px;
-}
-
-.force-complete-btn {
-    background-color: #ff6b6b;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.force-complete-btn:hover {
-    background-color: #ff5252;
-}
-
-/* Estilos para el botón de limpiar historial */
-#clear-history-container {
-    margin: 15px 0;
-}
-
-.modal-action-btns {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 15px;
-    gap: 10px;
-}
-
-/* Añadir estilos para la tabla de platillos completados */
-#completed-body td {
-    font-size: 0.9rem;
-    padding: 6px 8px;
-    max-width: 300px;
-    line-height: 1.2;
-}
-
-#completed-body td:nth-child(5) {
-    font-size: 0.85rem;
-    max-width: 280px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: normal;
-}
-
-/* Estado de platillos - indicadores visuales */
-.status-text {
-    display: inline-block;
-    padding: 6px 10px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    background-color: #f0f0f0;
-    color: #666;
-}
-
-.ticket-info {
-    display: inline-block;
-    padding: 3px 8px;
-    border-radius: 12px;
-    background-color: #e1f5fe;
-    color: #0277bd;
-    font-size: 0.8rem;
-    margin-top: 4px;
-}
-
-.notes {
-    display: block;
-    margin-top: 4px;
-    font-style: italic;
-    color: #666;
-    font-size: 0.85rem;
-}
-
-/* Mejoras visuales en tablas */
-.pending-orders-section {
-    border: 1px solid var(--border-color);
-}
-
-.pending-orders-section h2 {
-    font-size: 1.2rem;
-    padding: 12px 15px;
-    margin: -20px -20px 15px -20px;
-    background-color: #f5f5f5;
-    border-bottom: 1px solid var(--border-color);
-}
-
-/* Botones más intuitivos */
-.kitchen-btn {
-    font-size: 0.85rem;
-    padding: 8px 12px;
-    border-radius: 4px;
-}
-
-.kitchen-btn.disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
-.kitchen-btn:not(.disabled):hover {
-    opacity: 0.9;
-}
-
-.departure-btn {
-    background-color: #ff9800;
-}
-
-.arrival-btn {
-    background-color: #4caf50;
-}
-
-/* Estilos para la cuadrícula de platillos */
-.dishes-grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-    gap: 10px;
-    padding: 15px;
-    margin-bottom: 20px;
-    background-color: var(--highlight-bg);
-    border-radius: 8px;
-}
-
-/* Estilos para mejorar la visibilidad de platillos activos */
-.dish-btn {
-    position: relative;
-    overflow: hidden;
-}
-
-.dish-btn::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 3px;
-    background-color: var(--primary-btn);
-    transition: width 0.3s ease;
-}
-
-.dish-btn:hover::before {
-    width: 100%;
-}
-
-/* Mejoras para selección de categorías */
-#categories-section {
-    padding: 20px;
-    background-color: var(--container-bg);
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Ajustes para que la búsqueda sea más destacada */
-.search-container {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    padding: 10px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-
-/* Estilos para tooltips */
-.tooltip {
-    position: absolute;
-    background-color: #333;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    z-index: 1000;
-    max-width: 250px;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    pointer-events: none;
-    animation: fadeIn 0.2s;
-}
-
-.tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: #333 transparent transparent transparent;
-}
-
-/* Estilos para secciones de ayuda */
-.help-section {
-    margin-bottom: 20px;
-    padding: 15px;
-    background-color: #f8f8f8;
-    border-radius: 6px;
-    border-left: 4px solid #3498db;
-}
-
-.help-section h3 {
-    margin-top: 0;
-    margin-bottom: 10px;
-    color: #2980b9;
-}
-
-.help-section ol, 
-.help-section ul {
-    margin-left: 20px;
-    padding-left: 0;
-}
-
-.help-section li {
-    margin-bottom: 5px;
-    line-height: 1.4;
-}
-
-/* Mejoras para botón de ayuda */
-.icon-btn {
-    font-size: 1.2rem;
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(255, 255, 255, 0.2);
-    transition: all 0.2s ease;
-}
-
-.icon-btn:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-    transform: scale(1.1);
-}
-
-/* Interfaz adaptada para principiantes */
-.header-controls {
-    display: flex;
-    gap: 10px;
 }
