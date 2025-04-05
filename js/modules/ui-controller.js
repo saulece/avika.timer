@@ -591,22 +591,23 @@ Avika.ui = {
             timeSelectorModal = document.createElement('div');
             timeSelectorModal.id = 'time-selector-modal';
             timeSelectorModal.className = 'modal';
-                
-                var modalContent = document.createElement('div');
-                modalContent.className = 'modal-content';
+            
+            var modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
             modalContent.style.maxWidth = '400px';
-                
-                // Botón para cerrar
-                var closeBtn = document.createElement('span');
-                closeBtn.className = 'close-modal';
-                closeBtn.innerHTML = '&times;';
-                closeBtn.onclick = function() {
+            
+            // Botón para cerrar
+            var closeBtn = document.createElement('span');
+            closeBtn.className = 'close-modal';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = function() {
                 timeSelectorModal.style.display = 'none';
-                };
-                
-                // Título
-                var title = document.createElement('h2');
+            };
+            
+            // Título
+            var title = document.createElement('h2');
             title.textContent = 'Seleccionar hora de entrada';
+            title.style.color = '#333';
             
             // Contenedor de inputs
             var timeInputContainer = document.createElement('div');
@@ -627,6 +628,7 @@ Avika.ui = {
             hoursInput.style.textAlign = 'center';
             hoursInput.style.fontSize = '24px';
             hoursInput.style.margin = '0 5px';
+            hoursInput.style.color = '#333';
             
             // Input de minutos
             var minutesInput = document.createElement('input');
@@ -638,19 +640,21 @@ Avika.ui = {
             minutesInput.style.textAlign = 'center';
             minutesInput.style.fontSize = '24px';
             minutesInput.style.margin = '0 5px';
+            minutesInput.style.color = '#333';
             
             // Separador
             var separator = document.createElement('span');
             separator.textContent = ':';
             separator.style.fontSize = '24px';
             separator.style.margin = '0 5px';
+            separator.style.color = '#333';
             
             // Añadir elementos al contenedor
             timeInputContainer.appendChild(hoursInput);
             timeInputContainer.appendChild(separator);
             timeInputContainer.appendChild(minutesInput);
-                
-                // Botones de acción
+            
+            // Botones de acción
             var buttonsContainer = document.createElement('div');
             buttonsContainer.style.display = 'flex';
             buttonsContainer.style.justifyContent = 'space-between';
@@ -681,9 +685,9 @@ Avika.ui = {
                 
                 if (isNaN(minutes) || minutes < 0 || minutes > 59) {
                     alert('Por favor, ingresa minutos válidos (0-59)');
-            return;
-        }
-        
+                    return;
+                }
+                
                 // Crear fecha con la hora seleccionada
                 var selectedDate = new Date();
                 selectedDate.setHours(hours, minutes, 0, 0);
@@ -698,10 +702,10 @@ Avika.ui = {
             // Añadir botones al contenedor
             buttonsContainer.appendChild(currentTimeBtn);
             buttonsContainer.appendChild(confirmBtn);
-                
-                // Añadir elementos al modal
-                modalContent.appendChild(closeBtn);
-                modalContent.appendChild(title);
+            
+            // Añadir elementos al modal
+            modalContent.appendChild(closeBtn);
+            modalContent.appendChild(title);
             modalContent.appendChild(timeInputContainer);
             modalContent.appendChild(buttonsContainer);
             

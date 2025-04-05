@@ -1539,3 +1539,36 @@ h2 {
 #time-selector-modal input[type="number"] {
     -moz-appearance: textfield;
 }
+
+/* Asegurar que el texto sea visible en modales y tablas */
+.modal-content, .modal table, .modal td, .modal th, .modal input, .modal textarea {
+    color: #333 !important;
+}
+
+.modal-content input, .modal-content textarea {
+    background-color: #fff !important;
+    border: 1px solid #ccc !important;
+}
+
+/* Mejorar estilos de botones en tablas */
+.ticket-table .action-btn {
+    width: 100%;
+    white-space: nowrap;
+    margin: 2px 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+/* Mejorar visibilidad general */
+.ticket-table td {
+    padding: 8px;
+    vertical-align: middle;
+}
+
+/* Asegurar que el modal tiene suficiente espacio */
+#ticket-modal .modal-content {
+    max-width: 90%;
+    width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
