@@ -584,8 +584,148 @@ Avika.ui = {
         }
     },
 
-    // Iniciar preparación de un platillo
+    // Inicializar esta función antes de startPreparation
+    showTimeSelector: function(callback) {
+        // Crear modal si no existe
+        var timeSelectorModal = document.getElementById('time-selector-modal');
+        if (!timeSelectorModal) {
+            timeSelectorModal = document.createElement('div');
+            timeSelectorModal.id = 'time-selector-modal';
+            timeSelectorModal.className = 'modal';
+                
+                var modalContent = document.createElement('div');
+                modalContent.className = 'modal-content';
+            modalContent.style.maxWidth = '400px';
+                
+                // Botón para cerrar
+                var closeBtn = document.createElement('span');
+                closeBtn.className = 'close-modal';
+                closeBtn.innerHTML = '&times;';
+                closeBtn.onclick = function() {
+                timeSelectorModal.style.display = 'none';
+                };
+                
+                // Título
+                var title = document.createElement('h2');
+            title.textContent = 'Seleccionar hora de entrada';
+            
+            // Contenedor de inputs
+            var timeInputContainer = document.createElement('div');
+            timeInputContainer.style.display = 'flex';
+            timeInputContainer.style.justifyContent = 'center';
+            timeInputContainer.style.marginBottom = '20px';
+            
+            // Hora actual
+            var now = new Date();
+            
+            // Input de horas
+            var hoursInput = document.createElement('input');
+            hoursInput.type = 'number';
+            hoursInput.min = '0';
+            hoursInput.max = '23';
+            hoursInput.value = now.getHours();
+            hoursInput.style.width = '60px';
+            hoursInput.style.textAlign = 'center';
+            hoursInput.style.fontSize = '24px';
+            hoursInput.style.margin = '0 5px';
+            
+            // Input de minutos
+            var minutesInput = document.createElement('input');
+            minutesInput.type = 'number';
+            minutesInput.min = '0';
+            minutesInput.max = '59';
+            minutesInput.value = now.getMinutes();
+            minutesInput.style.width = '60px';
+            minutesInput.style.textAlign = 'center';
+            minutesInput.style.fontSize = '24px';
+            minutesInput.style.margin = '0 5px';
+            
+            // Separador
+            var separator = document.createElement('span');
+            separator.textContent = ':';
+            separator.style.fontSize = '24px';
+            separator.style.margin = '0 5px';
+            
+            // Añadir elementos al contenedor
+            timeInputContainer.appendChild(hoursInput);
+            timeInputContainer.appendChild(separator);
+            timeInputContainer.appendChild(minutesInput);
+                
+                // Botones de acción
+            var buttonsContainer = document.createElement('div');
+            buttonsContainer.style.display = 'flex';
+            buttonsContainer.style.justifyContent = 'space-between';
+            
+            // Botón para usar hora actual
+            var currentTimeBtn = document.createElement('button');
+            currentTimeBtn.textContent = 'Usar hora actual';
+            currentTimeBtn.className = 'action-btn';
+            currentTimeBtn.onclick = function() {
+                var currentDate = new Date();
+                if (callback) callback(currentDate);
+                timeSelectorModal.style.display = 'none';
+            };
+            
+            // Botón para confirmar
+            var confirmBtn = document.createElement('button');
+            confirmBtn.textContent = 'Confirmar';
+            confirmBtn.className = 'action-btn start-btn';
+            confirmBtn.onclick = function() {
+                var hours = parseInt(hoursInput.value, 10);
+                var minutes = parseInt(minutesInput.value, 10);
+                
+                // Validar valores
+                if (isNaN(hours) || hours < 0 || hours > 23) {
+                    alert('Por favor, ingresa una hora válida (0-23)');
+                    return;
+                }
+                
+                if (isNaN(minutes) || minutes < 0 || minutes > 59) {
+                    alert('Por favor, ingresa minutos válidos (0-59)');
+            return;
+        }
+        
+                // Crear fecha con la hora seleccionada
+                var selectedDate = new Date();
+                selectedDate.setHours(hours, minutes, 0, 0);
+                
+                // Llamar al callback con la fecha seleccionada
+                if (callback) callback(selectedDate);
+                
+                // Cerrar modal
+                timeSelectorModal.style.display = 'none';
+            };
+            
+            // Añadir botones al contenedor
+            buttonsContainer.appendChild(currentTimeBtn);
+            buttonsContainer.appendChild(confirmBtn);
+                
+                // Añadir elementos al modal
+                modalContent.appendChild(closeBtn);
+                modalContent.appendChild(title);
+            modalContent.appendChild(timeInputContainer);
+            modalContent.appendChild(buttonsContainer);
+            
+            timeSelectorModal.appendChild(modalContent);
+            document.body.appendChild(timeSelectorModal);
+        }
+        
+        // Actualizar valores de input con la hora actual
+        var now = new Date();
+        var hoursInput = timeSelectorModal.querySelector('input[type="number"][min="0"][max="23"]');
+        var minutesInput = timeSelectorModal.querySelector('input[type="number"][min="0"][max="59"]');
+        
+        if (hoursInput) hoursInput.value = now.getHours();
+        if (minutesInput) minutesInput.value = now.getMinutes();
+        
+        // Mostrar modal
+        timeSelectorModal.style.display = 'block';
+    },
+
+    // Modificar startPreparation para permitir hora personalizada
     startPreparation: function() {
+        const self = this; // Guardar referencia a this
+        
         // Mostrar selector de tiempo
         this.showTimeSelector(function(selectedTime) {
             console.log("Iniciando preparación con hora:", selectedTime);
@@ -610,7 +750,7 @@ Avika.ui = {
                 }
                 
                 // Si estamos en modo ticket, agregar a la lista de items del ticket
-                if (Avika.ui.state.ticketMode) {
+                if (self.state.ticketMode) {
                     console.log("Agregando platillo al ticket actual");
                     
                     // Crear objeto para el item del ticket
@@ -626,10 +766,10 @@ Avika.ui = {
                     };
                     
                     // Agregar a la lista de items
-                    Avika.ui.state.ticketItems.push(ticketItem);
+                    self.state.ticketItems.push(ticketItem);
                     
                     // Actualizar tabla de items del ticket
-                    Avika.ui.updateTicketItems();
+                    self.updateTicketItems();
                     
                     // Actualizar el texto del botón de agregar
                     var addButton = document.getElementById('btn-add-to-ticket');
@@ -642,15 +782,15 @@ Avika.ui = {
                     if (ticketModal) {
                         ticketModal.style.display = 'block';
                     } else {
-                        Avika.ui.showErrorMessage("El modal del ticket no se pudo encontrar");
+                        self.showErrorMessage("El modal del ticket no se pudo encontrar");
                     }
                     
                     // Mostrar notificación
-                    Avika.ui.showNotification("Platillo agregado al ticket");
-                    
-                    return;
-                }
+                    self.showNotification("Platillo agregado al ticket");
                 
+                return;
+            }
+            
                 // Si no estamos en modo ticket, crear un nuevo platillo individual
                 var newOrder = {
                     dish: Avika.data.currentDish,
@@ -677,21 +817,21 @@ Avika.ui = {
                 }
                 
                 // Actualizar tabla de órdenes pendientes
-                if (typeof Avika.ui.updatePendingTable === 'function') {
-                    Avika.ui.updatePendingTable();
+                if (typeof self.updatePendingTable === 'function') {
+                    self.updatePendingTable();
                 } else {
                     console.error("Función updatePendingTable no encontrada");
                 }
                 
                 // Volver a la sección de categorías
-                Avika.ui.showSection('categories-section');
+                self.showSection('categories-section');
                 
                 // Mostrar notificación
-                Avika.ui.showNotification("Platillo '" + Avika.data.currentDish + "' añadido a la lista de preparación");
+                self.showNotification("Platillo '" + Avika.data.currentDish + "' añadido a la lista de preparación");
                 
             } catch (e) {
                 console.error("Error al iniciar preparación:", e);
-                Avika.ui.showErrorMessage("Error al iniciar preparación: " + e.message);
+                self.showErrorMessage("Error al iniciar preparación: " + e.message);
             }
         });
     },
