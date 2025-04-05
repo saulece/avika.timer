@@ -93,49 +93,44 @@
             <button class="back-btn" id="btn-back-to-categories">Volver a Categorías</button>
         </div>
         
-        <!-- Sección de preparación - Modificada para un diseño más compacto -->
+        <!-- Sección de preparación -->
         <div id="preparation-section" class="preparation-section">
-            <h2 id="selected-dish-title">Platillo</h2>
+            <h2 id="selected-dish-title">Platillo seleccionado</h2>
             
-            <!-- Contenedor principal más compacto -->
             <div class="compact-form-container">
-                <div id="personalization-section">
-                    <div class="option-group">
-                        <div class="option-title">Personalización</div>
-                        <div class="option-btns" id="personalization-options">
-                            <!-- Se llenará dinámicamente con JS -->
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="option-group">
-                    <div class="option-title">Tipo de Servicio</div>
+                <div class="option-group" id="service-options">
+                    <div class="option-title">Tipo de servicio:</div>
                     <div class="option-btns">
-                        <button class="option-btn selected" id="btn-comedor" data-tooltip="Para clientes en el local">Comedor</button>
-                        <button class="option-btn" id="btn-domicilio" data-tooltip="Para entrega a domicilio">Domicilio</button>
-                        <button class="option-btn" id="btn-para-llevar" data-tooltip="Para clientes que esperan su pedido">Ordena y Espera</button>
+                        <button id="btn-comedor" class="option-btn selected" onclick="Avika.ui.selectService(this, 'comedor')">Comedor</button>
+                        <button id="btn-domicilio" class="option-btn" onclick="Avika.ui.selectService(this, 'domicilio')">Domicilio</button>
+                        <button id="btn-para-llevar" class="option-btn" onclick="Avika.ui.selectService(this, 'para-llevar')">Ordena y Espera</button>
                     </div>
                 </div>
                 
-                <div class="option-group">
-                    <div class="option-title">Cantidad</div>
+                <div class="option-group" id="quantity-control">
+                    <div class="option-title">Cantidad:</div>
                     <div class="qty-control">
-                        <button class="qty-btn" id="btn-decrease">-</button>
-                        <span class="qty-display" id="quantity-display">1</span>
-                        <button class="qty-btn" id="btn-increase">+</button>
+                        <button class="qty-btn" onclick="Avika.ui.changeQuantity(-1)">-</button>
+                        <span id="quantity-display" class="qty-display">1</span>
+                        <button class="qty-btn" onclick="Avika.ui.changeQuantity(1)">+</button>
+                    </div>
+                </div>
+                
+                <div class="option-group" id="customization-options">
+                    <div class="option-title">Personalizaciones:</div>
+                    <div class="option-btns" id="customization-container">
+                        <!-- Se llenará dinámicamente -->
                     </div>
                 </div>
                 
                 <div class="option-group">
-                    <div class="option-title">Notas Especiales</div>
-                    <textarea class="notes-input" id="notes-input" placeholder="Ej: Cliente alérgico a mariscos" rows="2"></textarea>
+                    <div class="option-title">Notas adicionales:</div>
+                    <textarea id="notes-input" class="notes-input" placeholder="Cualquier instrucción adicional..."></textarea>
                 </div>
                 
-                <!-- Botones de acción siempre visibles -->
                 <div class="action-btns">
-                    <button class="action-btn cancel-btn" id="btn-cancel">Cancelar</button>
-                    <button class="action-btn start-btn" id="btn-start">Iniciar Preparación</button>
-                    <button class="action-btn back-btn" id="btn-back-to-dishes">Atrás</button>
+                    <button id="btn-cancel" class="action-btn cancel-btn" onclick="Avika.ui.showSection('dishes-section')">Cancelar</button>
+                    <button id="btn-start" class="action-btn start-btn" onclick="Avika.ui.startPreparation()">Iniciar preparación</button>
                 </div>
             </div>
         </div>
