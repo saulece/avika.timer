@@ -641,9 +641,18 @@ Avika.ui = {
             var doneBtn = document.createElement('button');
             doneBtn.className = 'action-btn';
             doneBtn.textContent = 'Listo';
-            doneBtn.onclick = function() {
-                Avika.orders.finishPreparation(order.id);
-            };
+            
+            // Si es parte de un ticket, usar finishIndividualItem en lugar de finishPreparation
+            if (order.ticketId) {
+                doneBtn.onclick = function() {
+                    Avika.orders.finishIndividualItem(order.id);
+                };
+            } else {
+                doneBtn.onclick = function() {
+                    Avika.orders.finishPreparation(order.id);
+                };
+            }
+            
             actionsCell.appendChild(doneBtn);
         }
         

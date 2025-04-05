@@ -387,12 +387,66 @@ Avika.orders = {
         var order = Avika.data.pendingOrders[orderIndex];
         var endTime = new Date();
         
-        // Si es parte de un ticket de comedor o para llevar, completar todos los platillos
+        // Si es parte de un ticket de comedor o para llevar, verificar si todos los platillos están listos
         if (order.ticketId && (order.serviceType === 'comedor' || order.serviceType === 'para-llevar')) {
+            // Verificar si todos los platillos del ticket están terminados
             var ticketItems = Avika.data.pendingOrders.filter(function(item) {
                 return item.ticketId === order.ticketId;
             });
             
+            // Verificar si todos los platillos están terminados
+            var allTicketItemsFinished = true;
+            for (var i = 0; i < ticketItems.length; i++) {
+                var item = ticketItems[i];
+                if (item.isSpecialCombo && (!item.hotKitchenFinished || !item.coldKitchenFinished)) {
+                    allTicketItemsFinished = false;
+                    break;
+                } else if (!item.isSpecialCombo && !item.finished && item.id !== id) {
+                    allTicketItemsFinished = false;
+                    break;
+                }
+            }
+            
+            // Marcar este platillo como terminado
+            order.finished = true;
+            order.finishTime = endTime;
+            order.finishTimeFormatted = Avika.ui.formatTime(endTime);
+            
+            // Calcular tiempo de preparación individual
+            var prepTimeMillis = endTime - new Date(order.startTime);
+            var prepTimeSecs = Math.floor(prepTimeMillis / 1000);
+            var prepMins = Math.floor(prepTimeSecs / 60);
+            var prepSecs = prepTimeSecs % 60;
+            
+            var prepTimeFormatted = Avika.ui.padZero(prepMins) + ':' + Avika.ui.padZero(prepSecs) + ' minutos';
+            order.individualPrepTime = prepTimeFormatted;
+            
+            // Si todavía faltan platillos por terminar, actualizar la UI y salir
+            if (!allTicketItemsFinished) {
+                // Verificar si este evento completa todos los platillos
+                var completesTicket = true;
+                for (var i = 0; i < ticketItems.length; i++) {
+                    var item = ticketItems[i];
+                    if (item.id !== id) { // Excluir el platillo actual que ya sabemos está terminado
+                        if (item.isSpecialCombo && (!item.hotKitchenFinished || !item.coldKitchenFinished)) {
+                            completesTicket = false;
+                            break;
+                        } else if (!item.isSpecialCombo && !item.finished) {
+                            completesTicket = false;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!completesTicket) {
+                    Avika.ui.showNotification(order.dish + ' terminado. Faltan más platillos para completar el ticket.');
+                    Avika.ui.updatePendingTable();
+                    Avika.storage.guardarDatosLocales();
+                    return;
+                }
+            }
+            
+            // Si todos los platillos están terminados o este platillo completa el ticket, mover todo a completados
             var itemsToRemove = [];
             
             // Procesar todos los platillos del ticket
