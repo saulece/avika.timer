@@ -575,33 +575,73 @@ Avika.ui = {
         for (var i = 0; i < timerCells.length; i++) {
             var cell = timerCells[i];
             var orderId = cell.getAttribute('data-id');
+            var ticketId = cell.getAttribute('data-ticket-id');
             
-            // Buscar el pedido por ID
-            var order = null;
-            for (var j = 0; j < Avika.data.pendingOrders.length; j++) {
-                if (Avika.data.pendingOrders[j].id === orderId) {
-                    order = Avika.data.pendingOrders[j];
-                    break;
+            // Si es una celda de ticket, buscar el primer elemento del ticket para el tiempo
+            if (ticketId) {
+                // Buscar todos los pedidos del ticket
+                var ticketItems = [];
+                for (var j = 0; j < Avika.data.pendingOrders.length; j++) {
+                    if (Avika.data.pendingOrders[j].ticketId === ticketId) {
+                        ticketItems.push(Avika.data.pendingOrders[j]);
+                    }
+                }
+                
+                if (ticketItems.length > 0) {
+                    // Ordenar por tiempo de inicio para obtener el primero (el más antiguo)
+                    ticketItems.sort(function(a, b) {
+                        return new Date(a.startTime) - new Date(b.startTime);
+                    });
+                    
+                    var firstItem = ticketItems[0];
+                    var startTime = new Date(firstItem.startTime);
+                    var elapsedSeconds = Math.floor((now - startTime) / 1000);
+                    
+                    // Formatear el tiempo transcurrido en formato HH:MM:SS para mejor legibilidad
+                    var formattedTime = this.formatElapsedTime(elapsedSeconds);
+                    cell.textContent = formattedTime;
+                    
+                    // Añadir clases para alertas visuales según el tiempo transcurrido
+                    if (elapsedSeconds > 600) { // Más de 10 minutos para tickets
+                        cell.classList.add('alert');
+                        cell.classList.remove('warning');
+                    } else if (elapsedSeconds > 300) { // Más de 5 minutos
+                        cell.classList.add('warning');
+                        cell.classList.remove('alert');
+                    } else {
+                        cell.classList.remove('warning', 'alert');
+                    }
                 }
             }
-            
-            if (order) {
-                var startTime = new Date(order.startTime);
-                var elapsedSeconds = Math.floor((now - startTime) / 1000);
+            // Si es una celda individual, buscar por ID
+            else if (orderId) {
+                // Buscar el pedido por ID
+                var order = null;
+                for (var j = 0; j < Avika.data.pendingOrders.length; j++) {
+                    if (Avika.data.pendingOrders[j].id === orderId) {
+                        order = Avika.data.pendingOrders[j];
+                        break;
+                    }
+                }
                 
-                // Formatear el tiempo transcurrido en formato HH:MM:SS para mejor legibilidad
-                var formattedTime = this.formatElapsedTime(elapsedSeconds);
-                cell.textContent = formattedTime;
-                
-                // Añadir clases para alertas visuales según el tiempo transcurrido
-                if (elapsedSeconds > 300) { // Más de 5 minutos
-                    cell.classList.add('alert');
-                    cell.classList.remove('warning');
-                } else if (elapsedSeconds > 180) { // Más de 3 minutos
-                    cell.classList.add('warning');
-                    cell.classList.remove('alert');
-                } else {
-                    cell.classList.remove('warning', 'alert');
+                if (order) {
+                    var startTime = new Date(order.startTime);
+                    var elapsedSeconds = Math.floor((now - startTime) / 1000);
+                    
+                    // Formatear el tiempo transcurrido en formato HH:MM:SS para mejor legibilidad
+                    var formattedTime = this.formatElapsedTime(elapsedSeconds);
+                    cell.textContent = formattedTime;
+                    
+                    // Añadir clases para alertas visuales según el tiempo transcurrido
+                    if (elapsedSeconds > 300) { // Más de 5 minutos
+                        cell.classList.add('alert');
+                        cell.classList.remove('warning');
+                    } else if (elapsedSeconds > 180) { // Más de 3 minutos
+                        cell.classList.add('warning');
+                        cell.classList.remove('alert');
+                    } else {
+                        cell.classList.remove('warning', 'alert');
+                    }
                 }
             }
         }
@@ -1264,6 +1304,168 @@ Avika.ui = {
         modal.style.display = 'block';
     },
 
+    // Crear fila de encabezado para un ticket
+    createTicketHeaderRow: function(ticketId, ticketItems) {
+        var row = document.createElement('tr');
+        row.className = 'ticket-header-row';
+        row.setAttribute('data-ticket-id', ticketId);
+        
+        // Obtener información del ticket de cualquier item
+        var firstItem = ticketItems[0];
+        var serviceType = firstItem.serviceType || 'comedor';
+        var ticketNotes = firstItem.ticketNotes || '';
+        
+        // Platillo - Mostrar información del ticket
+        var dishCell = document.createElement('td');
+        dishCell.innerHTML = '<strong>TICKET #' + ticketId + '</strong> (' + ticketItems.length + ' platillos)';
+        
+        // Agregar iconos para expandir/contraer
+        var expandIcon = document.createElement('span');
+        expandIcon.textContent = this.state.expandedTickets[ticketId] ? '▼' : '►';
+        expandIcon.style.marginRight = '10px';
+        expandIcon.style.cursor = 'pointer';
+        expandIcon.style.display = 'inline-block';
+        expandIcon.style.width = '15px';
+        
+        // Agregar evento para expandir/contraer
+        expandIcon.addEventListener('click', (function(ticket) {
+            return function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                Avika.ui.toggleTicketItems(ticket);
+            };
+        })(ticketId));
+        
+        dishCell.insertBefore(expandIcon, dishCell.firstChild);
+        row.appendChild(dishCell);
+        
+        // Hora de inicio
+        var startCell = document.createElement('td');
+        startCell.textContent = firstItem.startTimeFormatted;
+        row.appendChild(startCell);
+        
+        // Tiempo transcurrido - Se actualizará por la función de temporizadores
+        var timerCell = document.createElement('td');
+        timerCell.className = 'timer-cell';
+        timerCell.setAttribute('data-ticket-id', ticketId);
+        timerCell.textContent = '00:00';
+        row.appendChild(timerCell);
+        
+        // Detalles del ticket
+        var detailsCell = document.createElement('td');
+        var serviceName = Avika.config.serviceNames[serviceType] || 'Comedor';
+        
+        // Agregar distintivo para el tipo de servicio
+        var serviceSpan = document.createElement('span');
+        serviceSpan.className = 'ticket-info';
+        serviceSpan.style.backgroundColor = serviceType === 'domicilio' ? '#f39c12' : 
+                                            serviceType === 'para-llevar' ? '#3498db' : '#2ecc71';
+        serviceSpan.style.color = '#fff';
+        serviceSpan.style.padding = '2px 6px';
+        serviceSpan.style.borderRadius = '4px';
+        serviceSpan.style.display = 'inline-block';
+        serviceSpan.style.marginRight = '5px';
+        serviceSpan.textContent = serviceName;
+        
+        detailsCell.appendChild(serviceSpan);
+        
+        // Agregar notas del ticket si existen
+        if (ticketNotes) {
+            var notesSpan = document.createElement('span');
+            notesSpan.className = 'notes';
+            notesSpan.textContent = ' Notas: ' + ticketNotes;
+            detailsCell.appendChild(notesSpan);
+        }
+        
+        row.appendChild(detailsCell);
+        
+        // Calcular si todos los platillos están completos
+        var allCompleted = ticketItems.every(function(item) {
+            if (item.isSpecialCombo) {
+                return item.hotKitchenFinished && item.coldKitchenFinished;
+            }
+            return item.finished;
+        });
+        
+        // Celda para acciones
+        var actionCell = document.createElement('td');
+        actionCell.className = 'action-cell';
+        
+        // Si todos los platillos están listos, mostrar botón para completar el ticket entero
+        if (allCompleted) {
+            // Para domicilio o para-llevar
+            if (serviceType === 'domicilio' || serviceType === 'para-llevar') {
+                var deliveryBtn = document.createElement('button');
+                deliveryBtn.className = 'finish-btn ' + (serviceType === 'domicilio' ? 'delivery' : 'delivery-arrived');
+                deliveryBtn.textContent = serviceType === 'domicilio' ? 'Enviar a Domicilio' : 'Entregar';
+                deliveryBtn.onclick = (function(ticket) {
+                    return function() {
+                        Avika.orders.completeTicket(ticket);
+                    };
+                })(ticketId);
+                actionCell.appendChild(deliveryBtn);
+            } 
+            // Para comedor
+            else {
+                var completeBtn = document.createElement('button');
+                completeBtn.className = 'finish-btn';
+                completeBtn.textContent = 'Entregar Todo';
+                completeBtn.onclick = (function(ticket) {
+                    return function() {
+                        Avika.orders.completeTicket(ticket);
+                    };
+                })(ticketId);
+                actionCell.appendChild(completeBtn);
+            }
+        } 
+        // Si no todos están completos, mostrar información o botón para expandir
+        else {
+            var statusText = document.createElement('span');
+            statusText.textContent = 'En preparación';
+            statusText.style.fontSize = '0.85rem';
+            statusText.style.color = '#666';
+            actionCell.appendChild(statusText);
+        }
+        
+        row.appendChild(actionCell);
+        
+        // Hacer que toda la fila sea clickeable para expandir/contraer
+        row.addEventListener('click', function() {
+            Avika.ui.toggleTicketItems(ticketId);
+        });
+        
+        return row;
+    },
+    
+    // Función para alternar la visibilidad de los items de un ticket
+    toggleTicketItems: function(ticketId) {
+        // Actualizar el estado
+        this.state.expandedTickets[ticketId] = !this.state.expandedTickets[ticketId];
+        
+        // Actualizar la vista
+        var headerRow = document.querySelector('.ticket-header-row[data-ticket-id="' + ticketId + '"]');
+        var expandIcon = headerRow.querySelector('span');
+        expandIcon.textContent = this.state.expandedTickets[ticketId] ? '▼' : '►';
+        
+        // Mostrar u ocultar los platillos
+        var itemRows = document.querySelectorAll('.ticket-item-row[data-ticket-id="' + ticketId + '"]');
+        if (!itemRows.length) {
+            // Si no hay filas con el atributo data-ticket-id, buscar todas las filas secundarias
+            var ticketRows = document.querySelectorAll('.ticket-item-row');
+            ticketRows.forEach(function(row) {
+                if (row.previousElementSibling && 
+                    row.previousElementSibling.classList.contains('ticket-header-row') && 
+                    row.previousElementSibling.getAttribute('data-ticket-id') === ticketId) {
+                    row.style.display = Avika.ui.state.expandedTickets[ticketId] ? 'table-row' : 'none';
+                }
+            });
+        } else {
+            itemRows.forEach(function(row) {
+                row.style.display = Avika.ui.state.expandedTickets[ticketId] ? 'table-row' : 'none';
+            });
+        }
+    },
+
     // Crear filas secundarias para los platillos de un ticket
     createTicketChildRows: function(ticketId, parentRow) {
         var childItems = [];
@@ -1313,6 +1515,8 @@ Avika.ui = {
     // Crear fila para un platillo individual dentro de un ticket
     createTicketChildRow: function(item, allTicketItemsFinished) {
         var row = document.createElement('tr');
+        row.className = 'ticket-item-row';
+        row.setAttribute('data-ticket-id', item.ticketId);
         
         // Celda del platillo
         var dishCell = document.createElement('td');

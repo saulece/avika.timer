@@ -617,5 +617,73 @@ Avika.orders = {
         Avika.ui.updateCompletedTable();
         Avika.storage.guardarDatosLocales();
         Avika.ui.showNotification('Historial de platillos terminados limpiado correctamente');
+    },
+
+    // Completar un ticket completo (entregar todo)
+    completeTicket: function(ticketId) {
+        var ticketItems = [];
+        var itemsToRemove = [];
+        var endTime = new Date();
+        var endTimeFormatted = Avika.ui.formatTime(endTime);
+        
+        // Verificar que existe el ticket
+        var ticketExists = false;
+        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+            if (Avika.data.pendingOrders[i].ticketId === ticketId) {
+                ticketExists = true;
+                break;
+            }
+        }
+        
+        if (!ticketExists) {
+            Avika.ui.showNotification('Error: El ticket #' + ticketId + ' no existe o ya fue completado.');
+            return;
+        }
+        
+        // Encontrar todos los elementos del ticket
+        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+            var item = Avika.data.pendingOrders[i];
+            if (item.ticketId === ticketId) {
+                // Marcar todos los platillos como terminados si no lo están
+                if (item.isSpecialCombo) {
+                    item.hotKitchenFinished = true;
+                    item.coldKitchenFinished = true;
+                }
+                
+                item.finished = true;
+                item.allItemsFinished = true;
+                item.allTicketItemsFinished = true;
+                
+                // Establecer tiempo de finalización
+                item.endTime = endTime;
+                item.endTimeFormatted = endTimeFormatted;
+                
+                // Calcular tiempo de preparación
+                var prepTimeMillis = endTime - new Date(item.startTime);
+                var prepTimeSecs = Math.floor(prepTimeMillis / 1000);
+                var prepMins = Math.floor(prepTimeSecs / 60);
+                var prepSecs = prepTimeSecs % 60;
+                
+                var prepTimeFormatted = Avika.ui.padZero(prepMins) + ':' + Avika.ui.padZero(prepSecs) + ' minutos';
+                item.prepTime = prepTimeFormatted;
+                
+                // Agregar a completados
+                Avika.data.completedOrders.unshift(JSON.parse(JSON.stringify(item)));
+                
+                // Marcar para eliminar
+                itemsToRemove.push(i);
+                ticketItems.push(item);
+            }
+        }
+        
+        // Eliminar platillos completados (de atrás hacia adelante)
+        for (var i = itemsToRemove.length - 1; i >= 0; i--) {
+            Avika.data.pendingOrders.splice(itemsToRemove[i], 1);
+        }
+        
+        Avika.ui.showNotification('¡Ticket #' + ticketId + ' completado! (' + ticketItems.length + ' platillos)');
+        Avika.ui.updatePendingTable();
+        Avika.ui.updateCompletedTable(false);
+        Avika.storage.guardarDatosLocales();
     }
 };
