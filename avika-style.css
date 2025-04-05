@@ -138,28 +138,31 @@ section {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
-    margin: 15px auto;
-    max-width: 800px;
+    gap: 6px;
+    margin: 10px auto;
+    max-width: 700px;
+    padding: 10px;
+    background-color: var(--highlight-bg);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px var(--shadow-color);
 }
 
 .category-btn {
     background-color: var(--primary-btn);
     color: var(--primary-btn-text);
     border: none;
-    padding: 10px 15px;
-    font-size: 0.95rem;
-    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    border-radius: 4px;
     cursor: pointer;
     text-align: center;
-    min-width: 150px;
-    max-width: 180px;
+    min-width: auto;
+    max-width: none;
+    width: auto;
     height: auto;
     transition: background-color var(--transition-speed), transform 0.2s;
     box-shadow: 0 2px 4px var(--shadow-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: inline-block;
 }
 
 .category-btn:hover {
@@ -1500,4 +1503,203 @@ h2 {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: normal;
+}
+
+/* Estado de platillos - indicadores visuales */
+.status-text {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    background-color: #f0f0f0;
+    color: #666;
+}
+
+.ticket-info {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background-color: #e1f5fe;
+    color: #0277bd;
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+.notes {
+    display: block;
+    margin-top: 4px;
+    font-style: italic;
+    color: #666;
+    font-size: 0.85rem;
+}
+
+/* Mejoras visuales en tablas */
+.pending-orders-section {
+    border: 1px solid var(--border-color);
+}
+
+.pending-orders-section h2 {
+    font-size: 1.2rem;
+    padding: 12px 15px;
+    margin: -20px -20px 15px -20px;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Botones más intuitivos */
+.kitchen-btn {
+    font-size: 0.85rem;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+.kitchen-btn.disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.kitchen-btn:not(.disabled):hover {
+    opacity: 0.9;
+}
+
+.departure-btn {
+    background-color: #ff9800;
+}
+
+.arrival-btn {
+    background-color: #4caf50;
+}
+
+/* Estilos para la cuadrícula de platillos */
+.dishes-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: var(--highlight-bg);
+    border-radius: 8px;
+}
+
+/* Estilos para mejorar la visibilidad de platillos activos */
+.dish-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.dish-btn::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background-color: var(--primary-btn);
+    transition: width 0.3s ease;
+}
+
+.dish-btn:hover::before {
+    width: 100%;
+}
+
+/* Mejoras para selección de categorías */
+#categories-section {
+    padding: 20px;
+    background-color: var(--container-bg);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Ajustes para que la búsqueda sea más destacada */
+.search-container {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 10px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+/* Estilos para tooltips */
+.tooltip {
+    position: absolute;
+    background-color: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    z-index: 1000;
+    max-width: 250px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    pointer-events: none;
+    animation: fadeIn 0.2s;
+}
+
+.tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+
+/* Estilos para secciones de ayuda */
+.help-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f8f8;
+    border-radius: 6px;
+    border-left: 4px solid #3498db;
+}
+
+.help-section h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #2980b9;
+}
+
+.help-section ol, 
+.help-section ul {
+    margin-left: 20px;
+    padding-left: 0;
+}
+
+.help-section li {
+    margin-bottom: 5px;
+    line-height: 1.4;
+}
+
+/* Mejoras para botón de ayuda */
+.icon-btn {
+    font-size: 1.2rem;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* Interfaz adaptada para principiantes */
+.header-controls {
+    display: flex;
+    gap: 10px;
 }

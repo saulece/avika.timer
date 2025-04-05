@@ -5,10 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Avika - Temporizador de Sushi</title>
     <link rel="stylesheet" href="avika-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
     <header>
         <h1>Avika - Temporizador de Sushi</h1>
+        <div class="header-controls">
+            <button id="btn-help" class="icon-btn" title="Mostrar ayuda"><i class="fas fa-question-circle"></i></button>
+        </div>
     </header>
     
     <div class="container">
@@ -19,26 +23,26 @@
         <div id="categories-section">
             <h2>Selecciona una categoría</h2>
             <div class="category-container">
-                <button class="category-btn" id="btn-frio">Platillos Fríos</button>
-                <button class="category-btn" id="btn-entrada-fria">Entradas Frías</button>
-                <button class="category-btn" id="btn-caliente">Platillos Calientes</button>
-                <button class="category-btn" id="btn-entrada-caliente">Entradas Calientes</button>
-                <button class="category-btn" id="btn-combos">Combos</button>
+                <button class="category-btn" id="btn-frio" data-tooltip="Platillos fríos como rollos y makis">Platillos Fríos</button>
+                <button class="category-btn" id="btn-entrada-fria" data-tooltip="Entradas frías como ceviches y sashimis">Entradas Frías</button>
+                <button class="category-btn" id="btn-caliente" data-tooltip="Platillos calientes y sopas">Platillos Calientes</button>
+                <button class="category-btn" id="btn-entrada-caliente" data-tooltip="Entradas calientes como empanizados">Entradas Calientes</button>
+                <button class="category-btn" id="btn-combos" data-tooltip="Combos y promociones especiales">Combos</button>
             </div>
             
             <!-- Órdenes pendientes -->
             <div class="pending-orders-section">
                 <h2>Platillos en preparación <span id="pending-count">0</span></h2>
                 <div class="action-btns" style="margin-bottom: 10px;">
-                    <button class="action-btn" id="btn-new-ticket">Nuevo Ticket/Comanda</button>
-                    <button class="action-btn" id="btn-force-complete" style="background-color: #ff9800;" title="Solo usar en casos excepcionales cuando un ticket quedó atorado y no se puede completar normalmente">Emergencia: Desbloquear</button>
+                    <button class="action-btn" id="btn-new-ticket" data-tooltip="Crear un nuevo ticket con múltiples platillos">Nuevo Ticket/Comanda</button>
+                    <button class="action-btn" id="btn-force-complete" style="background-color: #ff9800;" data-tooltip="Solo usar en casos excepcionales cuando un ticket quedó atorado">Emergencia: Desbloquear</button>
                 </div>
                 <table>
                     <thead>
                         <tr>
                             <th>Platillo</th>
                             <th>Inicio</th>
-                            <th>Tiempo</th> <!-- Modificado para acortar el texto -->
+                            <th>Tiempo</th>
                             <th>Detalles</th>
                             <th>Acción</th>
                         </tr>
@@ -53,10 +57,10 @@
             <div class="pending-orders-section">
                 <h2>Platillos completados</h2>
                 <div class="filter-controls">
-                    <button id="btn-show-all-history" class="filter-btn">Ver historial completo</button>
-                    <button id="btn-show-recent" class="filter-btn active">Ver recientes</button>
-                    <button id="btn-show-stats" class="filter-btn">Ver promedios</button>
-                    <button id="btn-clear-history" class="filter-btn">Limpiar historial</button>
+                    <button id="btn-show-all-history" class="filter-btn" data-tooltip="Ver todas las órdenes completadas">Ver historial completo</button>
+                    <button id="btn-show-recent" class="filter-btn active" data-tooltip="Ver solo las órdenes más recientes">Ver recientes</button>
+                    <button id="btn-show-stats" class="filter-btn" data-tooltip="Ver estadísticas de tiempos promedios">Ver promedios</button>
+                    <button id="btn-clear-history" class="filter-btn" data-tooltip="Eliminar historial de órdenes completadas">Limpiar historial</button>
                 </div>
                 <table>
                     <thead>
@@ -72,7 +76,7 @@
                         <!-- Se llenará con JavaScript -->
                     </tbody>
                 </table>
-                <button class="back-btn" id="btn-export">Exportar datos</button>
+                <button class="back-btn" id="btn-export" data-tooltip="Exportar datos para análisis">Exportar datos</button>
             </div>
         </div>
         
@@ -107,9 +111,9 @@
                 <div class="option-group">
                     <div class="option-title">Tipo de Servicio</div>
                     <div class="option-btns">
-                        <button class="option-btn selected" id="btn-comedor">Comedor</button>
-                        <button class="option-btn" id="btn-domicilio">Domicilio</button>
-                        <button class="option-btn" id="btn-para-llevar">Ordena y Espera</button>
+                        <button class="option-btn selected" id="btn-comedor" data-tooltip="Para clientes en el local">Comedor</button>
+                        <button class="option-btn" id="btn-domicilio" data-tooltip="Para entrega a domicilio">Domicilio</button>
+                        <button class="option-btn" id="btn-para-llevar" data-tooltip="Para clientes que esperan su pedido">Ordena y Espera</button>
                     </div>
                 </div>
                 
@@ -137,6 +141,46 @@
         </div>
     </div>
 
+    <!-- Modal de ayuda -->
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Guía Rápida de Uso</h2>
+            
+            <div class="help-section">
+                <h3>Flujo de trabajo básico</h3>
+                <ol>
+                    <li>Selecciona una categoría de platillo</li>
+                    <li>Elige el platillo específico</li>
+                    <li>Configura personalizaciones, tipo de servicio y cantidad</li>
+                    <li>Inicia la preparación</li>
+                    <li>Marca como "Listo" cuando el platillo esté terminado</li>
+                </ol>
+            </div>
+            
+            <div class="help-section">
+                <h3>Trabajar con tickets</h3>
+                <ol>
+                    <li>Haz clic en "Nuevo Ticket/Comanda"</li>
+                    <li>Añade varios platillos al ticket</li>
+                    <li>Selecciona el tipo de servicio para todo el ticket</li>
+                    <li>Guarda el ticket</li>
+                    <li>Marca como "Listo" cada platillo a medida que se completen</li>
+                    <li>El ticket se moverá a completados cuando todos los platillos estén listos</li>
+                </ol>
+            </div>
+            
+            <div class="help-section">
+                <h3>Estados de los platillos</h3>
+                <ul>
+                    <li><strong>En preparación:</strong> Platillo recién agregado</li>
+                    <li><strong>Esperando otros platillos:</strong> Este platillo ya está listo pero otros del mismo ticket aún no</li>
+                    <li><strong>Listo para salida:</strong> Para domicilios, indica que está listo para entregar al repartidor</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
     <!-- Cargar módulos en orden correcto -->
     <script src="avika-core.js"></script>
     <script src="js/modules/config.js"></script>
@@ -145,5 +189,55 @@
     <script src="js/modules/storage.js"></script>
     <script src="js/modules/stats.js"></script>
     <script src="avika-init.js"></script>
+    
+    <!-- Script para tooltips y ayuda -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar modal de ayuda
+        var helpModal = document.getElementById('help-modal');
+        var helpBtn = document.getElementById('btn-help');
+        var closeBtn = helpModal.querySelector('.close-modal');
+        
+        helpBtn.onclick = function() {
+            helpModal.style.display = 'block';
+        }
+        
+        closeBtn.onclick = function() {
+            helpModal.style.display = 'none';
+        }
+        
+        // Cerrar modal haciendo clic fuera
+        window.onclick = function(event) {
+            if (event.target == helpModal) {
+                helpModal.style.display = 'none';
+            }
+        }
+        
+        // Inicializar tooltips
+        document.querySelectorAll('[data-tooltip]').forEach(function(element) {
+            element.addEventListener('mouseenter', function() {
+                var tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = this.getAttribute('data-tooltip');
+                
+                // Posicionar tooltip
+                document.body.appendChild(tooltip);
+                var rect = this.getBoundingClientRect();
+                tooltip.style.left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2) + 'px';
+                tooltip.style.top = rect.top - tooltip.offsetHeight - 5 + 'px';
+                
+                // Almacenar referencia al tooltip
+                this.tooltip = tooltip;
+            });
+            
+            element.addEventListener('mouseleave', function() {
+                if (this.tooltip) {
+                    document.body.removeChild(this.tooltip);
+                    this.tooltip = null;
+                }
+            });
+        });
+    });
+    </script>
 </body>
 </html>
