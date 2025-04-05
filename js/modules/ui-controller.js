@@ -431,44 +431,43 @@ Avika.ui = {
     selectDish: function(dish) {
         console.log("Seleccionando platillo:", dish);
         
-        // Verificar que hay un platillo seleccionado
-        if (!dish) {
-            console.error("Error: No se proporcionó un platillo para seleccionar.");
-            return;
-        }
-        
-        // Actualizar el estado
-        Avika.data.currentDish = dish;
-        
-        // Verificar que existe el elemento del título
-        var dishTitle = document.getElementById('selected-dish-title');
-        if (!dishTitle) {
-            console.error("Error: No se encontró el elemento #selected-dish-title");
-            return;
-        }
-        
-        // Actualizar el título
-        dishTitle.textContent = dish;
-        
-        // Verificar si es combo especial
-        Avika.data.isSpecialCombo = (Avika.config.specialCombos && 
-                                     Avika.config.specialCombos.indexOf(dish) !== -1);
-        
-        // Verificar si los elementos existen antes de resetear opciones
-        if (document.getElementById('btn-comedor') &&
-            document.getElementById('quantity-display') &&
-            document.getElementById('notes-input')) {
+        try {
+            // Verificar que hay un platillo seleccionado
+            if (!dish) {
+                console.error("Error: No se proporcionó un platillo para seleccionar.");
+                return;
+            }
+            
+            // Actualizar el estado
+            Avika.data.currentDish = dish;
+            
+            // Verificar que existe el elemento del título
+            var dishTitle = document.getElementById('selected-dish-title');
+            if (!dishTitle) {
+                console.error("Error: No se encontró el elemento #selected-dish-title");
+                return;
+            }
+            
+            // Actualizar el título
+            dishTitle.textContent = dish;
+            
+            // Verificar si es combo especial
+            Avika.data.isSpecialCombo = (Avika.config.specialCombos && 
+                                         Avika.config.specialCombos.indexOf(dish) !== -1);
+            
+            // Resetear opciones
             this.resetOptions();
-        } else {
-            console.error("Error: No se encontraron todos los elementos necesarios para resetear opciones");
+            
+            // Actualizar opciones de personalización
+            this.updatePersonalizationOptions();
+            
+            // Cambiar a la sección de preparación
+            console.log("Cambiando a sección preparation-section");
+            this.showSection('preparation-section');
+        } catch (e) {
+            console.error("Error al seleccionar platillo:", e);
+            this.showNotification("Error al seleccionar platillo: " + e.message);
         }
-        
-        // Actualizar opciones de personalización
-        this.updatePersonalizationOptions();
-        
-        // Cambiar a la sección de preparación
-        console.log("Cambiando a sección preparation-section");
-        this.showSection('preparation-section');
     },
 
     resetOptions: function() {
@@ -1761,147 +1760,170 @@ Avika.ui = {
     },
     
     // Habilitar modo ticket/comanda para múltiples platillos
-    enableTicketMode: function() {
-        console.log("Activando modo ticket/comanda");
+    // Habilitar modo ticket/comanda para múltiples platillos
+enableTicketMode: function() {
+    console.log("Activando modo ticket/comanda");
+    
+    try {
+        // Cambiar estado de la UI
+        this.state.ticketMode = true;
+        this.state.ticketItems = [];
         
-        try {
-            // Cambiar estado de la UI
-            this.state.ticketMode = true;
-            this.state.ticketItems = [];
+        // Crear modal para ticket si no existe
+        var ticketModal = document.getElementById('ticket-modal');
+        if (!ticketModal) {
+            console.log("Creando modal para ticket");
             
-            // Crear modal para ticket
-            var ticketModal = document.getElementById('ticket-modal');
-            if (!ticketModal) {
-                ticketModal = document.createElement('div');
-                ticketModal.id = 'ticket-modal';
-                ticketModal.className = 'modal';
-                
-                var modalContent = document.createElement('div');
-                modalContent.className = 'modal-content';
-                
-                // Botón para cerrar
-                var closeBtn = document.createElement('span');
-                closeBtn.className = 'close-modal';
-                closeBtn.innerHTML = '&times;';
-                closeBtn.onclick = function() {
-                    ticketModal.style.display = 'none';
-                    Avika.ui.state.ticketMode = false;
-                };
-                
-                // Título
-                var title = document.createElement('h2');
-                title.textContent = 'Nuevo Ticket / Comanda';
-                
-                // Contenedor para productos añadidos
-                var itemsContainer = document.createElement('div');
-                itemsContainer.id = 'ticket-items';
-                itemsContainer.className = 'ticket-items';
-                
-                // Tabla de platillos añadidos
-                var table = document.createElement('table');
-                table.className = 'ticket-table';
-                
-                var thead = document.createElement('thead');
-                thead.innerHTML = '<tr><th>Cant.</th><th>Platillo</th><th>Personalización</th><th>Acciones</th></tr>';
-                
-                var tbody = document.createElement('tbody');
-                tbody.id = 'ticket-items-body';
-                
-                table.appendChild(thead);
-                table.appendChild(tbody);
-                itemsContainer.appendChild(table);
-                
-                // Opciones de servicio para ticket
-                var serviceOptions = document.createElement('div');
-                serviceOptions.className = 'option-group';
-                serviceOptions.innerHTML = `
-                    <div class="option-title">Tipo de servicio para todo el ticket:</div>
-                    <div class="option-btns">
-                        <button id="ticket-btn-comedor" class="option-btn selected">Comedor</button>
-                        <button id="ticket-btn-domicilio" class="option-btn">Domicilio</button>
-                        <button id="ticket-btn-para-llevar" class="option-btn">Ordena y espera</button>
-                    </div>
-                `;
-                
-                // Notas para todo el ticket
-                var notesGroup = document.createElement('div');
-                notesGroup.className = 'option-group';
-                notesGroup.innerHTML = `
-                    <div class="option-title">Notas generales para el ticket:</div>
-                    <textarea id="ticket-notes" class="notes-input" placeholder="Notas generales que aplican a todo el ticket..."></textarea>
-                `;
-                
-                // Botones de acción
-                var actionBtns = document.createElement('div');
-                actionBtns.className = 'action-btns';
-                actionBtns.innerHTML = `
-                    <button id="btn-add-to-ticket" class="action-btn">Agregar platillo</button>
-                    <button id="btn-save-ticket" class="action-btn start-btn">Guardar ticket</button>
-                `;
-                
-                // Añadir elementos al modal
-                modalContent.appendChild(closeBtn);
-                modalContent.appendChild(title);
-                modalContent.appendChild(itemsContainer);
-                modalContent.appendChild(serviceOptions);
-                modalContent.appendChild(notesGroup);
-                modalContent.appendChild(actionBtns);
-                
-                ticketModal.appendChild(modalContent);
-                document.body.appendChild(ticketModal);
-                
-                // Añadir eventos a los botones de servicio
-                document.getElementById('ticket-btn-comedor').addEventListener('click', function() {
-                    Avika.ui.selectTicketService(this, 'comedor');
-                });
-                
-                document.getElementById('ticket-btn-domicilio').addEventListener('click', function() {
-                    Avika.ui.selectTicketService(this, 'domicilio');
-                });
-                
-                document.getElementById('ticket-btn-para-llevar').addEventListener('click', function() {
-                    Avika.ui.selectTicketService(this, 'para-llevar');
-                });
-                
-                // Añadir eventos a los botones de acción
-                document.getElementById('btn-add-to-ticket').addEventListener('click', function() {
-                    ticketModal.style.display = 'none';
-                    Avika.ui.showSection('categories-section');
-                });
-                
-                document.getElementById('btn-save-ticket').addEventListener('click', function() {
-                    Avika.ui.saveTicket();
-                });
-            }
+            ticketModal = document.createElement('div');
+            ticketModal.id = 'ticket-modal';
+            ticketModal.className = 'modal';
+            ticketModal.style.display = 'none';
             
-            // Limpiar tabla de items
-            var ticketItemsBody = document.getElementById('ticket-items-body');
-            if (ticketItemsBody) {
-                ticketItemsBody.innerHTML = '';
-            }
+            var modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
             
-            // Resetear servicio del ticket
-            this.state.ticketService = 'comedor';
-            var btnComedor = document.getElementById('ticket-btn-comedor');
-            var btnDomicilio = document.getElementById('ticket-btn-domicilio');
-            var btnParaLlevar = document.getElementById('ticket-btn-para-llevar');
+            // Botón para cerrar
+            var closeBtn = document.createElement('span');
+            closeBtn.className = 'close-modal';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = function() {
+                ticketModal.style.display = 'none';
+                Avika.ui.state.ticketMode = false;
+            };
             
-            if (btnComedor) btnComedor.classList.add('selected');
-            if (btnDomicilio) btnDomicilio.classList.remove('selected');
-            if (btnParaLlevar) btnParaLlevar.classList.remove('selected');
+            // Título
+            var title = document.createElement('h2');
+            title.textContent = 'Nuevo Ticket / Comanda';
             
-            // Limpiar notas
-            var ticketNotes = document.getElementById('ticket-notes');
-            if (ticketNotes) ticketNotes.value = '';
+            // Contenedor para productos añadidos
+            var itemsContainer = document.createElement('div');
+            itemsContainer.id = 'ticket-items';
+            itemsContainer.className = 'ticket-items';
             
-            // Mostrar modal
-            ticketModal.style.display = 'block';
+            // Tabla de platillos añadidos
+            var table = document.createElement('table');
+            table.className = 'ticket-table';
             
-        } catch (e) {
-            console.error("Error al activar modo ticket:", e);
-            this.showErrorMessage("Error al activar modo ticket: " + e.message);
+            var thead = document.createElement('thead');
+            thead.innerHTML = '<tr><th>Cant.</th><th>Platillo</th><th>Personalización</th><th>Acciones</th></tr>';
+            
+            var tbody = document.createElement('tbody');
+            tbody.id = 'ticket-items-body';
+            
+            table.appendChild(thead);
+            table.appendChild(tbody);
+            itemsContainer.appendChild(table);
+            
+            // Opciones de servicio para ticket
+            var serviceOptions = document.createElement('div');
+            serviceOptions.className = 'option-group';
+            serviceOptions.innerHTML = `
+                <div class="option-title">Tipo de servicio para todo el ticket:</div>
+                <div class="option-btns">
+                    <button id="ticket-btn-comedor" class="option-btn selected">Comedor</button>
+                    <button id="ticket-btn-domicilio" class="option-btn">Domicilio</button>
+                    <button id="ticket-btn-para-llevar" class="option-btn">Ordena y espera</button>
+                </div>
+            `;
+            
+            // Notas para todo el ticket
+            var notesGroup = document.createElement('div');
+            notesGroup.className = 'option-group';
+            notesGroup.innerHTML = `
+                <div class="option-title">Notas generales para el ticket:</div>
+                <textarea id="ticket-notes" class="notes-input" placeholder="Notas generales que aplican a todo el ticket..."></textarea>
+            `;
+            
+            // Botones de acción
+            var actionBtns = document.createElement('div');
+            actionBtns.className = 'action-btns';
+            actionBtns.innerHTML = `
+                <button id="btn-add-to-ticket" class="action-btn">Agregar platillo</button>
+                <button id="btn-save-ticket" class="action-btn start-btn">Guardar ticket</button>
+            `;
+            
+            // Añadir elementos al modal
+            modalContent.appendChild(closeBtn);
+            modalContent.appendChild(title);
+            modalContent.appendChild(itemsContainer);
+            modalContent.appendChild(serviceOptions);
+            modalContent.appendChild(notesGroup);
+            modalContent.appendChild(actionBtns);
+            
+            ticketModal.appendChild(modalContent);
+            document.body.appendChild(ticketModal);
+            
+            console.log("Modal de ticket creado correctamente");
         }
-    },
+        
+        // Asegurarse de que los botones tengan los eventos correctos
+        console.log("Asignando eventos a los botones del ticket modal");
+        
+        // Botones de servicio
+        var btnComedor = document.getElementById('ticket-btn-comedor');
+        if (btnComedor) {
+            btnComedor.onclick = function() {
+                Avika.ui.selectTicketService(this, 'comedor');
+            };
+        }
+        
+        var btnDomicilio = document.getElementById('ticket-btn-domicilio');
+        if (btnDomicilio) {
+            btnDomicilio.onclick = function() {
+                Avika.ui.selectTicketService(this, 'domicilio');
+            };
+        }
+        
+        var btnParaLlevar = document.getElementById('ticket-btn-para-llevar');
+        if (btnParaLlevar) {
+            btnParaLlevar.onclick = function() {
+                Avika.ui.selectTicketService(this, 'para-llevar');
+            };
+        }
+        
+        // Botón para agregar platillos
+        var btnAddToTicket = document.getElementById('btn-add-to-ticket');
+        if (btnAddToTicket) {
+            btnAddToTicket.onclick = function() {
+                ticketModal.style.display = 'none';
+                Avika.ui.showSection('categories-section');
+            };
+        }
+        
+        // Botón para guardar ticket
+        var btnSaveTicket = document.getElementById('btn-save-ticket');
+        if (btnSaveTicket) {
+            btnSaveTicket.onclick = function() {
+                Avika.ui.saveTicket();
+            };
+        }
+        
+        // Limpiar tabla de items
+        var ticketItemsBody = document.getElementById('ticket-items-body');
+        if (ticketItemsBody) {
+            ticketItemsBody.innerHTML = '';
+        }
+        
+        // Resetear servicio del ticket
+        this.state.ticketService = 'comedor';
+        
+        if (btnComedor) btnComedor.classList.add('selected');
+        if (btnDomicilio) btnDomicilio.classList.remove('selected');
+        if (btnParaLlevar) btnParaLlevar.classList.remove('selected');
+        
+        // Limpiar notas
+        var ticketNotes = document.getElementById('ticket-notes');
+        if (ticketNotes) ticketNotes.value = '';
+        
+        // Mostrar modal
+        console.log("Mostrando modal de ticket");
+        ticketModal.style.display = 'block';
+        
+    } catch (e) {
+        console.error("Error al activar modo ticket:", e);
+        this.showErrorMessage("Error al activar modo ticket: " + e.message);
+    }
+},
     
     // Seleccionar servicio para ticket
     selectTicketService: function(button, service) {
