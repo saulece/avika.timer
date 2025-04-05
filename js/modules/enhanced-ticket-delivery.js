@@ -861,5 +861,103 @@
         
         // Iniciar cuando el DOM esté listo
         init();
+
+        // Store the original finishHotKitchen and finishColdKitchen functions
+        const originalFinishHotKitchen = Avika.orders.finishHotKitchen;
+        const originalFinishColdKitchen = Avika.orders.finishColdKitchen;
+        
+        // Fix for finishHotKitchen
+        Avika.orders.finishHotKitchen = function(id) {
+            console.log("Finishing hot kitchen for order ID:", id);
+            
+            // Find the order by ID
+            var orderIndex = -1;
+            for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                if (Avika.data.pendingOrders[i].id == id) {
+                    orderIndex = i;
+                    break;
+                }
+            }
+            
+            if (orderIndex === -1) {
+                console.error("Order not found with ID:", id);
+                return;
+            }
+            
+            var order = Avika.data.pendingOrders[orderIndex];
+            var now = new Date();
+            
+            // Mark hot kitchen as finished
+            order.hotKitchenFinished = true;
+            order.hotKitchenTime = now;
+            order.hotKitchenTimeFormatted = Avika.ui.formatTime(now);
+            
+            // Save data and update UI
+            Avika.ui.updatePendingTable();
+            Avika.storage.guardarDatosLocales();
+            Avika.ui.showNotification('Cocina caliente terminada para ' + order.dish);
+            
+            // If both kitchens are finished and not delivery, complete the order
+            if (order.hotKitchenFinished && order.coldKitchenFinished && 
+                order.service !== 'domicilio' && order.serviceType !== 'domicilio') {
+                Avika.orders.finishPreparation(id);
+            }
+            // For delivery orders, just mark kitchen as finished
+            else if (order.hotKitchenFinished && order.coldKitchenFinished && 
+                    (order.service === 'domicilio' || order.serviceType === 'domicilio')) {
+                order.kitchenFinished = true;
+                order.finished = true;
+                Avika.ui.updatePendingTable();
+                Avika.storage.guardarDatosLocales();
+            }
+        };
+        
+        // Fix for finishColdKitchen
+        Avika.orders.finishColdKitchen = function(id) {
+            console.log("Finishing cold kitchen for order ID:", id);
+            
+            // Find the order by ID
+            var orderIndex = -1;
+            for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                if (Avika.data.pendingOrders[i].id == id) {
+                    orderIndex = i;
+                    break;
+                }
+            }
+            
+            if (orderIndex === -1) {
+                console.error("Order not found with ID:", id);
+                return;
+            }
+            
+            var order = Avika.data.pendingOrders[orderIndex];
+            var now = new Date();
+            
+            // Mark cold kitchen as finished
+            order.coldKitchenFinished = true;
+            order.coldKitchenTime = now;
+            order.coldKitchenTimeFormatted = Avika.ui.formatTime(now);
+            
+            // Save data and update UI
+            Avika.ui.updatePendingTable();
+            Avika.storage.guardarDatosLocales();
+            Avika.ui.showNotification('Cocina fría terminada para ' + order.dish);
+            
+            // If both kitchens are finished and not delivery, complete the order
+            if (order.hotKitchenFinished && order.coldKitchenFinished && 
+                order.service !== 'domicilio' && order.serviceType !== 'domicilio') {
+                Avika.orders.finishPreparation(id);
+            }
+            // For delivery orders, just mark kitchen as finished
+            else if (order.hotKitchenFinished && order.coldKitchenFinished && 
+                    (order.service === 'domicilio' || order.serviceType === 'domicilio')) {
+                order.kitchenFinished = true;
+                order.finished = true;
+                Avika.ui.updatePendingTable();
+                Avika.storage.guardarDatosLocales();
+            }
+        };
+        
+        console.log("Fix for combo dishes in delivery tickets applied");
     });
 })();
