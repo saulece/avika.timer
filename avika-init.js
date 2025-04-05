@@ -7,7 +7,7 @@
 // Esperamos a que el DOM esté completamente cargado
 window.Avika = window.Avika || {};
 
-// Asegurarnos que el objeto de datos existe
+// Inicializar el objeto data si no existe
 if (!Avika.data) {
     Avika.data = {
         currentCategory: '',
@@ -69,14 +69,79 @@ document.addEventListener('DOMContentLoaded', function() {
         orders: !!Avika.orders
     });
     
+    // Verificar que las funciones de formato estén disponibles y sean válidas
+    if (Avika.ui) {
+        // Asegurar que formatTime está correctamente definida
+        if (typeof Avika.ui.formatTime !== 'function') {
+            console.error("Función formatTime no encontrada, implementando versión básica");
+            Avika.ui.formatTime = function(date) {
+                if (!date) return '--:--:--';
+                try {
+                    var d = new Date(date);
+                    var hours = d.getHours().toString().padStart(2, '0');
+                    var minutes = d.getMinutes().toString().padStart(2, '0');
+                    var seconds = d.getSeconds().toString().padStart(2, '0');
+                    return hours + ':' + minutes + ':' + seconds;
+                } catch (e) {
+                    console.error("Error al formatear hora:", e);
+                    return '--:--:--';
+                }
+            };
+        }
+        
+        // Asegurar que padZero está disponible
+        if (typeof Avika.ui.padZero !== 'function') {
+            console.error("Función padZero no encontrada, implementando versión básica");
+            Avika.ui.padZero = function(num) {
+                return (num < 10 ? '0' : '') + num;
+            };
+        }
+        
+        // Asegurar que calculateElapsedTime está disponible
+        if (typeof Avika.ui.calculateElapsedTime !== 'function') {
+            console.error("Función calculateElapsedTime no encontrada, implementando versión básica");
+            Avika.ui.calculateElapsedTime = function(startTimeStr) {
+                try {
+                    var startTime = new Date(startTimeStr);
+                    var now = new Date();
+                    var elapsed = Math.floor((now - startTime) / 1000); // en segundos
+                    
+                    var hours = Math.floor(elapsed / 3600);
+                    var minutes = Math.floor((elapsed % 3600) / 60);
+                    var seconds = elapsed % 60;
+                    
+                    var timeStr = '';
+                    
+                    if (hours > 0) {
+                        timeStr += hours + 'h ';
+                    }
+                    
+                    timeStr += minutes.toString().padStart(2, '0') + ':' + 
+                               seconds.toString().padStart(2, '0');
+                    
+                    return timeStr;
+                } catch (e) {
+                    console.error("Error al calcular tiempo transcurrido:", e);
+                    return "--:--";
+                }
+            };
+        }
+        
+        // Crear alias globales para facilitar acceso
+        window.formatTime = Avika.ui.formatTime;
+        window.padZero = Avika.ui.padZero;
+        window.calculateElapsedTime = Avika.ui.calculateElapsedTime;
+        
+        // También en el objeto Avika
+        Avika.formatTime = Avika.ui.formatTime;
+        Avika.padZero = Avika.ui.padZero;
+        Avika.calculateElapsedTime = Avika.ui.calculateElapsedTime;
+    }
+    
     // Mostrar mensaje de error si no hay UI
     if (!Avika.ui) {
         console.error("Error crítico: Módulo UI no encontrado");
-        if (typeof showErrorMessage === 'function') {
-            showErrorMessage("Error crítico: La interfaz de usuario no se ha cargado correctamente.");
-        } else {
-            alert("Error crítico: La interfaz de usuario no se ha cargado correctamente.");
-        }
+        alert("Error crítico: La interfaz de usuario no se ha cargado correctamente.");
         return;
     }
     
@@ -120,8 +185,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Detectar tipo de dispositivo
         if (Avika.ui && typeof Avika.ui.detectDevice === 'function') {
-            var isMobile = Avika.ui.detectDevice();
-            console.log("¿Dispositivo móvil?: " + isMobile);
+            try {
+                var isMobile = Avika.ui.detectDevice();
+                console.log("¿Dispositivo móvil?: " + isMobile);
+            } catch (e) {
+                console.error("Error al detectar dispositivo:", e);
+            }
         }
         
         // Inicializar botones de categoría si existe la función
@@ -156,11 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } else {
             console.error("Función initEvents no encontrada en Avika.ui");
-            if (Avika.ui && typeof Avika.ui.showErrorMessage === 'function') {
-                Avika.ui.showErrorMessage("No se encontró la función para inicializar eventos. La aplicación no puede continuar.");
-            } else {
-                alert("No se encontró la función para inicializar eventos. La aplicación no puede continuar.");
-            }
+            alert("No se encontró la función para inicializar eventos. La aplicación no puede continuar.");
             return false;
         }
         
@@ -170,7 +235,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Configurar actualizaciones periódicas para temporizadores
         if (Avika.ui && typeof Avika.ui.updateAllTimers === 'function') {
             setInterval(function() {
-                Avika.ui.updateAllTimers();
+                try {
+                    Avika.ui.updateAllTimers();
+                } catch (e) {
+                    console.error("Error al actualizar temporizadores:", e);
+                }
             }, 1000);
             console.log("Temporizadores inicializados");
         } else {
@@ -180,8 +249,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Configurar autoguardado si está disponible
         if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
             setInterval(function() {
-                Avika.storage.guardarDatosLocales();
-            }, Avika.config.autoSaveInterval || 30000);
+                try {
+                    Avika.storage.guardarDatosLocales();
+                } catch (e) {
+                    console.error("Error al guardar datos locales:", e);
+                }
+            }, Avika.config && Avika.config.autoSaveInterval ? Avika.config.autoSaveInterval : 30000);
             console.log("Autoguardado configurado");
         } else {
             console.warn("Autoguardado no disponible. Los datos no se guardarán automáticamente.");
@@ -190,13 +263,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // Actualizar tablas inicialmente
         if (Avika.ui) {
             if (typeof Avika.ui.updatePendingTable === 'function') {
-                Avika.ui.updatePendingTable();
+                try {
+                    Avika.ui.updatePendingTable();
+                } catch (e) {
+                    console.error("Error al actualizar tabla de pendientes:", e);
+                }
             } else {
                 console.warn("Función updatePendingTable no encontrada.");
             }
             
             if (typeof Avika.ui.updateCompletedTable === 'function') {
-                Avika.ui.updateCompletedTable(false);
+                try {
+                    Avika.ui.updateCompletedTable(false);
+                } catch (e) {
+                    console.error("Error al actualizar tabla de completados:", e);
+                }
             } else {
                 console.warn("Función updateCompletedTable no encontrada.");
             }
@@ -214,10 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     } catch (e) {
         console.error("Error fatal durante la inicialización:", e);
-        if (Avika.ui && typeof Avika.ui.showErrorMessage === 'function') {
-            Avika.ui.showErrorMessage("Error fatal durante la inicialización: " + e.message);
-        } else {
-            alert("Error al inicializar la aplicación: " + e.message + ". Consulta la consola para más detalles.");
-        }
+        console.error("Stack:", e.stack);
+        alert("Error al inicializar la aplicación: " + e.message + ". Consulta la consola para más detalles.");
     }
 });
