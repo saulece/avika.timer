@@ -13,47 +13,52 @@ Avika.storage = {
                 localStorage.setItem('avika_completedOrders', JSON.stringify(Avika.data.completedOrders));
                 localStorage.setItem('avika_lastSaved', new Date().toString());
                 this.lastSavedState = currentState;
+                console.log('Datos guardados localmente:', new Date().toLocaleTimeString());
             }
         } catch (e) {
             console.error('Error al guardar datos localmente:', e);
         }
     },
-
-    // Función para cargar datos guardados
+    
+    // Función para cargar datos guardados desde el almacenamiento local
     cargarDatosGuardados: function() {
         try {
-            var savedPending = localStorage.getItem('avika_pendingOrders');
-            var savedCompleted = localStorage.getItem('avika_completedOrders');
-            
-            if (savedPending) {
-                Avika.data.pendingOrders = JSON.parse(savedPending);
-                Avika.ui.updatePendingTable();
-            }
-            
-            if (savedCompleted) {
-                Avika.data.completedOrders = JSON.parse(savedCompleted);
-                Avika.ui.updateCompletedTable();
-            }
-            
+            var pendingOrders = localStorage.getItem('avika_pendingOrders');
+            var completedOrders = localStorage.getItem('avika_completedOrders');
             var lastSaved = localStorage.getItem('avika_lastSaved');
-            if (lastSaved) {
-                Avika.ui.showNotification('Datos cargados de ' + new Date(lastSaved).toLocaleString());
+            
+            if (pendingOrders) {
+                Avika.data.pendingOrders = JSON.parse(pendingOrders);
+                console.log('Órdenes pendientes cargadas');
             }
             
-            // Actualizar el estado guardado
+            if (completedOrders) {
+                Avika.data.completedOrders = JSON.parse(completedOrders);
+                console.log('Órdenes completadas cargadas');
+            }
+            
+            if (lastSaved) {
+                console.log('Última vez guardado:', lastSaved);
+            }
+            
+            // Actualizar el estado guardado para evitar guardar inmediatamente después de cargar
             this.lastSavedState = JSON.stringify(Avika.data.pendingOrders) + JSON.stringify(Avika.data.completedOrders);
+            
+            return true;
         } catch (e) {
             console.error('Error al cargar datos guardados:', e);
+            return false;
         }
     },
     
-    // Función para limpiar historial
+    // Función para limpiar el historial de pedidos completados
     limpiarHistorial: function() {
-        if (confirm('¿Estás seguro de que deseas borrar todo el historial completado?')) {
+        if (confirm('¿Estás seguro de que deseas eliminar todo el historial de pedidos completados?')) {
             Avika.data.completedOrders = [];
-            Avika.ui.updateCompletedTable();
-            Avika.storage.guardarDatosLocales();
-            Avika.ui.showNotification('Historial limpiado');
+            localStorage.removeItem('avika_completedOrders');
+            Avika.ui.updateCompletedTable(false);
+            this.guardarDatosLocales();
+            console.log('Historial limpiado correctamente');
         }
     }
 };

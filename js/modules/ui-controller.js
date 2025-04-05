@@ -338,15 +338,26 @@ Avika.ui = {
     },
 
     updatePersonalizationOptions: function() {
-        var container = document.getElementById('personalization-options');
-        container.innerHTML = '';
-        
-        if (Avika.data.currentCategory === 'combos') {
-            document.getElementById('personalization-section').style.display = 'none';
+        var container = document.getElementById('customization-container');
+        if (!container) {
+            console.error("No se encontró el contenedor de personalizaciones #customization-container");
             return;
         }
         
-        document.getElementById('personalization-section').style.display = 'block';
+        container.innerHTML = '';
+        
+        if (Avika.data.currentCategory === 'combos') {
+            var optionGroup = document.getElementById('customization-options');
+            if (optionGroup) {
+                optionGroup.style.display = 'none';
+            }
+            return;
+        }
+        
+        var optionGroup = document.getElementById('customization-options');
+        if (optionGroup) {
+            optionGroup.style.display = 'block';
+        }
         
         for (var code in Avika.config.customizationOptions) {
             if (!Avika.config.customizationOptions.hasOwnProperty(code)) continue;
@@ -1467,5 +1478,127 @@ Avika.ui = {
         row.appendChild(actionCell);
         
         return row;
+    },
+
+    startPreparation: function() {
+        console.log("Iniciando preparación para:", Avika.data.currentDish);
+        
+        // Validar que se ha seleccionado un platillo
+        if (!Avika.data.currentDish) {
+            this.showNotification('Por favor, selecciona un platillo primero.');
+            return;
+        }
+        
+        // Crear orden
+        var preparation = {
+            id: Date.now().toString() + Math.floor(Math.random() * 1000),
+            dish: Avika.data.currentDish,
+            category: Avika.data.currentCategory,
+            categoryDisplay: Avika.config.categoryNames[Avika.data.currentCategory],
+            quantity: Avika.data.currentQuantity,
+            customizations: Avika.data.currentCustomizations,
+            serviceType: Avika.data.currentService,
+            notes: document.getElementById('notes-input').value,
+            startTime: new Date(),
+            startTimeFormatted: this.formatTime(new Date()),
+            isSpecialCombo: Avika.data.isSpecialCombo
+        };
+        
+        // Si es combo especial, inicializar estados de cocinas
+        if (Avika.data.isSpecialCombo) {
+            preparation.hotKitchenFinished = false;
+            preparation.coldKitchenFinished = false;
+        }
+        
+        // Agregar a pendientes
+        Avika.data.pendingOrders.push(preparation);
+        
+        // Actualizar UI
+        this.updatePendingTable();
+        
+        // Mostrar notificación
+        this.showNotification('Preparación iniciada para: ' + Avika.data.currentDish);
+        
+        // Guardar datos
+        Avika.storage.guardarDatosLocales();
+        
+        // Volver a la sección de categorías
+        this.showSection('categories-section');
+    },
+    
+    // Inicializar eventos cuando se carga la página
+    initEvents: function() {
+        // Inicializar botones de categoría
+        document.getElementById('btn-frio').addEventListener('click', function() { Avika.ui.selectCategory('frio'); });
+        document.getElementById('btn-entrada-fria').addEventListener('click', function() { Avika.ui.selectCategory('entrada-fria'); });
+        document.getElementById('btn-caliente').addEventListener('click', function() { Avika.ui.selectCategory('caliente'); });
+        document.getElementById('btn-entrada-caliente').addEventListener('click', function() { Avika.ui.selectCategory('entrada-caliente'); });
+        document.getElementById('btn-combos').addEventListener('click', function() { Avika.ui.selectCategory('combos'); });
+        
+        // Inicializar botón para volver a categorías
+        document.getElementById('btn-back-to-categories').addEventListener('click', function() { Avika.ui.showSection('categories-section'); });
+        
+        // Inicializar ticket/comanda
+        var newTicketBtn = document.getElementById('btn-new-ticket');
+        if (newTicketBtn) {
+            newTicketBtn.addEventListener('click', function() { Avika.ui.enableTicketMode(); });
+        }
+        
+        // Inicializar botón para desbloquear tickets
+        var forceCompleteBtn = document.getElementById('btn-force-complete');
+        if (forceCompleteBtn) {
+            forceCompleteBtn.addEventListener('click', function() { Avika.ui.showForceCompleteModal(); });
+        }
+        
+        // Inicializar filtros de historial
+        var showAllBtn = document.getElementById('btn-show-all-history');
+        var showRecentBtn = document.getElementById('btn-show-recent');
+        var showStatsBtn = document.getElementById('btn-show-stats');
+        var clearHistoryBtn = document.getElementById('btn-clear-history');
+        
+        if (showAllBtn) {
+            showAllBtn.addEventListener('click', function() {
+                Avika.ui.updateCompletedTable(true);
+                showAllBtn.classList.add('active');
+                showRecentBtn.classList.remove('active');
+                showStatsBtn.classList.remove('active');
+            });
+        }
+        
+        if (showRecentBtn) {
+            showRecentBtn.addEventListener('click', function() {
+                Avika.ui.updateCompletedTable(false);
+                showRecentBtn.classList.add('active');
+                showAllBtn.classList.remove('active');
+                showStatsBtn.classList.remove('active');
+            });
+        }
+        
+        if (showStatsBtn) {
+            showStatsBtn.addEventListener('click', function() {
+                Avika.stats.showStatistics();
+                showStatsBtn.classList.add('active');
+                showAllBtn.classList.remove('active');
+                showRecentBtn.classList.remove('active');
+            });
+        }
+        
+        if (clearHistoryBtn) {
+            clearHistoryBtn.addEventListener('click', function() {
+                if (confirm('¿Estás seguro de que deseas eliminar todo el historial de platillos completados?')) {
+                    Avika.orders.clearCompletedOrders();
+                }
+            });
+        }
+        
+        // Agregar función de exportar datos si existe el botón
+        var exportBtn = document.getElementById('btn-export');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', function() {
+                Avika.stats.exportData();
+            });
+        }
+        
+        console.log("Eventos inicializados correctamente");
     }
 };
