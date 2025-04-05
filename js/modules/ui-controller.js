@@ -608,6 +608,12 @@ Avika.ui = {
                 // Actualizar tabla de items del ticket
                 this.updateTicketItems();
                 
+                // Actualizar el texto del botón de agregar
+                var addButton = document.getElementById('btn-add-to-ticket');
+                if (addButton) {
+                    addButton.textContent = 'Agregar otro platillo';
+                }
+                
                 // Mostrar modal de ticket
                 var ticketModal = document.getElementById('ticket-modal');
                 if (ticketModal) {
@@ -677,6 +683,16 @@ Avika.ui = {
         
         // Limpiar tabla
         ticketItemsBody.innerHTML = '';
+        
+        // Actualizar el texto del botón según si hay platillos o no
+        var addButton = document.getElementById('btn-add-to-ticket');
+        if (addButton) {
+            if (this.state.ticketItems.length === 0) {
+                addButton.textContent = 'Agregar platillo';
+            } else {
+                addButton.textContent = 'Agregar otro platillo';
+            }
+        }
         
         // Si no hay items, mostrar mensaje
         if (this.state.ticketItems.length === 0) {
@@ -1645,7 +1661,7 @@ Avika.ui = {
                 var actionBtns = document.createElement('div');
                 actionBtns.className = 'action-btns';
                 actionBtns.innerHTML = `
-                    <button id="btn-add-to-ticket" class="action-btn">Agregar otro platillo</button>
+                    <button id="btn-add-to-ticket" class="action-btn">Agregar platillo</button>
                     <button id="btn-save-ticket" class="action-btn start-btn">Guardar ticket</button>
                 `;
                 
