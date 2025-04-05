@@ -16,7 +16,109 @@
         
         // Función para actualizar tabla de platillos completados
         Avika.ui.updateCompletedTable = function(showAll) {
-            // Código existente no modificado
+            try {
+                console.log("Actualizando tabla de platillos completados");
+                
+                var completedBody = document.getElementById('completed-body');
+                if (!completedBody) {
+                    console.error("Elemento completed-body no encontrado");
+                    return;
+                }
+                
+                // Limpiar tabla
+                completedBody.innerHTML = '';
+                
+                // Verificar si hay órdenes completadas
+                if (!Avika.data.completedOrders || Avika.data.completedOrders.length === 0) {
+                    var row = completedBody.insertRow();
+                    var cell = row.insertCell(0);
+                    cell.colSpan = 5;
+                    cell.textContent = "No hay platillos completados";
+                    cell.style.textAlign = "center";
+                    cell.style.padding = "20px";
+                    return;
+                }
+                
+                // Limitar a los 20 más recientes si no se solicita ver todo
+                var ordersToShow = showAll ? 
+                    Avika.data.completedOrders : 
+                    Avika.data.completedOrders.slice(0, 20);
+                
+                // Mostrar cada orden completada
+                for (var i = 0; i < ordersToShow.length; i++) {
+                    var order = ordersToShow[i];
+                    
+                    var row = completedBody.insertRow();
+                    
+                    // Platillo
+                    var dishCell = row.insertCell(0);
+                    dishCell.textContent = order.dish + (order.quantity > 1 ? ' (' + order.quantity + ')' : '');
+                    
+                    // Hora de inicio
+                    var startCell = row.insertCell(1);
+                    startCell.textContent = Avika.ui.formatTime(order.startTime);
+                    
+                    // Hora de finalización
+                    var endCell = row.insertCell(2);
+                    endCell.textContent = Avika.ui.formatTime(order.finishTime);
+                    
+                    // Tiempo total
+                    var totalTimeCell = row.insertCell(3);
+                    totalTimeCell.textContent = order.prepTime || calculateTotalTime(order.startTime, order.finishTime);
+                    
+                    // Detalles
+                    var detailsCell = row.insertCell(4);
+                    
+                    // Servicio
+                    var serviceText = '';
+                    switch (order.service) {
+                        case 'comedor': serviceText = 'Comedor'; break;
+                        case 'domicilio': serviceText = 'Domicilio'; break;
+                        case 'para-llevar': serviceText = 'Ordena y Espera'; break;
+                        default: serviceText = order.service;
+                    }
+                    
+                    // Personalización
+                    var customText = '';
+                    if (order.customizations && order.customizations.length > 0) {
+                        for (var j = 0; j < order.customizations.length; j++) {
+                            var code = order.customizations[j];
+                            if (Avika.config && Avika.config.customizationOptions && Avika.config.customizationOptions[code]) {
+                                customText += Avika.config.customizationOptions[code] + ', ';
+                            }
+                        }
+                        if (customText) {
+                            customText = customText.slice(0, -2); // Eliminar última coma y espacio
+                        }
+                    }
+                    
+                    // Notas
+                    var notesText = order.notes ? '<br>Nota: ' + order.notes : '';
+                    
+                    // Combinar toda la información
+                    detailsCell.innerHTML = '<strong>' + serviceText + '</strong>' + 
+                                           (customText ? '<br>' + customText : '') + 
+                                           notesText;
+                }
+            } catch (e) {
+                console.error("Error al actualizar tabla de completados:", e);
+                if (typeof Avika.ui.showErrorMessage === 'function') {
+                    Avika.ui.showErrorMessage("Error al actualizar tabla de completados: " + e.message);
+                }
+            }
+            
+            function calculateTotalTime(startTime, endTime) {
+                try {
+                    var start = new Date(startTime);
+                    var end = new Date(endTime);
+                    var diffMs = end - start;
+                    var diffMins = Math.floor(diffMs / 60000);
+                    var diffSecs = Math.floor((diffMs % 60000) / 1000);
+                    return Avika.ui.padZero(diffMins) + ':' + Avika.ui.padZero(diffSecs);
+                } catch (e) {
+                    return "--:--";
+                }
+            }
         };
         
         // 2. IMPLEMENTACIÓN PARA COCINAS FRÍAS Y CALIENTES
