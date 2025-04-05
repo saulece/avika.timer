@@ -74,57 +74,51 @@ document.addEventListener('DOMContentLoaded', function() {
         // Asegurar que formatTime está correctamente definida
         if (typeof Avika.ui.formatTime !== 'function') {
             console.error("Función formatTime no encontrada, implementando versión básica");
-            Avika.ui.formatTime = function(date) {
-                if (!date) return '--:--:--';
-                try {
-                    var d = new Date(date);
-                    var hours = d.getHours().toString().padStart(2, '0');
-                    var minutes = d.getMinutes().toString().padStart(2, '0');
-                    var seconds = d.getSeconds().toString().padStart(2, '0');
-                    return hours + ':' + minutes + ':' + seconds;
-                } catch (e) {
-                    console.error("Error al formatear hora:", e);
-                    return '--:--:--';
-                }
-            };
+            // Asegurar que formatTime está correctamente definida
+Avika.ui.formatTime = function(date) {
+    if (!date) return '--:--:--';
+    try {
+        var d = new Date(date);
+        var hours = d.getHours().toString().padStart(2, '0');
+        var minutes = d.getMinutes().toString().padStart(2, '0');
+        var seconds = d.getSeconds().toString().padStart(2, '0');
+        return hours + ':' + minutes + ':' + seconds;
+    } catch (e) {
+        console.error("Error al formatear hora:", e);
+        return '--:--:--';
+    }
+};
+
+// Hacer lo mismo con padZero y calculateElapsedTime
+Avika.ui.padZero = function(num) {
+    return (num < 10 ? '0' : '') + num;
+};
+
+Avika.ui.calculateElapsedTime = function(startTimeStr) {
+    try {
+        var startTime = new Date(startTimeStr);
+        var now = new Date();
+        var elapsed = Math.floor((now - startTime) / 1000); // en segundos
+        
+        var hours = Math.floor(elapsed / 3600);
+        var minutes = Math.floor((elapsed % 3600) / 60);
+        var seconds = elapsed % 60;
+        
+        var timeStr = '';
+        
+        if (hours > 0) {
+            timeStr += hours + 'h ';
         }
         
-        // Asegurar que padZero está disponible
-        if (typeof Avika.ui.padZero !== 'function') {
-            console.error("Función padZero no encontrada, implementando versión básica");
-            Avika.ui.padZero = function(num) {
-                return (num < 10 ? '0' : '') + num;
-            };
-        }
+        timeStr += minutes.toString().padStart(2, '0') + ':' + 
+                  seconds.toString().padStart(2, '0');
         
-        // Asegurar que calculateElapsedTime está disponible
-        if (typeof Avika.ui.calculateElapsedTime !== 'function') {
-            console.error("Función calculateElapsedTime no encontrada, implementando versión básica");
-            Avika.ui.calculateElapsedTime = function(startTimeStr) {
-                try {
-                    var startTime = new Date(startTimeStr);
-                    var now = new Date();
-                    var elapsed = Math.floor((now - startTime) / 1000); // en segundos
-                    
-                    var hours = Math.floor(elapsed / 3600);
-                    var minutes = Math.floor((elapsed % 3600) / 60);
-                    var seconds = elapsed % 60;
-                    
-                    var timeStr = '';
-                    
-                    if (hours > 0) {
-                        timeStr += hours + 'h ';
-                    }
-                    
-                    timeStr += minutes.toString().padStart(2, '0') + ':' + 
-                               seconds.toString().padStart(2, '0');
-                    
-                    return timeStr;
-                } catch (e) {
-                    console.error("Error al calcular tiempo transcurrido:", e);
-                    return "--:--";
-                }
-            };
+        return timeStr;
+    } catch (e) {
+        console.error("Error al calcular tiempo transcurrido:", e);
+        return "--:--";
+    }
+};
         }
         
         // Crear alias globales para facilitar acceso
