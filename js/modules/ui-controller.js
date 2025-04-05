@@ -1526,79 +1526,374 @@ Avika.ui = {
         this.showSection('categories-section');
     },
     
+    // Mostrar mensaje de error para el usuario
+    showErrorMessage: function(message) {
+        try {
+            var errorDiv = document.createElement('div');
+            errorDiv.style.position = 'fixed';
+            errorDiv.style.top = '50%';
+            errorDiv.style.left = '50%';
+            errorDiv.style.transform = 'translate(-50%, -50%)';
+            errorDiv.style.background = 'white';
+            errorDiv.style.padding = '20px';
+            errorDiv.style.border = '1px solid #ff4757';
+            errorDiv.style.borderRadius = '8px';
+            errorDiv.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)';
+            errorDiv.style.zIndex = '10000';
+            errorDiv.style.maxWidth = '90%';
+            errorDiv.style.width = '300px';
+            errorDiv.style.textAlign = 'center';
+            
+            var titleText = document.createElement('h3');
+            titleText.textContent = 'Error al inicializar la aplicación';
+            titleText.style.margin = '0 0 10px 0';
+            titleText.style.color = '#ff4757';
+            
+            var messageText = document.createElement('p');
+            messageText.textContent = message;
+            messageText.style.margin = '0 0 15px 0';
+            
+            var closeButton = document.createElement('button');
+            closeButton.textContent = 'Cerrar';
+            closeButton.style.padding = '8px 20px';
+            closeButton.style.background = '#ff4757';
+            closeButton.style.color = 'white';
+            closeButton.style.border = 'none';
+            closeButton.style.borderRadius = '4px';
+            closeButton.style.cursor = 'pointer';
+            
+            closeButton.onclick = function() {
+                document.body.removeChild(errorDiv);
+            };
+            
+            errorDiv.appendChild(titleText);
+            errorDiv.appendChild(messageText);
+            errorDiv.appendChild(closeButton);
+            
+            document.body.appendChild(errorDiv);
+        } catch (e) {
+            // Si falla incluso el mostrar el error, usar alert como respaldo
+            alert('Error: ' + message);
+        }
+    },
+    
     // Inicializar eventos cuando se carga la página
     initEvents: function() {
-        // Inicializar botones de categoría
-        document.getElementById('btn-frio').addEventListener('click', function() { Avika.ui.selectCategory('frio'); });
-        document.getElementById('btn-entrada-fria').addEventListener('click', function() { Avika.ui.selectCategory('entrada-fria'); });
-        document.getElementById('btn-caliente').addEventListener('click', function() { Avika.ui.selectCategory('caliente'); });
-        document.getElementById('btn-entrada-caliente').addEventListener('click', function() { Avika.ui.selectCategory('entrada-caliente'); });
-        document.getElementById('btn-combos').addEventListener('click', function() { Avika.ui.selectCategory('combos'); });
-        
-        // Inicializar botón para volver a categorías
-        document.getElementById('btn-back-to-categories').addEventListener('click', function() { Avika.ui.showSection('categories-section'); });
-        
-        // Inicializar ticket/comanda
-        var newTicketBtn = document.getElementById('btn-new-ticket');
-        if (newTicketBtn) {
-            newTicketBtn.addEventListener('click', function() { Avika.ui.enableTicketMode(); });
-        }
-        
-        // Inicializar botón para desbloquear tickets
-        var forceCompleteBtn = document.getElementById('btn-force-complete');
-        if (forceCompleteBtn) {
-            forceCompleteBtn.addEventListener('click', function() { Avika.ui.showForceCompleteModal(); });
-        }
-        
-        // Inicializar filtros de historial
-        var showAllBtn = document.getElementById('btn-show-all-history');
-        var showRecentBtn = document.getElementById('btn-show-recent');
-        var showStatsBtn = document.getElementById('btn-show-stats');
-        var clearHistoryBtn = document.getElementById('btn-clear-history');
-        
-        if (showAllBtn) {
-            showAllBtn.addEventListener('click', function() {
-                Avika.ui.updateCompletedTable(true);
-                showAllBtn.classList.add('active');
-                showRecentBtn.classList.remove('active');
-                showStatsBtn.classList.remove('active');
-            });
-        }
-        
-        if (showRecentBtn) {
-            showRecentBtn.addEventListener('click', function() {
-                Avika.ui.updateCompletedTable(false);
-                showRecentBtn.classList.add('active');
-                showAllBtn.classList.remove('active');
-                showStatsBtn.classList.remove('active');
-            });
-        }
-        
-        if (showStatsBtn) {
-            showStatsBtn.addEventListener('click', function() {
-                Avika.stats.showStatistics();
-                showStatsBtn.classList.add('active');
-                showAllBtn.classList.remove('active');
-                showRecentBtn.classList.remove('active');
-            });
-        }
-        
-        if (clearHistoryBtn) {
-            clearHistoryBtn.addEventListener('click', function() {
-                if (confirm('¿Estás seguro de que deseas eliminar todo el historial de platillos completados?')) {
-                    Avika.orders.clearCompletedOrders();
+        try {
+            console.log("Iniciando configuración de eventos...");
+            
+            // Detectar tipo de dispositivo y adaptar interfaz
+            this.detectDevice();
+            
+            // Verificación de elementos esenciales
+            if (!document.querySelector('.category-btn[data-category]')) {
+                this.showErrorMessage('No se encontraron botones de categoría. Es posible que el HTML no se haya cargado correctamente.');
+                console.error('Error crítico: No se encontraron botones de categoría');
+                return false;
+            }
+            
+            // Inicializar botones de categoría por atributo data-category
+            var categoryButtons = document.querySelectorAll('.category-btn[data-category]');
+            console.log("Botones de categoría encontrados:", categoryButtons.length);
+            
+            categoryButtons.forEach(function(btn) {
+                var category = btn.getAttribute('data-category');
+                if (category) {
+                    btn.addEventListener('click', function() {
+                        console.log("Clic en botón de categoría:", category);
+                        Avika.ui.selectCategory(category);
+                    });
+                } else {
+                    console.warn("Botón de categoría sin atributo data-category");
                 }
             });
-        }
-        
-        // Agregar función de exportar datos si existe el botón
-        var exportBtn = document.getElementById('btn-export');
-        if (exportBtn) {
-            exportBtn.addEventListener('click', function() {
-                Avika.stats.exportData();
+            
+            // Inicializar botones de servicio
+            var btnComedor = document.getElementById('btn-comedor');
+            var btnDomicilio = document.getElementById('btn-domicilio');
+            var btnParaLlevar = document.getElementById('btn-para-llevar');
+            
+            if (btnComedor) {
+                btnComedor.onclick = null; // Eliminar onclick inline
+                btnComedor.addEventListener('click', function() {
+                    Avika.ui.selectService(this, 'comedor');
+                });
+            }
+            
+            if (btnDomicilio) {
+                btnDomicilio.onclick = null; // Eliminar onclick inline
+                btnDomicilio.addEventListener('click', function() {
+                    Avika.ui.selectService(this, 'domicilio');
+                });
+            }
+            
+            if (btnParaLlevar) {
+                btnParaLlevar.onclick = null; // Eliminar onclick inline
+                btnParaLlevar.addEventListener('click', function() {
+                    Avika.ui.selectService(this, 'para-llevar');
+                });
+            }
+            
+            // Inicializar botones de cantidad
+            var quantityBtns = document.querySelectorAll('.qty-btn');
+            quantityBtns.forEach(function(btn) {
+                btn.onclick = null; // Eliminar onclick inline
+                
+                if (btn.textContent === '-') {
+                    btn.addEventListener('click', function() {
+                        Avika.ui.changeQuantity(-1);
+                    });
+                } else if (btn.textContent === '+') {
+                    btn.addEventListener('click', function() {
+                        Avika.ui.changeQuantity(1);
+                    });
+                }
             });
+            
+            // Inicializar botón para iniciar preparación
+            var btnStart = document.getElementById('btn-start');
+            if (btnStart) {
+                btnStart.onclick = null; // Eliminar onclick inline
+                btnStart.addEventListener('click', function() {
+                    Avika.ui.startPreparation();
+                });
+            }
+            
+            // Inicializar botón para cancelar
+            var btnCancel = document.getElementById('btn-cancel');
+            if (btnCancel) {
+                btnCancel.onclick = null; // Eliminar onclick inline
+                btnCancel.addEventListener('click', function() {
+                    Avika.ui.showSection('dishes-section');
+                });
+            }
+            
+            // Inicializar botón para volver a categorías
+            var btnBackToCategories = document.getElementById('btn-back-to-categories');
+            if (btnBackToCategories) {
+                btnBackToCategories.addEventListener('click', function() {
+                    Avika.ui.showSection('categories-section');
+                });
+            }
+            
+            // Inicializar ticket/comanda
+            var newTicketBtn = document.getElementById('btn-new-ticket');
+            if (newTicketBtn) {
+                newTicketBtn.addEventListener('click', function() {
+                    Avika.ui.enableTicketMode();
+                });
+            }
+            
+            // Inicializar botón para desbloquear tickets
+            var forceCompleteBtn = document.getElementById('btn-force-complete');
+            if (forceCompleteBtn) {
+                forceCompleteBtn.addEventListener('click', function() {
+                    Avika.ui.showForceCompleteModal();
+                });
+            }
+            
+            // Inicializar filtros de historial
+            var filterBtns = {
+                showAll: document.getElementById('btn-show-all-history'),
+                showRecent: document.getElementById('btn-show-recent'),
+                showStats: document.getElementById('btn-show-stats'),
+                clearHistory: document.getElementById('btn-clear-history')
+            };
+            
+            if (filterBtns.showAll) {
+                filterBtns.showAll.addEventListener('click', function() {
+                    Avika.ui.updateCompletedTable(true);
+                    this.classList.add('active');
+                    if (filterBtns.showRecent) filterBtns.showRecent.classList.remove('active');
+                    if (filterBtns.showStats) filterBtns.showStats.classList.remove('active');
+                });
+            }
+            
+            if (filterBtns.showRecent) {
+                filterBtns.showRecent.addEventListener('click', function() {
+                    Avika.ui.updateCompletedTable(false);
+                    this.classList.add('active');
+                    if (filterBtns.showAll) filterBtns.showAll.classList.remove('active');
+                    if (filterBtns.showStats) filterBtns.showStats.classList.remove('active');
+                });
+            }
+            
+            if (filterBtns.showStats) {
+                filterBtns.showStats.addEventListener('click', function() {
+                    if (Avika.stats && typeof Avika.stats.showStatistics === 'function') {
+                        Avika.stats.showStatistics();
+                        this.classList.add('active');
+                        if (filterBtns.showAll) filterBtns.showAll.classList.remove('active');
+                        if (filterBtns.showRecent) filterBtns.showRecent.classList.remove('active');
+                    } else {
+                        console.error("Función showStatistics no disponible");
+                    }
+                });
+            }
+            
+            if (filterBtns.clearHistory) {
+                filterBtns.clearHistory.addEventListener('click', function() {
+                    if (confirm('¿Estás seguro de que deseas eliminar todo el historial de platillos completados?')) {
+                        if (Avika.orders && typeof Avika.orders.clearCompletedOrders === 'function') {
+                            Avika.orders.clearCompletedOrders();
+                        } else if (Avika.storage && typeof Avika.storage.limpiarHistorial === 'function') {
+                            Avika.storage.limpiarHistorial();
+                        } else {
+                            console.error("No se encontró función para limpiar historial");
+                        }
+                    }
+                });
+            }
+            
+            // Agregar función de exportar datos si existe el botón
+            var exportBtn = document.getElementById('btn-export');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', function() {
+                    if (Avika.stats && typeof Avika.stats.exportData === 'function') {
+                        Avika.stats.exportData();
+                    } else if (Avika.stats && typeof Avika.stats.exportarDatos === 'function') {
+                        Avika.stats.exportarDatos();
+                    } else {
+                        console.error("Función de exportar datos no disponible");
+                    }
+                });
+            }
+            
+            console.log("Eventos inicializados correctamente");
+            return true;
+        } catch (e) {
+            console.error("Error durante la inicialización de eventos:", e);
+            console.error("Detalles del error:", e.message);
+            console.error("Stack:", e.stack);
+            
+            // Mostrar mensaje de error al usuario
+            this.showErrorMessage('Hubo un problema al inicializar la aplicación: ' + e.message);
+            return false;
+        }
+    },
+
+    // Generar botones de categoría para modales
+    generateCategoryButtons: function() {
+        var html = '';
+        
+        // Categorías principales
+        var categories = [
+            { id: 'frio', name: 'Platillos Fríos' },
+            { id: 'entrada-fria', name: 'Entradas Frías' },
+            { id: 'caliente', name: 'Platillos Calientes' },
+            { id: 'entrada-caliente', name: 'Entradas Calientes' },
+            { id: 'combos', name: 'Combos' }
+        ];
+        
+        // Generar HTML para cada categoría
+        categories.forEach(function(cat) {
+            html += `<button class="category-btn" data-category="${cat.id}">${cat.name}</button>`;
+        });
+        
+        return html;
+    },
+
+    // Detectar tipo de dispositivo y adaptar interfaz
+    detectDevice: function() {
+        var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        var isSmallScreen = window.innerWidth < 480;
+        
+        if (isMobile || isSmallScreen) {
+            document.body.classList.add('mobile-device');
+            console.log("Dispositivo móvil detectado. Adaptando interfaz...");
+            
+            // Si es dispositivo móvil, reducir el tamaño de los textos y elementos
+            this.adaptMobileInterface();
+        } else {
+            document.body.classList.remove('mobile-device');
+            console.log("Dispositivo de escritorio detectado");
         }
         
-        console.log("Eventos inicializados correctamente");
+        // Registrar evento de cambio de tamaño de ventana
+        window.addEventListener('resize', function() {
+            var isSmallScreen = window.innerWidth < 480;
+            if (isSmallScreen) {
+                document.body.classList.add('mobile-device');
+                Avika.ui.adaptMobileInterface();
+            } else {
+                document.body.classList.remove('mobile-device');
+            }
+        });
+        
+        return isMobile || isSmallScreen;
+    },
+    
+    // Adaptar interfaz para móviles
+    adaptMobileInterface: function() {
+        try {
+            console.log("Adaptando interfaz para móviles...");
+            
+            // Reducir altura de encabezado
+            var header = document.querySelector('header');
+            if (header) {
+                header.style.padding = '8px';
+            }
+            
+            // Aplicar estilos adicionales para categorías en móviles
+            var categoryContainer = document.querySelector('.category-container');
+            if (categoryContainer) {
+                // Asegurar que tenga máximo 3 botones por fila
+                var buttons = categoryContainer.querySelectorAll('.category-btn');
+                var screenWidth = window.innerWidth;
+                var maxButtons = screenWidth < 360 ? 2 : 3;
+                
+                // Asignar ancho aproximado para mostrar 2 o 3 botones por fila
+                var buttonWidth = (screenWidth - 40) / maxButtons;
+                buttons.forEach(function(btn) {
+                    // Establecer ancho fijo para cada botón
+                    btn.style.width = (buttonWidth - 10) + 'px';
+                    btn.style.margin = '3px';
+                    
+                    // Ajustar texto para que quepa mejor
+                    var text = btn.textContent;
+                    if (text.includes("Platillos")) {
+                        btn.textContent = text.replace("Platillos", "Plat.");
+                    }
+                    if (text.includes("Entradas")) {
+                        btn.textContent = text.replace("Entradas", "Ent.");
+                    }
+                });
+            }
+            
+            console.log("Interfaz móvil adaptada correctamente");
+        } catch (e) {
+            console.error("Error al adaptar interfaz móvil:", e);
+        }
+    },
+    
+    // Activar consola de depuración para móviles
+    enableMobileDebugging: function() {
+        try {
+            // Verificar si estamos en un dispositivo móvil
+            var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                console.log("Dispositivo móvil detectado, activando consola de depuración...");
+                
+                // Crear elemento script para cargar eruda
+                var script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/eruda';
+                script.onload = function() {
+                    // Una vez cargado, iniciar eruda
+                    if (typeof eruda !== 'undefined') {
+                        eruda.init();
+                        console.log("Consola de depuración móvil activada");
+                    }
+                };
+                script.onerror = function() {
+                    console.error("No se pudo cargar la consola de depuración móvil");
+                };
+                
+                // Agregar script al documento
+                document.head.appendChild(script);
+            }
+        } catch (e) {
+            console.error("Error al activar depuración móvil:", e);
+        }
     }
 };

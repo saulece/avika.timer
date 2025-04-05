@@ -1041,14 +1041,20 @@ h2 {
 /* Ajustes específicos para pantallas muy pequeñas */
 @media (max-width: 480px) {
     .category-container {
-        padding: 5px;
-        gap: 3px;
+        padding: 4px;
+        gap: 2px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin: 5px auto;
     }
     
     .category-btn {
-        padding: 5px 8px;
-        font-size: 0.8rem;
+        padding: 4px 8px;
+        font-size: 0.75rem;
+        margin: 1px;
+        flex: 0 1 auto;
         border-radius: 3px;
+        max-width: none;
     }
     
     /* Hacemos la tabla de completados más compacta */
@@ -1613,3 +1619,68 @@ textarea#ticket-notes-input {
         min-height: 30px;
     }
 }
+
+/* Estilos específicos para móviles con la clase mobile-device */
+.mobile-device .category-container {
+    padding: 3px;
+    gap: 1px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 3px auto;
+    max-width: 100%;
+}
+
+.mobile-device .category-btn {
+    padding: 4px 6px;
+    font-size: 0.7rem;
+    margin: 1px;
+    border-radius: 3px;
+}
+
+.mobile-device header {
+    padding: 8px 10px;
+}
+
+.mobile-device header h1 {
+    font-size: 1.3rem;
+}
+
+.mobile-device .pending-orders-section {
+    padding: 10px;
+}
+
+.mobile-device .action-btn {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+}
+
+.mobile-device .dish-btn {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    min-width: auto;
+}
+
+.mobile-device .dishes-container {
+    gap: 5px;
+}
+
+.mobile-device .action-btns {
+    gap: 5px;
+}
+
+.mobile-device .option-title {
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+
+.mobile-device .option-btn {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+}
+
+.mobile-device .notes-input {
+    padding: 8px;
+    font-size: 0.9rem;
+}
+
+/* Media queries existentes para pantallas pequeñas */
