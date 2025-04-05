@@ -699,7 +699,14 @@ Avika.ui = {
                 }
                 
                 // Actualizar tabla de órdenes pendientes
-                self.updatePendingTable();
+                if (typeof self.updatePendingTable === 'function') {
+                    self.updatePendingTable();
+                } else if (typeof Avika.ui.updatePendingTable === 'function') {
+                    // Try to use the global function if available
+                    Avika.ui.updatePendingTable();
+                } else {
+                    console.warn("updatePendingTable no está disponible");
+                }
                 
                 // Mostrar notificación
                 self.showNotification("Platillo agregado a la lista de preparación");
