@@ -748,7 +748,7 @@
                                 if (!item.hotKitchenFinished || !item.coldKitchenFinished) {
                                     allTicketItemsFinished = false;
                                 }
-                            } else if (item.id !== order.id && !item.finished) { // Excluir el platillo actual
+                            } else if (!item.finished) { // No excluir el platillo actual
                                 allTicketItemsFinished = false;
                             }
                         }
@@ -817,8 +817,10 @@
                             Avika.ui.showNotification('Todos los platillos del ticket están listos. Pendiente salida del repartidor.');
                         }
                     } else {
-                        // No todos los platillos están terminados, mantener este en la lista
+                        // No todos los platillos están terminados, solo actualizar la interfaz
                         Avika.ui.showNotification('Platillo ' + order.dish + ' terminado. Faltan más platillos para completar el ticket.');
+                        
+                        // Solo actualizar la UI sin mover nada a completados ni eliminar este platillo
                     }
                 } 
                 // No es parte de un ticket, manejo normal
