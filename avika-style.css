@@ -1515,3 +1515,27 @@ h2 {
 }
 
 /* Media queries existentes para pantallas pequeñas */
+
+/* Selector de hora personalizado */
+#time-selector-modal input[type="number"] {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px;
+}
+
+#time-selector-modal input[type="number"]:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+}
+
+/* Quitar flechas de incremento/decremento en navegadores */
+#time-selector-modal input[type="number"]::-webkit-inner-spin-button, 
+#time-selector-modal input[type="number"]::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+#time-selector-modal input[type="number"] {
+    -moz-appearance: textfield;
+}

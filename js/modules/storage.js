@@ -28,12 +28,72 @@ Avika.storage = {
             var lastSaved = localStorage.getItem('avika_lastSaved');
             
             if (pendingOrders) {
-                Avika.data.pendingOrders = JSON.parse(pendingOrders);
+                var parsedPending = JSON.parse(pendingOrders);
+                
+                // Restaurar objetos Date
+                parsedPending.forEach(function(order) {
+                    // Restaurar fechas usando campos ISO si existen
+                    if (order.startTimeISO) {
+                        order.startTime = new Date(order.startTimeISO);
+                    } else if (typeof order.startTime === 'string') {
+                        order.startTime = new Date(order.startTime);
+                        // Guardar el formato ISO para futuras cargas
+                        order.startTimeISO = order.startTime.toISOString();
+                    }
+                    
+                    if (order.finishTimeISO) {
+                        order.finishTime = new Date(order.finishTimeISO);
+                    } else if (order.finishTime && typeof order.finishTime === 'string') {
+                        order.finishTime = new Date(order.finishTime);
+                        // Guardar el formato ISO para futuras cargas
+                        order.finishTimeISO = order.finishTime.toISOString();
+                    }
+                    
+                    // Otras fechas posibles
+                    if (order.kitchenFinishedTimeISO) {
+                        order.kitchenFinishedTime = new Date(order.kitchenFinishedTimeISO);
+                    } else if (order.kitchenFinishedTime && typeof order.kitchenFinishedTime === 'string') {
+                        order.kitchenFinishedTime = new Date(order.kitchenFinishedTime);
+                        order.kitchenFinishedTimeISO = order.kitchenFinishedTime.toISOString();
+                    }
+                });
+                
+                Avika.data.pendingOrders = parsedPending;
                 console.log('Órdenes pendientes cargadas');
             }
             
             if (completedOrders) {
-                Avika.data.completedOrders = JSON.parse(completedOrders);
+                var parsedCompleted = JSON.parse(completedOrders);
+                
+                // Restaurar objetos Date
+                parsedCompleted.forEach(function(order) {
+                    // Restaurar fechas usando campos ISO si existen
+                    if (order.startTimeISO) {
+                        order.startTime = new Date(order.startTimeISO);
+                    } else if (typeof order.startTime === 'string') {
+                        order.startTime = new Date(order.startTime);
+                        // Guardar el formato ISO para futuras cargas
+                        order.startTimeISO = order.startTime.toISOString();
+                    }
+                    
+                    if (order.finishTimeISO) {
+                        order.finishTime = new Date(order.finishTimeISO);
+                    } else if (order.finishTime && typeof order.finishTime === 'string') {
+                        order.finishTime = new Date(order.finishTime);
+                        // Guardar el formato ISO para futuras cargas
+                        order.finishTimeISO = order.finishTime.toISOString();
+                    }
+                    
+                    // Otras fechas posibles
+                    if (order.kitchenFinishedTimeISO) {
+                        order.kitchenFinishedTime = new Date(order.kitchenFinishedTimeISO);
+                    } else if (order.kitchenFinishedTime && typeof order.kitchenFinishedTime === 'string') {
+                        order.kitchenFinishedTime = new Date(order.kitchenFinishedTime);
+                        order.kitchenFinishedTimeISO = order.kitchenFinishedTime.toISOString();
+                    }
+                });
+                
+                Avika.data.completedOrders = parsedCompleted;
                 console.log('Órdenes completadas cargadas');
             }
             

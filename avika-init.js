@@ -6,6 +6,22 @@
 
 // Esperamos a que el DOM esté completamente cargado
 window.Avika = window.Avika || {};
+
+// Asegurarnos que el objeto de datos existe
+if (!Avika.data) {
+    Avika.data = {
+        currentCategory: '',
+        currentDish: '',
+        currentCustomizations: [],
+        currentService: 'comedor',
+        currentQuantity: 1,
+        isSpecialCombo: false,
+        pendingOrders: [],
+        completedOrders: [],
+        timerInterval: null
+    };
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Inicializando Avika...");
     
