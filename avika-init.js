@@ -102,6 +102,24 @@ document.addEventListener('DOMContentLoaded', function() {
     function initApp() {
         console.log("Inicializando aplicación...");
         
+        // Detectar tipo de dispositivo
+        if (Avika.ui && typeof Avika.ui.detectDevice === 'function') {
+            var isMobile = Avika.ui.detectDevice();
+            console.log("¿Dispositivo móvil?: " + isMobile);
+        }
+        
+        // Inicializar botones de categoría si existe la función
+        if (Avika.ui && typeof Avika.ui.initCategoryButtons === 'function') {
+            try {
+                var categoryButtonsInitialized = Avika.ui.initCategoryButtons();
+                console.log("Botones de categoría inicializados: " + categoryButtonsInitialized);
+            } catch (e) {
+                console.error("Error al inicializar botones de categoría:", e);
+            }
+        } else {
+            console.warn("Función initCategoryButtons no encontrada");
+        }
+        
         // Inicializar eventos UI si existe la función
         if (Avika.ui && typeof Avika.ui.initEvents === 'function') {
             try {
