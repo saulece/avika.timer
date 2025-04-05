@@ -529,6 +529,15 @@ Avika.orders = {
                         }
                     }
                 }
+                
+                // Si todos los platillos del ticket están listos y es servicio de comedor,
+                // automáticamente completar el ticket (mover a completados)
+                if (order.serviceType === 'comedor') {
+                    // Usamos el ID de cualquier platillo del ticket para llamar a finishPreparation
+                    // que se encargará de mover todos los platillos del ticket a completados
+                    this.finishPreparation(order.id);
+                    return; // Salimos temprano porque finishPreparation ya actualizará la UI
+                }
             } else {
                 // Si no todos los platillos están listos, asegurarnos que NO se active el botón de salida
                 for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
