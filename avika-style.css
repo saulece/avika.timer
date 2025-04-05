@@ -135,22 +135,26 @@ section {
 
 /* Contenedor de categorías */
 .category-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin: 15px auto;
+    max-width: 800px;
 }
 
 .category-btn {
     background-color: var(--primary-btn);
     color: var(--primary-btn-text);
     border: none;
-    padding: 15px 25px;
-    font-size: 18px;
-    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 0.95rem;
+    border-radius: 6px;
     cursor: pointer;
     text-align: center;
-    height: 80px;
+    min-width: 150px;
+    max-width: 180px;
+    height: auto;
     transition: background-color var(--transition-speed), transform 0.2s;
     box-shadow: 0 2px 4px var(--shadow-color);
     display: flex;
@@ -1480,4 +1484,20 @@ h2 {
     justify-content: flex-end;
     margin-top: 15px;
     gap: 10px;
+}
+
+/* Añadir estilos para la tabla de platillos completados */
+#completed-body td {
+    font-size: 0.9rem;
+    padding: 6px 8px;
+    max-width: 300px;
+    line-height: 1.2;
+}
+
+#completed-body td:nth-child(5) {
+    font-size: 0.85rem;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
 }
