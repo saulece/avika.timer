@@ -867,5 +867,512 @@ Avika.ui = {
         };
         
         actionsCell.appendChild(completeBtn);
+    },
+    
+    // Eliminar item del ticket
+    removeTicketItem: function(index) {
+        console.log("Eliminando item del ticket:", index);
+        
+        // Verificar que el índice es válido
+        if (index < 0 || index >= this.state.ticketItems.length) {
+            console.error("Índice de item inválido:", index);
+            return;
+        }
+        
+        // Eliminar el item
+        this.state.ticketItems.splice(index, 1);
+        
+        // Actualizar tabla
+        this.updateTicketItems();
+        
+        // Actualizar el texto del botón de agregar
+        var addButton = document.getElementById('btn-add-to-ticket');
+        if (addButton && this.state.ticketItems.length === 0) {
+            addButton.textContent = 'Agregar platillo';
+        }
+    },
+    
+    // Guardar ticket
+    saveTicket: function() {
+        console.log("Guardando ticket con", this.state.ticketItems.length, "items");
+        
+        if (this.state.ticketItems.length === 0) {
+            this.showErrorMessage("Error: No hay platillos en el ticket.");
+            return;
+        }
+        
+        try {
+            // Obtener notas generales
+            var ticketNotes = document.getElementById('ticket-notes');
+            var generalNotes = ticketNotes ? ticketNotes.value : '';
+            
+            // Crear nuevo ticket
+            var ticketId = 'ticket-' + Date.now();
+            
+            // Crear órdenes individuales para cada item
+            var orders = [];
+            for (var i = 0; i < this.state.ticketItems.length; i++) {
+                var item = this.state.ticketItems[i];
+                
+                // Crear nueva orden
+                var order = {
+                    dish: item.dish,
+                    quantity: item.quantity,
+                    customizations: item.customizations || [],
+                    notes: item.notes || (generalNotes ? generalNotes : ''),
+                    service: this.state.ticketService,
+                    startTime: item.startTime || new Date(),
+                    ticketId: ticketId, // Referencia al ticket
+                    status: 'pending'
+                };
+                
+                // Asegurarse de que hay fechas en formato ISO para almacenamiento
+                order.startTimeISO = order.startTime.toISOString();
+                
+                // Añadir orden
+                orders.push(order);
+            }
+            
+            // Agregar órdenes a la lista de pendientes
+            if (!Avika.data.pendingOrders) {
+                Avika.data.pendingOrders = [];
+            }
+            
+            // Añadir todas las órdenes
+            Array.prototype.push.apply(Avika.data.pendingOrders, orders);
+            
+            // Guardar datos
+            if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+                Avika.storage.guardarDatosLocales();
+            }
+            
+            // Actualizar tabla de órdenes pendientes
+            this.updatePendingTable();
+            
+            // Cerrar modal
+            var ticketModal = document.getElementById('ticket-modal');
+            if (ticketModal) {
+                ticketModal.style.display = 'none';
+            }
+            
+            // Resetear estado
+            this.state.ticketMode = false;
+            this.state.ticketItems = [];
+            
+            // Mostrar notificación
+            this.showNotification("Ticket guardado con " + orders.length + " platillos");
+            
+        } catch (e) {
+            console.error("Error al guardar ticket:", e);
+            this.showErrorMessage("Error al guardar ticket: " + e.message);
+        }
+    },
+    
+    // Función para mostrar platillos de una categoría en el modal de ticket
+    showTicketDishes: function(category) {
+        console.log("Mostrando platillos de categoría para ticket:", category);
+        
+        try {
+            var dishesContainer = document.getElementById('ticket-dishes-grid');
+            if (!dishesContainer) {
+                console.error("Contenedor de platillos para ticket no encontrado");
+                return;
+            }
+            
+            // Limpiar contenedor
+            dishesContainer.innerHTML = '';
+            
+            // Marcar botón de categoría activa
+            var categoryBtns = document.querySelectorAll('#ticket-modal .category-btn');
+            categoryBtns.forEach(function(btn) {
+                var cat = btn.getAttribute('data-category');
+                btn.style.backgroundColor = cat === category ? '#2980b9' : '#3498db';
+            });
+            
+            // Verificar si hay platillos en esta categoría
+            if (!Avika.config || !Avika.config.dishes || !Avika.config.dishes[category] || Avika.config.dishes[category].length === 0) {
+                dishesContainer.innerHTML = '<p style="text-align:center;padding:15px;color:#666;">No hay platillos en esta categoría</p>';
+                return;
+            }
+            
+            // Añadir botones para cada platillo
+            var self = this;
+            Avika.config.dishes[category].forEach(function(dish) {
+                var button = document.createElement('button');
+                button.className = 'dish-btn';
+                button.textContent = dish;
+                button.setAttribute('data-dish', dish);
+                button.style.padding = '10px';
+                button.style.backgroundColor = '#f9f9f9';
+                button.style.border = '1px solid #ddd';
+                button.style.borderRadius = '4px';
+                button.style.cursor = 'pointer';
+                button.style.color = '#333';
+                
+                button.addEventListener('click', function() {
+                    self.addDishToTicket(this.getAttribute('data-dish'));
+                });
+                
+                dishesContainer.appendChild(button);
+            });
+            
+        } catch (e) {
+            console.error("Error al mostrar platillos para ticket:", e);
+            this.showErrorMessage("Error: " + e.message);
+        }
+    },
+    
+    // Añadir platillo al ticket
+    addDishToTicket: function(dish) {
+        console.log("Añadiendo platillo al ticket:", dish);
+        
+        try {
+            // Validar platillo
+            if (!dish) {
+                console.error("Error: No se proporcionó un platillo para añadir");
+                return;
+            }
+            
+            // Obtener hora del ticket
+            var hourInput = document.getElementById('ticket-hour-input');
+            var minuteInput = document.getElementById('ticket-minute-input');
+            
+            var hour = hourInput ? parseInt(hourInput.value) : new Date().getHours();
+            var minute = minuteInput ? parseInt(minuteInput.value) : new Date().getMinutes();
+            
+            // Validar hora
+            if (isNaN(hour) || hour < 0 || hour > 23) {
+                hour = new Date().getHours();
+            }
+            if (isNaN(minute) || minute < 0 || minute > 59) {
+                minute = new Date().getMinutes();
+            }
+            
+            // Crear fecha con la hora seleccionada
+            var selectedTime = new Date();
+            selectedTime.setHours(hour, minute, 0);
+            
+            // Crear item para el ticket
+            var ticketItem = {
+                dish: dish,
+                quantity: 1,
+                customizations: [],
+                customizationText: '',
+                notes: '',
+                service: this.state.ticketService || 'comedor',
+                startTime: selectedTime,
+                startTimeFormatted: this.formatTime(selectedTime)
+            };
+            
+            // Añadir al array de items
+            this.state.ticketItems.push(ticketItem);
+            
+            // Actualizar tabla de items
+            this.updateTicketItems();
+            
+            // Mostrar notificación
+            this.showNotification("Platillo añadido al ticket: " + dish);
+            
+        } catch (e) {
+            console.error("Error al añadir platillo al ticket:", e);
+            this.showErrorMessage("Error al añadir platillo: " + e.message);
+        }
+    },
+    
+    // Actualizar contador de órdenes pendientes
+    updatePendingCount: function() {
+        var pendingCount = document.getElementById('pending-count');
+        if (pendingCount) {
+            pendingCount.textContent = Avika.data.pendingOrders ? Avika.data.pendingOrders.length : 0;
+        }
+    },
+    
+    // Inicializar botones de categoría
+    initCategoryButtons: function() {
+        try {
+            console.log("Inicializando botones de categoría...");
+            
+            // Usar selectores para elementos con data-category
+            var categoryButtons = document.querySelectorAll('.category-btn[data-category]');
+            console.log("Encontrados " + categoryButtons.length + " botones de categoría");
+            
+            if (categoryButtons.length === 0) {
+                console.warn("No se encontraron botones de categoría con atributo data-category");
+                return false;
+            }
+            
+            // Asignar eventos a los botones
+            for (var i = 0; i < categoryButtons.length; i++) {
+                var btn = categoryButtons[i];
+                var category = btn.getAttribute('data-category');
+                
+                // Eliminar cualquier evento previo
+                var newBtn = btn.cloneNode(true);
+                if (btn.parentNode) {
+                    btn.parentNode.replaceChild(newBtn, btn);
+                }
+                
+                // Asignar nuevo evento usando closure para capturar la categoría
+                (function(cat) {
+                    newBtn.addEventListener('click', function() {
+                        console.log("Clic en categoría:", cat);
+                        Avika.ui.selectCategory(cat);
+                    });
+                })(category);
+            }
+            
+            console.log("Botones de categoría inicializados correctamente");
+            return true;
+            
+        } catch (e) {
+            console.error("Error al inicializar botones de categoría:", e);
+            console.error("Stack:", e.stack);
+            return false;
+        }
+    },
+    
+    // Mostrar notificación al usuario
+    showNotification: function(message, duration) {
+        console.log("Notificación:", message);
+        
+        var notification = document.getElementById('notification');
+        if (!notification) {
+            notification = document.createElement('div');
+            notification.id = 'notification';
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.left = '50%';
+            notification.style.transform = 'translateX(-50%)';
+            notification.style.backgroundColor = '#4CAF50';
+            notification.style.color = 'white';
+            notification.style.padding = '15px 20px';
+            notification.style.borderRadius = '5px';
+            notification.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+            notification.style.zIndex = '9999';
+            notification.style.minWidth = '200px';
+            notification.style.textAlign = 'center';
+            notification.style.opacity = '0';
+            notification.style.transition = 'opacity 0.3s ease-in-out';
+            document.body.appendChild(notification);
+        }
+        
+        notification.textContent = message;
+        notification.style.opacity = '1';
+        
+        // Ocultar la notificación después de un tiempo
+        clearTimeout(this.notificationTimeout);
+        this.notificationTimeout = setTimeout(function() {
+            notification.style.opacity = '0';
+        }, duration || 3000);
+    },
+    
+    // Función auxiliar para obtener tickets pendientes
+    getPendingTickets: function() {
+        var ticketsMap = {};
+        
+        if (Avika.data.pendingOrders) {
+            Avika.data.pendingOrders.forEach(function(order) {
+                if (order.ticketId && !ticketsMap[order.ticketId]) {
+                    ticketsMap[order.ticketId] = {
+                        id: order.ticketId,
+                        count: 0,
+                        service: order.service,
+                        items: []
+                    };
+                }
+                
+                if (order.ticketId) {
+                    ticketsMap[order.ticketId].count++;
+                    ticketsMap[order.ticketId].items.push(order);
+                }
+            });
+        }
+        
+        return ticketsMap;
+    },
+
+    // Función para forzar completado de un ticket específico
+    forceCompleteTicket: function(ticketId) {
+        console.log("Forzando completado del ticket:", ticketId);
+        
+        if (!confirm('¿Estás seguro de marcar como completado todo el ticket #' + ticketId.replace('ticket-', '') + '?')) {
+            return;
+        }
+        
+        this.completeTicket(ticketId);
+    },
+    
+    // Mostrar modal para forzar completado de tickets
+    showForceCompleteModal: function() {
+        console.log("Mostrando modal para forzar completado");
+        
+        try {
+            // Verificar si existe el modal
+            var modal = document.getElementById('force-complete-modal');
+            
+            // Si no existe, crearlo
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'force-complete-modal';
+                modal.className = 'modal';
+                modal.style.display = 'none';
+                modal.style.position = 'fixed';
+                modal.style.top = '0';
+                modal.style.left = '0';
+                modal.style.width = '100%';
+                modal.style.height = '100%';
+                modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+                modal.style.zIndex = '9999';
+                
+                // Contenido del modal
+                var modalContent = document.createElement('div');
+                modalContent.className = 'modal-content';
+                modalContent.style.backgroundColor = 'white';
+                modalContent.style.margin = '10% auto';
+                modalContent.style.padding = '20px';
+                modalContent.style.width = '80%';
+                modalContent.style.maxWidth = '600px';
+                modalContent.style.borderRadius = '5px';
+                modalContent.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                
+                // Título
+                var title = document.createElement('h2');
+                title.textContent = 'Forzar completado de tickets';
+                title.style.color = '#333';
+                title.style.marginTop = '0';
+                
+                // Descripción
+                var description = document.createElement('p');
+                description.textContent = 'Selecciona el ticket que deseas marcar como completado:';
+                description.style.color = '#333';
+                
+                // Lista de tickets
+                var ticketList = document.createElement('div');
+                ticketList.id = 'force-complete-ticket-list';
+                ticketList.style.maxHeight = '300px';
+                ticketList.style.overflowY = 'auto';
+                ticketList.style.marginBottom = '20px';
+                
+                // Botón de cerrar
+                var closeBtn = document.createElement('button');
+                closeBtn.textContent = 'Cerrar';
+                closeBtn.style.backgroundColor = '#ccc';
+                closeBtn.style.color = '#333';
+                closeBtn.style.border = 'none';
+                closeBtn.style.padding = '10px 20px';
+                closeBtn.style.borderRadius = '4px';
+                closeBtn.style.cursor = 'pointer';
+                closeBtn.style.marginRight = '10px';
+                
+                closeBtn.addEventListener('click', function() {
+                    modal.style.display = 'none';
+                });
+                
+                // Agregar elementos al modal
+                modalContent.appendChild(title);
+                modalContent.appendChild(description);
+                modalContent.appendChild(ticketList);
+                modalContent.appendChild(closeBtn);
+                modal.appendChild(modalContent);
+                
+                // Agregar modal al documento
+                document.body.appendChild(modal);
+            }
+            
+            // Mostrar modal
+            modal.style.display = 'block';
+            
+            // Actualizar lista de tickets
+            this.updateForceCompleteTicketList();
+            
+        } catch (e) {
+            console.error("Error al mostrar modal para forzar completado:", e);
+            this.showErrorMessage("Error: " + e.message);
+        }
+    },
+    
+    // Actualizar lista de tickets para forzar completado
+    updateForceCompleteTicketList: function() {
+        try {
+            var ticketList = document.getElementById('force-complete-ticket-list');
+            if (!ticketList) {
+                console.error("Lista de tickets para forzar completado no encontrada");
+                return;
+            }
+            
+            // Limpiar lista
+            ticketList.innerHTML = '';
+            
+            // Obtener tickets pendientes
+            var tickets = this.getPendingTickets();
+            var ticketIds = Object.keys(tickets);
+            
+            // Si no hay tickets, mostrar mensaje
+            if (ticketIds.length === 0) {
+                ticketList.innerHTML = '<p style="color:#666;text-align:center;padding:20px;">No hay tickets pendientes</p>';
+                return;
+            }
+            
+            // Crear lista de tickets
+            var self = this;
+            ticketIds.forEach(function(ticketId) {
+                var ticket = tickets[ticketId];
+                
+                // Crear elemento para el ticket
+                var ticketItem = document.createElement('div');
+                ticketItem.className = 'ticket-item';
+                ticketItem.style.padding = '10px';
+                ticketItem.style.margin = '5px 0';
+                ticketItem.style.backgroundColor = '#f9f9f9';
+                ticketItem.style.borderRadius = '4px';
+                ticketItem.style.display = 'flex';
+                ticketItem.style.justifyContent = 'space-between';
+                ticketItem.style.alignItems = 'center';
+                
+                // Información del ticket
+                var ticketInfo = document.createElement('div');
+                ticketInfo.style.color = '#333';
+                
+                // Formatear número de ticket
+                var ticketNumber = ticketId.replace('ticket-', '');
+                
+                // Service text
+                var serviceText = '';
+                switch (ticket.service) {
+                    case 'comedor': serviceText = 'Comedor'; break;
+                    case 'domicilio': serviceText = 'Domicilio'; break;
+                    case 'para-llevar': serviceText = 'Ordena y espera'; break;
+                    default: serviceText = ticket.service;
+                }
+                
+                // Texto del ticket
+                ticketInfo.innerHTML = '<strong>Ticket #' + ticketNumber + '</strong> - ' + 
+                                      serviceText + ' - ' + 
+                                      ticket.count + ' platillos';
+                
+                // Botón para completar
+                var completeBtn = document.createElement('button');
+                completeBtn.textContent = 'Completar';
+                completeBtn.style.backgroundColor = '#e74c3c';
+                completeBtn.style.color = 'white';
+                completeBtn.style.border = 'none';
+                completeBtn.style.padding = '5px 10px';
+                completeBtn.style.borderRadius = '4px';
+                completeBtn.style.cursor = 'pointer';
+                
+                completeBtn.addEventListener('click', function() {
+                    self.forceCompleteTicket(ticketId);
+                });
+                
+                // Añadir elementos al ticket
+                ticketItem.appendChild(ticketInfo);
+                ticketItem.appendChild(completeBtn);
+                ticketList.appendChild(ticketItem);
+            });
+            
+        } catch (e) {
+            console.error("Error al actualizar lista de tickets para forzar completado:", e);
+            this.showErrorMessage("Error: " + e.message);
+        }
     }
 };
