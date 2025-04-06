@@ -617,5 +617,17 @@ Avika.orders = {
         Avika.ui.updateCompletedTable();
         Avika.storage.guardarDatosLocales();
         Avika.ui.showNotification('Historial de platillos terminados limpiado correctamente');
+    },
+
+    generateMinuteOptions: function() {
+        var options = '';
+        for (var i = 0; i < 60; i += 1) {
+            options += `<option value="${i}">${this.padZero(i)}</option>`;
+        }
+        return options;
+    },
+
+    getMinutes: function(num) {
+        return num % 60;
     }
 };

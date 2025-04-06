@@ -948,7 +948,7 @@ Avika.ui = {
         // Inicializar hora actual
         var now = new Date();
         document.getElementById('ticket-hour').value = now.getHours();
-        document.getElementById('ticket-minute').value = this.roundToFive(now.getMinutes());
+        document.getElementById('ticket-minute').value = this.getMinutes(now.getMinutes());
         
         // Resetear lista de items
         this.state.ticketItems = [];
@@ -978,14 +978,14 @@ Avika.ui = {
     
     generateMinuteOptions: function() {
         var options = '';
-        for (var i = 0; i < 60; i += 5) {
+        for (var i = 0; i < 60; i += 1) {
             options += `<option value="${i}">${this.padZero(i)}</option>`;
         }
         return options;
     },
     
-    roundToFive: function(num) {
-        return Math.round(num / 5) * 5 % 60;
+    getMinutes: function(num) {
+        return num % 60;
     },
     
     selectTicketService: function(button, service) {
