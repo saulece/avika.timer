@@ -10,7 +10,27 @@ Avika.data = {
     
     pendingOrders: [],
     completedOrders: [],
-    timerInterval: null
+    timerInterval: null,
+    
+    // Añadir una función de utilidad para encontrar órdenes por ID
+    findOrderIndexById: function(id) {
+        for (var i = 0; i < this.pendingOrders.length; i++) {
+            if (this.pendingOrders[i].id === id) {
+                return i;
+            }
+        }
+        return -1;
+    },
+    
+    // Función para calcular tiempos formateados
+    calculateTimeFormatted: function(endTime, startTime) {
+        var timeMillis = endTime - new Date(startTime);
+        var timeSecs = Math.floor(timeMillis / 1000);
+        var mins = Math.floor(timeSecs / 60);
+        var secs = timeSecs % 60;
+        
+        return Avika.ui.padZero(mins) + ':' + Avika.ui.padZero(secs) + ' minutos';
+    }
 };
 
 Avika.orders = {
@@ -47,13 +67,7 @@ Avika.orders = {
     },
 
     finishHotKitchen: function(id) {
-        var orderIndex = -1;
-        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            if (Avika.data.pendingOrders[i].id === id) {
-                orderIndex = i;
-                break;
-            }
-        }
+        var orderIndex = Avika.data.findOrderIndexById(id);
         
         if (orderIndex === -1) return;
         
@@ -81,13 +95,7 @@ Avika.orders = {
     },
 
     finishColdKitchen: function(id) {
-        var orderIndex = -1;
-        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            if (Avika.data.pendingOrders[i].id === id) {
-                orderIndex = i;
-                break;
-            }
-        }
+        var orderIndex = Avika.data.findOrderIndexById(id);
         
         if (orderIndex === -1) return;
         
@@ -116,13 +124,7 @@ Avika.orders = {
 
     // Esta función se llama cuando termina la preparación en cocina para un pedido a domicilio
     finishKitchenForDelivery: function(id) {
-        var orderIndex = -1;
-        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            if (Avika.data.pendingOrders[i].id === id) {
-                orderIndex = i;
-                break;
-            }
-        }
+        var orderIndex = Avika.data.findOrderIndexById(id);
         
         if (orderIndex === -1) return;
         
@@ -200,13 +202,7 @@ Avika.orders = {
 
     // Esta función registra la salida del repartidor (para todos los platillos del mismo ticket)
     markDeliveryDeparture: function(id) {
-        var orderIndex = -1;
-        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            if (Avika.data.pendingOrders[i].id === id) {
-                orderIndex = i;
-                break;
-            }
-        }
+        var orderIndex = Avika.data.findOrderIndexById(id);
         
         if (orderIndex === -1) return;
         
@@ -260,13 +256,7 @@ Avika.orders = {
 
     // Esta función registra la entrega al cliente (para todos los platillos del mismo ticket)
     markDeliveryArrival: function(id) {
-        var orderIndex = -1;
-        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            if (Avika.data.pendingOrders[i].id === id) {
-                orderIndex = i;
-                break;
-            }
-        }
+        var orderIndex = Avika.data.findOrderIndexById(id);
         
         if (orderIndex === -1) return;
         
@@ -289,25 +279,14 @@ Avika.orders = {
                     
                     // Calcular tiempo total desde inicio hasta entrega
                     var endTime = arrivalTime;
-                    var prepTimeMillis = endTime - new Date(item.startTime);
-                    var prepTimeSecs = Math.floor(prepTimeMillis / 1000);
-                    var prepMins = Math.floor(prepTimeSecs / 60);
-                    var prepSecs = prepTimeSecs % 60;
-                    
-                    var prepTimeFormatted = Avika.ui.padZero(prepMins) + ':' + Avika.ui.padZero(prepSecs) + ' minutos';
+                    item.prepTime = Avika.data.calculateTimeFormatted(endTime, item.startTime);
                     
                     item.endTime = endTime;
                     item.endTimeFormatted = arrivalTimeFormatted;
-                    item.prepTime = prepTimeFormatted;
                     
                     // También calcular el tiempo específico de entrega
                     if (item.deliveryDepartureTime) {
-                        var deliveryTimeMillis = endTime - new Date(item.deliveryDepartureTime);
-                        var deliveryTimeSecs = Math.floor(deliveryTimeMillis / 1000);
-                        var deliveryMins = Math.floor(deliveryTimeSecs / 60);
-                        var deliverySecs = deliveryTimeSecs % 60;
-                        
-                        item.deliveryTime = Avika.ui.padZero(deliveryMins) + ':' + Avika.ui.padZero(deliverySecs) + ' minutos';
+                        item.deliveryTime = Avika.data.calculateTimeFormatted(endTime, item.deliveryDepartureTime);
                     }
                     
                     // Agregar a completados
@@ -333,25 +312,14 @@ Avika.orders = {
             
             // Calcular tiempo total desde inicio hasta entrega
             var endTime = arrivalTime;
-            var prepTimeMillis = endTime - new Date(order.startTime);
-            var prepTimeSecs = Math.floor(prepTimeMillis / 1000);
-            var prepMins = Math.floor(prepTimeSecs / 60);
-            var prepSecs = prepTimeSecs % 60;
-            
-            var prepTimeFormatted = Avika.ui.padZero(prepMins) + ':' + Avika.ui.padZero(prepSecs) + ' minutos';
+            order.prepTime = Avika.data.calculateTimeFormatted(endTime, order.startTime);
             
             order.endTime = endTime;
             order.endTimeFormatted = arrivalTimeFormatted;
-            order.prepTime = prepTimeFormatted;
             
             // También calcular el tiempo específico de entrega
             if (order.deliveryDepartureTime) {
-                var deliveryTimeMillis = endTime - new Date(order.deliveryDepartureTime);
-                var deliveryTimeSecs = Math.floor(deliveryTimeMillis / 1000);
-                var deliveryMins = Math.floor(deliveryTimeSecs / 60);
-                var deliverySecs = deliveryTimeSecs % 60;
-                
-                order.deliveryTime = Avika.ui.padZero(deliveryMins) + ':' + Avika.ui.padZero(deliverySecs) + ' minutos';
+                order.deliveryTime = Avika.data.calculateTimeFormatted(endTime, order.deliveryDepartureTime);
             }
             
             // Crear una copia profunda del objeto para evitar problemas de referencia
@@ -364,7 +332,7 @@ Avika.orders = {
             Avika.data.pendingOrders.splice(orderIndex, 1);
             
             Avika.ui.showNotification('¡' + order.dish + ' entregado al cliente! Tiempo total: ' + 
-                          prepTimeFormatted + (order.deliveryTime ? ', Tiempo de entrega: ' + order.deliveryTime : ''));
+                          order.prepTime + (order.deliveryTime ? ', Tiempo de entrega: ' + order.deliveryTime : ''));
         }
         
         Avika.ui.updatePendingTable();
@@ -374,13 +342,7 @@ Avika.orders = {
 
     // Verifica que este código esté presente en order-service.js en la función finishPreparation
     finishPreparation: function(id) {
-        var orderIndex = -1;
-        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            if (Avika.data.pendingOrders[i].id === id) {
-                orderIndex = i;
-                break;
-            }
-        }
+        var orderIndex = Avika.data.findOrderIndexById(id);
         
         if (orderIndex === -1) return;
         
@@ -415,13 +377,7 @@ Avika.orders = {
             order.finishTimeFormatted = Avika.ui.formatTime(endTime);
             
             // Calcular tiempo de preparación individual
-            var prepTimeMillis = endTime - new Date(order.startTime);
-            var prepTimeSecs = Math.floor(prepTimeMillis / 1000);
-            var prepMins = Math.floor(prepTimeSecs / 60);
-            var prepSecs = prepTimeSecs % 60;
-            
-            var prepTimeFormatted = Avika.ui.padZero(prepMins) + ':' + Avika.ui.padZero(prepSecs) + ' minutos';
-            order.individualPrepTime = prepTimeFormatted;
+            order.individualPrepTime = Avika.data.calculateTimeFormatted(endTime, order.startTime);
             
             // Si todavía faltan platillos por terminar, actualizar la UI y salir
             if (!allTicketItemsFinished) {
@@ -456,17 +412,11 @@ Avika.orders = {
                 var item = Avika.data.pendingOrders[i];
                 if (item.ticketId === order.ticketId) {
                     // Calcular tiempo de preparación
-                    var prepTimeMillis = endTime - new Date(item.startTime);
-                    var prepTimeSecs = Math.floor(prepTimeMillis / 1000);
-                    var prepMins = Math.floor(prepTimeSecs / 60);
-                    var prepSecs = prepTimeSecs % 60;
-                    
-                    var prepTimeFormatted = Avika.ui.padZero(prepMins) + ':' + Avika.ui.padZero(prepSecs) + ' minutos';
+                    item.prepTime = Avika.data.calculateTimeFormatted(endTime, item.startTime);
                     
                     // Completar platillo
                     item.endTime = endTime;
                     item.endTimeFormatted = Avika.ui.formatTime(endTime);
-                    item.prepTime = prepTimeFormatted;
                     
                     // Agregar a completados
                     Avika.data.completedOrders.unshift(JSON.parse(JSON.stringify(item)));
@@ -485,16 +435,11 @@ Avika.orders = {
         }
         // Caso normal: platillo individual
         else {
-            var prepTimeMillis = endTime - new Date(order.startTime);
-            var prepTimeSecs = Math.floor(prepTimeMillis / 1000);
-            var prepMins = Math.floor(prepTimeSecs / 60);
-            var prepSecs = prepTimeSecs % 60;
-            
-            var prepTimeFormatted = Avika.ui.padZero(prepMins) + ':' + Avika.ui.padZero(prepSecs) + ' minutos';
+            // Calcular tiempo de preparación
+            order.prepTime = Avika.data.calculateTimeFormatted(endTime, order.startTime);
             
             order.endTime = endTime;
             order.endTimeFormatted = Avika.ui.formatTime(endTime);
-            order.prepTime = prepTimeFormatted;
             
             // Crear una copia profunda del objeto para evitar problemas de referencia
             var orderCopy = JSON.parse(JSON.stringify(order));
@@ -505,7 +450,7 @@ Avika.orders = {
             // Eliminar de pendientes
             Avika.data.pendingOrders.splice(orderIndex, 1);
             
-            Avika.ui.showNotification('¡' + order.dish + ' terminado! Tiempo total: ' + prepTimeFormatted);
+            Avika.ui.showNotification('¡' + order.dish + ' terminado! Tiempo total: ' + order.prepTime);
         }
         
         Avika.ui.updatePendingTable();
@@ -515,13 +460,7 @@ Avika.orders = {
 
     // Esta función marca como terminado un platillo individual dentro de un ticket
     finishIndividualItem: function(id) {
-        var orderIndex = -1;
-        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            if (Avika.data.pendingOrders[i].id === id) {
-                orderIndex = i;
-                break;
-            }
-        }
+        var orderIndex = Avika.data.findOrderIndexById(id);
         
         if (orderIndex === -1) return;
         
@@ -533,12 +472,7 @@ Avika.orders = {
         order.finishTimeFormatted = Avika.ui.formatTime(order.finishTime);
         
         // Calcular el tiempo de preparación individual
-        var prepTimeMillis = order.finishTime - new Date(order.startTime);
-        var prepTimeSecs = Math.floor(prepTimeMillis / 1000);
-        var prepMins = Math.floor(prepTimeSecs / 60);
-        var prepSecs = prepTimeSecs % 60;
-        
-        order.individualPrepTime = Avika.ui.padZero(prepMins) + ':' + Avika.ui.padZero(prepSecs) + ' minutos';
+        order.individualPrepTime = Avika.data.calculateTimeFormatted(order.finishTime, order.startTime);
         
         Avika.ui.showNotification(order.dish + ' terminado individualmente en ' + order.individualPrepTime);
         
@@ -619,15 +553,20 @@ Avika.orders = {
         Avika.ui.showNotification('Historial de platillos terminados limpiado correctamente');
     },
 
+    // Funciones de utilidad para manejo de tiempo
     generateMinuteOptions: function() {
         var options = '';
         for (var i = 0; i < 60; i += 1) {
-            options += `<option value="${i}">${this.padZero(i)}</option>`;
+            options += `<option value="${i}">${Avika.ui.padZero(i)}</option>`;
         }
         return options;
     },
 
-    getMinutes: function(num) {
-        return num % 60;
+    getMinutes: function(totalSeconds) {
+        return Math.floor(totalSeconds / 60);
+    },
+    
+    getSeconds: function(totalSeconds) {
+        return totalSeconds % 60;
     }
 };
