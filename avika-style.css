@@ -493,13 +493,16 @@ section {
 
 .pending-orders-section th:nth-child(3),
 .pending-orders-section td:nth-child(3) {
-    width: 10%;
+    width: 12%;
+    min-width: 100px;
+    text-align: center;
 }
 
 .pending-orders-section th:nth-child(4),
 .pending-orders-section td:nth-child(4) {
-    width: 36%;
+    width: 34%;
     word-break: break-word;
+    padding-left: 10px;
 }
 
 /* Estilo para celda de temporizador */
@@ -508,6 +511,9 @@ section {
     color: var(--text-color);
     font-size: 18px;
     font-family: var(--font-monospace);
+    min-width: 100px;
+    white-space: nowrap;
+    text-align: center;
 }
 
 .timer-cell.warning {
