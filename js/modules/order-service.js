@@ -86,72 +86,58 @@
     Avika.orders.completeOrder = function(index) {
         try {
             if (!Avika.data.pendingOrders || index < 0 || index >= Avika.data.pendingOrders.length) {
-                console.error("Índice de orden inválido:", index);
+                console.error("Índice de pedido inválido:", index);
                 return false;
             }
             
             var order = Avika.data.pendingOrders[index];
-            order.finishTime = new Date();
             
-            // Calcular tiempo de preparación
-            var startTime = new Date(order.startTime);
-            var endTime = order.finishTime;
-            var prepTimeMillis = endTime - startTime;
-            var prepTimeSecs = Math.floor(prepTimeMillis / 1000);
-            
-            // Formatear tiempo de preparación
-            var prepMins = Math.floor(prepTimeSecs / 60);
-            var prepSecs = prepTimeSecs % 60;
-            
-            if (Avika.dateUtils && typeof Avika.dateUtils.padZero === 'function') {
-                order.prepTime = Avika.dateUtils.padZero(prepMins) + ':' + Avika.dateUtils.padZero(prepSecs);
-            } else {
-                order.prepTime = (prepMins < 10 ? '0' : '') + prepMins + ':' + (prepSecs < 10 ? '0' : '') + prepSecs;
-            }
-            
-            // Verificar si es parte de un ticket
-            var ticketId = order.ticketId;
-            
-            // Si no es parte de un ticket, procesarlo individualmente
-            if (!ticketId) {
-                // Mover a completados
-                if (!Avika.data.completedOrders) {
-                    Avika.data.completedOrders = [];
-                }
+            // Check if this is a delivery order
+            if (order.service === 'domicilio') {
+                // Mark it as finished but keep it in the pending orders for delivery tracking
+                order.finishTime = new Date();
+                order.completed = true;
                 
-                Avika.data.completedOrders.unshift(order);
+                // Calculate preparation time
+                var startTime = new Date(order.startTime);
+                var endTime = order.finishTime;
+                var prepTimeMillis = endTime - startTime;
+                var prepTimeSecs = Math.floor(prepTimeMillis / 1000);
                 
-                // Eliminar de pendientes
-                Avika.data.pendingOrders.splice(index, 1);
+                // Format preparation time
+                var prepMins = Math.floor(prepTimeSecs / 60);
+                var prepSecs = prepTimeSecs % 60;
                 
-                // Actualizar UI
+                order.prepTime = (Avika.dateUtils && typeof Avika.dateUtils.padZero === 'function' ? 
+                                Avika.dateUtils.padZero(prepMins) : (prepMins < 10 ? '0' : '') + prepMins) + 
+                               ':' + 
+                               (Avika.dateUtils && typeof Avika.dateUtils.padZero === 'function' ? 
+                                Avika.dateUtils.padZero(prepSecs) : (prepSecs < 10 ? '0' : '') + prepSecs);
+                
+                // Update the pending table to show the delivery tracking buttons
                 if (Avika.ui && typeof Avika.ui.updatePendingTable === 'function') {
                     Avika.ui.updatePendingTable();
                 }
                 
-                if (Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
-                    Avika.ui.updateCompletedTable(false);
-                }
-                
-                // Guardar datos
+                // Save data
                 if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
                     Avika.storage.guardarDatosLocales();
                 }
                 
-                // Notificar
+                // Notify
                 if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
-                    Avika.ui.showNotification("Platillo '" + order.dish + "' completado");
+                    Avika.ui.showNotification("Platillo '" + order.dish + "' listo para entrega. Registre salida del repartidor.");
                 }
                 
                 return true;
+            } else {
+                // For non-delivery orders, use the original function
+                return Avika.orders.handleTicketItemCompletion(index, order, order.ticketId);
             }
-            
-            // Manejo especial para órdenes en tickets
-            return Avika.orders.handleTicketItemCompletion(index, order, ticketId);
         } catch (e) {
-            console.error("Error al completar orden:", e);
+            console.error("Error al completar pedido (versión mejorada):", e);
             if (Avika.ui && typeof Avika.ui.showErrorMessage === 'function') {
-                Avika.ui.showErrorMessage("Error al completar orden: " + e.message);
+                Avika.ui.showErrorMessage("Error al completar pedido: " + e.message);
             }
             return false;
         }
@@ -583,15 +569,24 @@
                         if (order.service === 'domicilio') {
                             var actionCell = row.cells[4]; // Action column
                             
-                            // If the order is marked as completed but waiting for delivery
-                            if (order.finishTime && !order.deliveryDepartureTime) {
-                                // Add departure button if not already present
+                            // If the order is ready for delivery (completed or finishTime is set)
+                            if ((order.completed || order.finishTime) && !order.deliveryDepartureTime) {
+                                // Replace standard action buttons with delivery buttons
                                 if (!actionCell.innerHTML.includes('Salida Repartidor')) {
+                                    // Clear existing content
+                                    actionCell.innerHTML = '';
+                                    
+                                    // Add delivery departure button
                                     var departureBtn = document.createElement('button');
                                     departureBtn.textContent = 'Salida Repartidor';
                                     departureBtn.className = 'action-btn';
                                     departureBtn.style.backgroundColor = '#ff9800';
                                     departureBtn.style.margin = '2px';
+                                    departureBtn.style.color = 'white';
+                                    departureBtn.style.border = 'none';
+                                    departureBtn.style.borderRadius = '4px';
+                                    departureBtn.style.padding = '8px 12px';
+                                    departureBtn.style.cursor = 'pointer';
                                     
                                     departureBtn.onclick = function() {
                                         Avika.orders.registerDeliveryDeparture(order.id);
@@ -603,13 +598,22 @@
                             
                             // If the order has departure time but not arrival time
                             if (order.deliveryDepartureTime && !order.deliveryArrivalTime) {
-                                // Add arrival button if not already present
+                                // Replace with arrival button
                                 if (!actionCell.innerHTML.includes('Llegada')) {
+                                    // Clear existing content
+                                    actionCell.innerHTML = '';
+                                    
+                                    // Add arrival button
                                     var arrivalBtn = document.createElement('button');
                                     arrivalBtn.textContent = 'Llegada';
                                     arrivalBtn.className = 'action-btn';
                                     arrivalBtn.style.backgroundColor = '#4CAF50';
                                     arrivalBtn.style.margin = '2px';
+                                    arrivalBtn.style.color = 'white';
+                                    arrivalBtn.style.border = 'none';
+                                    arrivalBtn.style.borderRadius = '4px';
+                                    arrivalBtn.style.padding = '8px 12px';
+                                    arrivalBtn.style.cursor = 'pointer';
                                     
                                     arrivalBtn.onclick = function() {
                                         Avika.orders.registerDeliveryArrival(order.id);
