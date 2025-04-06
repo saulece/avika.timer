@@ -275,222 +275,311 @@
     
     Avika.ui.enableTicketMode = function() {
         try {
-            console.log("Iniciando configuración de ticket...");
+            console.log("Activando modo ticket (versión mejorada)");
             
-        // Reiniciar configuración
-            window.ticketConfig = {
-            service: 'comedor',
-            startTime: null,
-            configured: false
-        };
-        
-            // Configurar ticket
-            return Avika.ui.configureTicket();
-        } catch (e) {
-            console.error("Error al iniciar modo ticket:", e);
-            if (Avika.ui && typeof Avika.ui.showErrorMessage === 'function') {
-                Avika.ui.showErrorMessage("Error al iniciar modo ticket: " + e.message);
+            // First, remove any existing ticket modals to prevent duplicates
+            var existingModal = document.getElementById('ticket-modal');
+            if (existingModal) {
+                // Instead of removing, just hide it and we'll show it again
+                existingModal.style.display = 'none';
+            }
+            
+            // Call the original function
+            if (typeof originalEnableTicketMode === 'function') {
+                originalEnableTicketMode.call(this);
             } else {
-                alert("Error al iniciar modo ticket: " + e.message);
+                console.warn("Función original enableTicketMode no encontrada");
+                
+                // Basic implementation if original is not available
+                Avika.orders.currentTicket = {
+                    id: 'ticket-' + Date.now(),
+                    items: [],
+                    service: 'comedor',
+                    creationTime: new Date(),
+                    active: true
+                };
+            }
+            
+            // Make sure the modal is displayed and doesn't disappear
+            var ticketModal = document.getElementById('ticket-modal');
+            if (!ticketModal) {
+                // Create a basic modal if it doesn't exist
+                createBasicTicketModal();
+                ticketModal = document.getElementById('ticket-modal');
+            }
+            
+            if (ticketModal) {
+                // Make sure it's visible
+                ticketModal.style.display = 'block';
+                
+                // Keep it visible with a periodic check
+                startModalVisibilityCheck();
+            }
+            
+            return true;
+        } catch (e) {
+            console.error("Error al activar modo ticket:", e);
+            if (Avika.ui && typeof Avika.ui.showErrorMessage === 'function') {
+                Avika.ui.showErrorMessage("Error al activar modo ticket: " + e.message);
             }
             return false;
         }
     };
     
-    // Función para activar el ticket después de la configuración
-    function activateTicketAfterConfig() {
-        try {
-            console.log("Activando ticket después de configuración");
-            
-            // Generar ID único para el ticket
-            Avika.orders.currentTicket.id = 'ticket-' + Date.now();
-            Avika.orders.currentTicket.items = [];
-            Avika.orders.currentTicket.service = window.ticketConfig.service;
-            Avika.orders.currentTicket.startTime = window.ticketConfig.startTime;
-            Avika.orders.currentTicket.creationTime = new Date();
-            Avika.orders.currentTicket.active = true;
-            
-            // Cambiar apariencia del botón
-            var ticketBtn = document.getElementById('btn-new-ticket');
-            if (ticketBtn) {
-                ticketBtn.textContent = 'Guardar Ticket';
-                ticketBtn.style.backgroundColor = '#e74c3c';
-                
-                // Remover cualquier evento previo y asignar uno nuevo
-                var newBtn = ticketBtn.cloneNode(true);
-                if (ticketBtn.parentNode) {
-                ticketBtn.parentNode.replaceChild(newBtn, ticketBtn);
-                }
-                
-                // Asignar el evento de guardar ticket
-                newBtn.addEventListener('click', function() {
-                    Avika.orders.saveCurrentTicket();
-                });
+    // Function to create a basic ticket modal if the original one is missing
+    function createBasicTicketModal() {
+        console.log("Creando modal de ticket básico...");
+        
+        var modalHtml = `
+            <div id="ticket-modal" style="display:block; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.7); z-index:9999;">
+                <div style="background-color:white; width:90%; max-width:800px; margin:30px auto; padding:20px; border-radius:5px; max-height:90%; overflow-y:auto;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h2 style="margin:0;">Crear Nuevo Ticket/Comanda</h2>
+                        <span id="close-ticket-modal" style="font-size:24px; cursor:pointer;">&times;</span>
+                    </div>
+                    
+                    <div style="display:flex; gap:20px; margin-bottom:20px;">
+                        <div style="flex:1;">
+                            <h3>Categorías</h3>
+                            <div id="ticket-categories" style="display:flex; flex-wrap:wrap; gap:10px;">
+                                <button class="category-btn" data-category="frio" style="padding:8px 12px; background:#3498db; color:white; border:none; border-radius:4px; cursor:pointer;">Platillos Fríos</button>
+                                <button class="category-btn" data-category="caliente" style="padding:8px 12px; background:#3498db; color:white; border:none; border-radius:4px; cursor:pointer;">Platillos Calientes</button>
+                                <button class="category-btn" data-category="combos" style="padding:8px 12px; background:#3498db; color:white; border:none; border-radius:4px; cursor:pointer;">Combos</button>
+                            </div>
+                            
+                            <h3>Platillos</h3>
+                            <div id="ticket-dishes" style="max-height:300px; overflow-y:auto; border:1px solid #ddd; padding:10px;">
+                                <p>Selecciona una categoría para ver los platillos</p>
+                            </div>
+                        </div>
+                        
+                        <div style="flex:1;">
+                            <h3>Platillos Seleccionados</h3>
+                            <table style="width:100%; border-collapse:collapse;">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Platillo</th>
+                                        <th style="text-align:center; padding:8px; border-bottom:1px solid #ddd;">Cantidad</th>
+                                        <th style="text-align:center; padding:8px; border-bottom:1px solid #ddd;">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ticket-items-body">
+                                    <tr>
+                                        <td colspan="3" style="text-align:center; padding:10px;">No hay platillos seleccionados</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div style="margin-top:20px;">
+                                <h3>Tipo de Servicio</h3>
+                                <div style="display:flex; gap:10px; margin-bottom:15px;">
+                                    <button id="ticket-btn-comedor" style="flex:1; padding:8px; background:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">Comedor</button>
+                                    <button id="ticket-btn-domicilio" style="flex:1; padding:8px; background:#ddd; color:black; border:none; border-radius:4px; cursor:pointer;">Domicilio</button>
+                                    <button id="ticket-btn-para-llevar" style="flex:1; padding:8px; background:#ddd; color:black; border:none; border-radius:4px; cursor:pointer;">Ordena y Espera</button>
+                                </div>
+                                
+                                <h3>Hora de Ingreso</h3>
+                                <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
+                                    <input id="ticket-hour-input" type="number" min="0" max="23" style="width:60px; padding:8px; text-align:center;" value="${new Date().getHours()}">
+                                    <span style="font-size:20px; font-weight:bold;">:</span>
+                                    <input id="ticket-minute-input" type="number" min="0" max="59" style="width:60px; padding:8px; text-align:center;" value="${new Date().getMinutes()}">
+                                </div>
+                            </div>
+                            
+                            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                                <button id="ticket-cancel-btn" style="padding:10px 20px; background:#e74c3c; color:white; border:none; border-radius:4px; cursor:pointer;">Cancelar</button>
+                                <button id="ticket-save-btn" style="padding:10px 20px; background:#2ecc71; color:white; border:none; border-radius:4px; cursor:pointer;">Guardar Ticket</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        // Set up event handlers
+        document.getElementById('close-ticket-modal').addEventListener('click', function() {
+            var modal = document.getElementById('ticket-modal');
+            if (modal) {
+                modal.style.display = 'none';
             }
             
-            // Mostrar notificación
-            if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
-                Avika.ui.showNotification("Modo ticket activado - Agrega platillos");
+            // Reset ticket state
+            if (Avika.orders && Avika.orders.currentTicket) {
+                Avika.orders.currentTicket.active = false;
             }
             
-            return true;
-        } catch (e) {
-            console.error("Error al activar ticket después de configuración:", e);
-            return false;
-        }
-    }
-    
-    // Hacer accesible la función para otros módulos
-    Avika.ui.enableTicketModeWithConfig = activateTicketAfterConfig;
-    
-    // Reescribir completamente saveCurrentTicket para mayor robustez
-    Avika.orders.saveCurrentTicket = function() {
-        try {
-            console.log("Guardando ticket (versión robusta)");
-            
-            // Verificar que el ticket está activo
-            if (!Avika.orders.currentTicket || !Avika.orders.currentTicket.active) {
-                console.warn("Intentando guardar un ticket no activo");
-                return false;
-            }
-            
-            // Si no hay items, mostrar notificación
-            if (!Avika.orders.currentTicket.items || Avika.orders.currentTicket.items.length === 0) {
-                if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
-                    Avika.ui.showNotification("No hay platillos en el ticket", 3000);
-                }
-                return false;
-            }
-            
-            // Usar la hora configurada al crear el ticket
-            var startTime = window.ticketConfig.startTime || new Date();
-            
-            // Crear órdenes para cada ítem del ticket
-            Avika.orders.currentTicket.items.forEach(function(item) {
-                var newOrder = {
-                    id: 'order-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
-                    dish: item.dish,
-                    quantity: item.quantity,
-                    customizations: item.customizations,
-                    service: Avika.orders.currentTicket.service, // Usar el servicio del ticket
-                    notes: item.notes,
-                    startTime: startTime, // Usar la misma hora para todos
-                    ticketId: Avika.orders.currentTicket.id
-                };
-                
-                // Agregar a la lista de pedidos pendientes
-                if (!Avika.data.pendingOrders) {
-                    Avika.data.pendingOrders = [];
-                }
-                
-                Avika.data.pendingOrders.push(newOrder);
-            });
-            
-            // Actualizar tabla
-            if (Avika.ui && typeof Avika.ui.updatePendingTable === 'function') {
-                Avika.ui.updatePendingTable();
-            }
-            
-            // Guardar datos
-            if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
-                Avika.storage.guardarDatosLocales();
-            }
-            
-            // Notificar
-            if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
-                Avika.ui.showNotification("Ticket guardado con " + Avika.orders.currentTicket.items.length + " platillos");
-            }
-            
-            // Restablecer el ticket
-            Avika.orders.currentTicket.active = false;
-            Avika.orders.currentTicket.items = [];
-            
-            // Restaurar botón
+            // Reset button
             var ticketBtn = document.getElementById('btn-new-ticket');
             if (ticketBtn) {
                 ticketBtn.textContent = 'Nuevo Ticket/Comanda';
                 ticketBtn.style.backgroundColor = '';
                 
-                // Remover cualquier evento previo y asignar uno nuevo
-                var newBtn = ticketBtn.cloneNode(true);
-                if (ticketBtn.parentNode) {
-                ticketBtn.parentNode.replaceChild(newBtn, ticketBtn);
-                }
-                
-                // Asignar el evento de nuevo ticket
-                newBtn.addEventListener('click', function() {
-                    if (Avika.ui && typeof Avika.ui.enableTicketMode === 'function') {
-                        Avika.ui.enableTicketMode();
-                    }
-                });
+                // Restore original function
+                ticketBtn.onclick = function() {
+                    Avika.ui.enableTicketMode();
+                };
             }
+        });
+        
+        // Set up service type buttons
+        document.getElementById('ticket-btn-comedor').addEventListener('click', function() {
+            this.style.background = '#4CAF50';
+            this.style.color = 'white';
+            document.getElementById('ticket-btn-domicilio').style.background = '#ddd';
+            document.getElementById('ticket-btn-domicilio').style.color = 'black';
+            document.getElementById('ticket-btn-para-llevar').style.background = '#ddd';
+            document.getElementById('ticket-btn-para-llevar').style.color = 'black';
             
-            // Reiniciar configuración
-            window.ticketConfig = {
-                service: 'comedor',
-                startTime: null,
-                configured: false
-            };
+            if (Avika.orders && Avika.orders.currentTicket) {
+                Avika.orders.currentTicket.service = 'comedor';
+            }
+        });
+        
+        document.getElementById('ticket-btn-domicilio').addEventListener('click', function() {
+            this.style.background = '#4CAF50';
+            this.style.color = 'white';
+            document.getElementById('ticket-btn-comedor').style.background = '#ddd';
+            document.getElementById('ticket-btn-comedor').style.color = 'black';
+            document.getElementById('ticket-btn-para-llevar').style.background = '#ddd';
+            document.getElementById('ticket-btn-para-llevar').style.color = 'black';
             
-            return true;
-        } catch (e) {
-            console.error("Error al guardar ticket:", e);
-            if (Avika.ui && typeof Avika.ui.showErrorMessage === 'function') {
-                Avika.ui.showErrorMessage("Error al guardar ticket: " + e.message);
+            if (Avika.orders && Avika.orders.currentTicket) {
+                Avika.orders.currentTicket.service = 'domicilio';
+            }
+        });
+        
+        document.getElementById('ticket-btn-para-llevar').addEventListener('click', function() {
+            this.style.background = '#4CAF50';
+            this.style.color = 'white';
+            document.getElementById('ticket-btn-comedor').style.background = '#ddd';
+            document.getElementById('ticket-btn-comedor').style.color = 'black';
+            document.getElementById('ticket-btn-domicilio').style.background = '#ddd';
+            document.getElementById('ticket-btn-domicilio').style.color = 'black';
+            
+            if (Avika.orders && Avika.orders.currentTicket) {
+                Avika.orders.currentTicket.service = 'para-llevar';
+            }
+        });
+        
+        // Set up ticket save button
+        document.getElementById('ticket-save-btn').addEventListener('click', function() {
+            if (Avika.orders && typeof Avika.orders.saveCurrentTicket === 'function') {
+                Avika.orders.saveCurrentTicket();
             } else {
-                alert("Error al guardar ticket: " + e.message);
+                console.error("La función saveCurrentTicket no está disponible");
+            if (Avika.ui && typeof Avika.ui.showErrorMessage === 'function') {
+                    Avika.ui.showErrorMessage("No se pudo guardar el ticket: función no disponible");
+                }
             }
-            return false;
-        }
-    };
+        });
+        
+        // Set up ticket cancel button
+        document.getElementById('ticket-cancel-btn').addEventListener('click', function() {
+            document.getElementById('close-ticket-modal').click();
+        });
+    }
     
-    // Asegurar que el botón de Nuevo Ticket tiene el handler correcto
-    document.addEventListener('DOMContentLoaded', function() {
-        try {
-            // Eliminar modales residuales que pudieran quedar
-            var oldModals = document.querySelectorAll('#ticket-config-modal');
-            oldModals.forEach(function(modal) {
-                if (modal && modal.parentNode) {
-                    modal.parentNode.removeChild(modal);
-                }
-            });
+    // Variables for modal visibility check
+    var modalCheckInterval = null;
+    var modalCheckCount = 0;
+    var MAX_MODAL_CHECKS = 20; // 10 seconds (20 * 500ms)
+    
+    // Function to start checking modal visibility
+    function startModalVisibilityCheck() {
+        // Clear any existing interval
+        if (modalCheckInterval) {
+            clearInterval(modalCheckInterval);
+        }
+        
+        // Reset check count
+        modalCheckCount = 0;
+        
+        // Start new interval
+        modalCheckInterval = setInterval(function() {
+            var ticketModal = document.getElementById('ticket-modal');
             
-            var btnNewTicket = document.getElementById('btn-new-ticket');
-            if (btnNewTicket) {
-                console.log("Configurando botón Nuevo Ticket/Comanda");
+            // If modal exists but is hidden, show it
+            if (ticketModal && ticketModal.style.display !== 'block' && Avika.orders && Avika.orders.currentTicket && Avika.orders.currentTicket.active) {
+                console.log("Restaurando visibilidad del modal de ticket");
+                ticketModal.style.display = 'block';
+            }
+            
+            // If we've reached max checks, stop checking
+            if (++modalCheckCount >= MAX_MODAL_CHECKS) {
+                clearInterval(modalCheckInterval);
+                modalCheckInterval = null;
+            }
+        }, 500); // Check every 500ms
+    }
+    
+    // Function to remove residual modals
+    function removeResidualModals() {
+        // Find elements with fixed positioning that could be residual modals
+        var fixedElements = document.querySelectorAll('[style*="position: fixed"], [style*="position:fixed"]');
+        
+        fixedElements.forEach(function(element) {
+            // Check if it's an unwanted modal - skip essential elements
+            if (!element.id || 
+                (element.id !== 'ticket-modal' && 
+                 element.id !== 'ticket-config-modal' &&
+                 element.id !== 'force-complete-modal' && 
+                 element.id !== 'help-modal' && 
+                 element.id !== 'notification' && 
+                 element.id !== 'error-message')) {
                 
-                // Remover cualquier event listener previo
-                var newBtn = btnNewTicket.cloneNode(true);
-                if (btnNewTicket.parentNode) {
-                    btnNewTicket.parentNode.replaceChild(newBtn, btnNewTicket);
-                }
+                console.log("Modal o elemento residual encontrado:", element);
                 
-                // Asignar el nuevo handler
-                newBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
+                // Verify if it's in the bottom part of the screen
+                var rect = element.getBoundingClientRect();
+                var windowHeight = window.innerHeight;
+                
+                if (rect.bottom > windowHeight * 0.7) {
+                    console.log("Eliminando modal residual en la parte inferior");
                     
-                    console.log("Nuevo Ticket/Comanda button clicked");
+                    // Hide first
+                    element.style.display = 'none';
                     
-                    if (this.textContent.includes('Guardar')) {
-                        console.log("Guardando ticket");
-        if (Avika.orders && typeof Avika.orders.saveCurrentTicket === 'function') {
-                            Avika.orders.saveCurrentTicket();
-                        }
-                } else {
-                        console.log("Iniciando nuevo ticket");
-                    if (Avika.ui && typeof Avika.ui.enableTicketMode === 'function') {
-                        Avika.ui.enableTicketMode();
+                    // Try to remove
+                    if (element.parentNode) {
+                        element.parentNode.removeChild(element);
                     }
                 }
-                    
-                    return false;
-            });
             }
-        } catch (e) {
-            console.error("Error al configurar botón de nuevo ticket:", e);
+        });
+    }
+    
+    // Execute when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Inicializando correcciones para modales de tickets...");
+        
+        // Remove any residual modals
+        removeResidualModals();
+        
+        // Setup periodic check for residual modals
+        setInterval(removeResidualModals, 3000);
+        
+        // Fix New Ticket button click behavior
+        var btnNewTicket = document.getElementById('btn-new-ticket');
+        if (btnNewTicket) {
+            console.log("Configurando botón de nuevo ticket...");
+            
+            // Clone to remove any existing listeners
+            var newBtn = btnNewTicket.cloneNode(true);
+            btnNewTicket.parentNode.replaceChild(newBtn, btnNewTicket);
+            
+            // Add improved click handler
+            newBtn.addEventListener('click', function() {
+                console.log("Botón de nuevo ticket clickeado");
+                if (Avika.ui && typeof Avika.ui.enableTicketMode === 'function') {
+                    Avika.ui.enableTicketMode();
+                } else {
+                    console.error("Función enableTicketMode no disponible");
+                }
+            });
         }
     });
     
-    console.log("Nueva corrección para el modo ticket aplicada");
+    console.log("Correcciones para el modal de tickets aplicadas correctamente");
 })();
