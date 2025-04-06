@@ -563,6 +563,65 @@
             }
             
             console.log("Eventos del servicio de órdenes inicializados");
+            
+            // Add a function to create delivery action buttons for each order
+            var originalUpdatePendingTable = Avika.ui.updatePendingTable;
+            
+            if (originalUpdatePendingTable) {
+                Avika.ui.updatePendingTable = function() {
+                    // Call the original function first
+                    originalUpdatePendingTable.call(this);
+                    
+                    // Now enhance the table for delivery orders
+                    var rows = document.querySelectorAll('#pending-body tr');
+                    rows.forEach(function(row, index) {
+                        // Get order information
+                        var order = Avika.data.pendingOrders[index];
+                        if (!order) return;
+                        
+                        // Only modify delivery orders
+                        if (order.service === 'domicilio') {
+                            var actionCell = row.cells[4]; // Action column
+                            
+                            // If the order is marked as completed but waiting for delivery
+                            if (order.finishTime && !order.deliveryDepartureTime) {
+                                // Add departure button if not already present
+                                if (!actionCell.innerHTML.includes('Salida Repartidor')) {
+                                    var departureBtn = document.createElement('button');
+                                    departureBtn.textContent = 'Salida Repartidor';
+                                    departureBtn.className = 'action-btn';
+                                    departureBtn.style.backgroundColor = '#ff9800';
+                                    departureBtn.style.margin = '2px';
+                                    
+                                    departureBtn.onclick = function() {
+                                        Avika.orders.registerDeliveryDeparture(order.id);
+                                    };
+                                    
+                                    actionCell.appendChild(departureBtn);
+                                }
+                            }
+                            
+                            // If the order has departure time but not arrival time
+                            if (order.deliveryDepartureTime && !order.deliveryArrivalTime) {
+                                // Add arrival button if not already present
+                                if (!actionCell.innerHTML.includes('Llegada')) {
+                                    var arrivalBtn = document.createElement('button');
+                                    arrivalBtn.textContent = 'Llegada';
+                                    arrivalBtn.className = 'action-btn';
+                                    arrivalBtn.style.backgroundColor = '#4CAF50';
+                                    arrivalBtn.style.margin = '2px';
+                                    
+                                    arrivalBtn.onclick = function() {
+                                        Avika.orders.registerDeliveryArrival(order.id);
+                                    };
+                                    
+                                    actionCell.appendChild(arrivalBtn);
+                                }
+                            }
+                        }
+                    });
+                };
+            }
         } catch (e) {
             console.error("Error al inicializar eventos del servicio de órdenes:", e);
         }

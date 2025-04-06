@@ -368,20 +368,30 @@
         return false;
     };
     
-    // Asegurar que el botón tenga el evento correcto al cargar la página
+    // Fix for Nuevo Ticket/Comanda button
     document.addEventListener('DOMContentLoaded', function() {
+        // Get the button element
         var btnNewTicket = document.getElementById('btn-new-ticket');
+        
         if (btnNewTicket) {
-            // Limpiar todos los eventos previos
-            var newBtn = btnNewTicket.cloneNode(true);
-            btnNewTicket.parentNode.replaceChild(newBtn, btnNewTicket);
+            console.log("Applying Nuevo Ticket/Comanda button fix");
             
-            // Asignar el evento correcto basado en el texto del botón
+            // Remove all existing event listeners by cloning the button
+            var newBtn = btnNewTicket.cloneNode(true);
+            if (btnNewTicket.parentNode) {
+                btnNewTicket.parentNode.replaceChild(newBtn, btnNewTicket);
+            }
+            
+            // Add a new, proper click handler
             newBtn.addEventListener('click', function() {
+                console.log("Nuevo Ticket/Comanda button clicked");
                 if (this.textContent.includes('Guardar')) {
-                    // Llamar a guardarTicketActual (función global de respaldo)
-                    window.guardarTicketActual();
+                    console.log("Saving current ticket");
+                    if (Avika.orders && typeof Avika.orders.saveCurrentTicket === 'function') {
+                        Avika.orders.saveCurrentTicket();
+                    }
                 } else {
+                    console.log("Starting new ticket");
                     if (Avika.ui && typeof Avika.ui.enableTicketMode === 'function') {
                         Avika.ui.enableTicketMode();
                     }
