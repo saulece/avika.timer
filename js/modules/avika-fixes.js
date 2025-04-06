@@ -18,25 +18,24 @@
     // ====================================================================
     
     // Fix para actualizar todos los temporizadores de manera eficiente
-    A// Fix para actualizar todos los temporizadores de manera eficiente
-Avika.ui.updateAllTimers = function() {
-    try {
-        // Actualizar todos los temporizadores
-        document.querySelectorAll('.timer-cell[data-start-time]').forEach(function(cell) {
-            var startTime = cell.getAttribute('data-start-time');
-            if (startTime) {
-                cell.textContent = Avika.dateUtils.calculateElapsedTime(startTime);
+    Avika.ui.updateAllTimers = function() {
+        try {
+            // Actualizar todos los temporizadores
+            document.querySelectorAll('.timer-cell[data-start-time]').forEach(function(cell) {
+                var startTime = cell.getAttribute('data-start-time');
+                if (startTime) {
+                    cell.textContent = Avika.dateUtils.calculateElapsedTime(startTime);
+                }
+            });
+            
+            // Actualizar colores de temporizadores
+            if (Avika.ui && typeof Avika.ui.updateTimerColors === 'function') {
+                Avika.ui.updateTimerColors();
             }
-        });
-        
-        // Actualizar colores de temporizadores
-        if (Avika.ui && typeof Avika.ui.updateTimerColors === 'function') {
-            Avika.ui.updateTimerColors();
+        } catch (e) {
+            console.error("Error al actualizar temporizadores:", e);
         }
-    } catch (e) {
-        console.error("Error al actualizar temporizadores:", e);
-    }
-};
+    };
     
     // Fix para las tablas de órdenes - asegura que los datos se muestran correctamente
     const originalUpdatePendingTable = Avika.ui.updatePendingTable;
@@ -1068,6 +1067,56 @@ document.addEventListener('DOMContentLoaded', function() {
                     Avika.ui.showNotification("Función de tablero no disponible");
                 }
             }
+        });
+    }
+});
+// Arreglo para botones de categoría en el modal de ticket
+document.addEventListener('DOMContentLoaded', function() {
+    // Función para inicializar los botones de categoría en el modal de ticket
+    function initTicketCategoryButtons() {
+        console.log("Inicializando botones de categoría en el modal de ticket");
+        document.querySelectorAll('#ticket-modal .category-btn').forEach(function(btn) {
+            var category = btn.getAttribute('data-category');
+            btn.onclick = function() {
+                if (Avika.ui && typeof Avika.ui.showTicketDishes === 'function') {
+                    Avika.ui.showTicketDishes(category);
+                } else {
+                    console.error("Función showTicketDishes no disponible");
+                }
+            };
+        });
+    }
+    
+    // Observe cambios en el DOM para detectar cuando se muestra el modal de ticket
+    var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                var ticketModal = document.getElementById('ticket-modal');
+                if (ticketModal && ticketModal.style.display === 'block') {
+                    // El modal de ticket se ha mostrado, inicializar botones
+                    initTicketCategoryButtons();
+                }
+            }
+        });
+    });
+    
+    // Comenzar a observar el modal cuando esté disponible
+    var ticketModal = document.getElementById('ticket-modal');
+    if (ticketModal) {
+        observer.observe(ticketModal, { attributes: true });
+    }
+    
+    // También intentar inicializar al cargar la página, por si ya está visible
+    var btnNewTicket = document.getElementById('btn-new-ticket');
+    if (btnNewTicket) {
+        btnNewTicket.addEventListener('click', function() {
+            // Dar tiempo para que se cree el modal si no existe
+            setTimeout(function() {
+                var modal = document.getElementById('ticket-modal');
+                if (modal && modal.style.display === 'block') {
+                    initTicketCategoryButtons();
+                }
+            }, 500);
         });
     }
 });
