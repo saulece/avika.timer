@@ -449,6 +449,18 @@ Avika.ui = {
                 });
             }
             
+            // Ajustar tamaños de botones para mejor experiencia táctil
+            document.querySelectorAll('.finish-btn, .action-btn').forEach(function(btn) {
+                btn.style.minHeight = '44px'; // Tamaño mínimo recomendado para táctil
+            });
+            
+            // Simplificar tablas en móviles
+            if (window.innerWidth < 400) {
+                document.querySelectorAll('.pending-orders-section th:nth-child(4), .pending-orders-section td:nth-child(4)').forEach(function(cell) {
+                    cell.style.display = 'none'; // Ocultar columna de detalles en pantallas muy pequeñas
+                });
+            }
+            
             console.log("Interfaz móvil adaptada correctamente");
         } catch (e) {
             console.error("Error al adaptar interfaz móvil:", e);
@@ -747,7 +759,7 @@ Avika.ui = {
             
             console.log("Completando", ticketOrders.length, "órdenes del ticket", ticketId);
             
-            // Marcar todas las órdenes como completadas
+            /// Marcar todas las órdenes como completadas
             var now = new Date();
             
             for (var j = 0; j < ticketOrders.length; j++) {
@@ -807,47 +819,93 @@ Avika.ui = {
         }
     },
     
-    // Implementar la función addOrderRow correctamente
+    // Actualizar tabla de órdenes pendientes
+    updatePendingTable: function() {
+        try {
+            var pendingBody = document.getElementById('pending-body');
+            if (!pendingBody) return;
+            
+            pendingBody.innerHTML = '';
+            
+            // Actualizar contador
+            var pendingCount = document.getElementById('pending-count');
+            if (pendingCount) {
+                pendingCount.textContent = Avika.data.pendingOrders ? Avika.data.pendingOrders.length : 0;
+            }
+            
+            if (!Avika.data.pendingOrders || Avika.data.pendingOrders.length === 0) {
+                var emptyRow = pendingBody.insertRow();
+                var emptyCell = emptyRow.insertCell(0);
+                emptyCell.colSpan = 5;
+                emptyCell.textContent = "No hay platillos en preparación";
+                emptyCell.style.textAlign = "center";
+                return;
+            }
+            
+            // Renderizar órdenes pendientes
+            for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                this.addOrderRow(pendingBody, Avika.data.pendingOrders[i], i);
+            }
+            
+            // Aplicar colores a temporizadores según tiempo transcurrido
+            this.updateTimerColors();
+        } catch (e) {
+            console.error("Error al actualizar tabla de pedidos pendientes:", e);
+            
+            // Implementación de respaldo en caso de error
+            if (pendingBody) {
+                pendingBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:red;">Error al actualizar tabla</td></tr>';
+            }
+        }
+    },
+
+    // Añadir fila de orden a la tabla
     addOrderRow: function(tbody, order, index) {
         var row = tbody.insertRow();
-        var self = this;
         
         // Platillo
         var dishCell = row.insertCell(0);
         dishCell.textContent = order.dish + (order.quantity > 1 ? ' (' + order.quantity + ')' : '');
-        dishCell.style.color = "#333"; // Asegurar color de texto visible
+        
+        // Verificar si es un combo especial
+        if (order.isSpecialCombo || (Avika.config && Avika.config.specialCombos && Avika.config.specialCombos.includes(order.dish))) {
+            dishCell.innerHTML += '<br><span style="color:#e74c3c;font-size:0.8em;">Combo Especial</span>';
+        }
         
         // Hora de inicio
         var startCell = row.insertCell(1);
-        startCell.textContent = Avika.ui.formatTime(new Date(order.startTime));
-        startCell.style.color = "#333"; // Asegurar color de texto visible
+        startCell.textContent = Avika.dateUtils.formatTime(order.startTime);
         
         // Temporizador
         var timerCell = row.insertCell(2);
         timerCell.className = 'timer-cell';
         timerCell.setAttribute('data-start-time', order.startTime);
-        timerCell.textContent = Avika.ui.calculateElapsedTime(order.startTime);
-        timerCell.style.color = "#333"; // Asegurar color de texto visible
+        timerCell.textContent = Avika.dateUtils.calculateElapsedTime(order.startTime);
         
         // Detalles
         var detailsCell = row.insertCell(3);
-        detailsCell.style.color = "#333"; // Asegurar color de texto visible
         
         // Servicio
         var serviceText = '';
-        switch (order.service) {
-            case 'comedor': serviceText = 'Comedor'; break;
-            case 'domicilio': serviceText = 'Domicilio'; break;
-            case 'para-llevar': serviceText = 'Ordena y espera'; break;
-            default: serviceText = order.service;
+        if (Avika.config && Avika.config.serviceNames && Avika.config.serviceNames[order.service]) {
+            serviceText = Avika.config.serviceNames[order.service];
+        } else {
+            switch (order.service) {
+                case 'comedor': serviceText = 'Comedor'; break;
+                case 'domicilio': serviceText = 'Domicilio'; break;
+                case 'para-llevar': serviceText = 'Ordena y Espera'; break;
+                default: serviceText = order.service;
+            }
         }
         
         // Personalización
         var customText = '';
         if (order.customizations && order.customizations.length > 0) {
             order.customizations.forEach(function(code) {
-                if (Avika.config.customizationOptions[code]) {
+                if (Avika.config && Avika.config.customizationOptions && Avika.config.customizationOptions[code]) {
                     customText += Avika.config.customizationOptions[code] + ', ';
+                } else {
+                    customText += code + ', ';
                 }
             });
             customText = customText.slice(0, -2); // Eliminar última coma y espacio
@@ -856,24 +914,215 @@ Avika.ui = {
         // Notas
         var notesText = order.notes ? '<br>Nota: ' + order.notes : '';
         
+        // Ticket ID si es parte de un ticket
+        var ticketText = order.ticketId ? '<br><small>Ticket: ' + order.ticketId.split('-')[1] + '</small>' : '';
+        
         // Combinar toda la información
         detailsCell.innerHTML = '<strong>' + serviceText + '</strong>' + 
                               (customText ? '<br>' + customText : '') + 
-                              notesText;
+                              notesText + 
+                              ticketText;
+
+        // Añadir indicador de tiempo objetivo
+        var timeIndicator = this.showTargetTimeIndicator(order);
+        if (timeIndicator) {
+            detailsCell.appendChild(timeIndicator);
+        }
+        
+        // Estado para tickets
+        if (order.completed) {
+            detailsCell.innerHTML += '<br><span style="color:#2ecc71;"><i>Listo - Esperando otros platillos</i></span>';
+        }
         
         // Acciones
         var actionsCell = row.insertCell(4);
         
-        // Botón para marcar como completado
-        var completeBtn = document.createElement('button');
-        completeBtn.textContent = 'Listo';
-        completeBtn.className = 'action-btn';
+        // Si es un combo especial, mostrar botones para cocina fría y caliente
+        if (order.isSpecialCombo || (Avika.config && Avika.config.specialCombos && Avika.config.specialCombos.includes(order.dish))) {
+            // Botón para cocina fría
+            var coldBtn = document.createElement('button');
+            coldBtn.textContent = 'Frío Listo';
+            coldBtn.className = 'finish-btn cold-kitchen';
+            
+            // Deshabilitar si ya está completado
+            if (order.coldComplete) {
+                coldBtn.disabled = true;
+                coldBtn.style.opacity = '0.5';
+            }
+            
+            coldBtn.onclick = function() {
+                if (Avika.orders && typeof Avika.orders.markComboPartComplete === 'function') {
+                    Avika.orders.markComboPartComplete(index, 'frio');
+                }
+            };
+            
+            // Botón para cocina caliente
+            var hotBtn = document.createElement('button');
+            hotBtn.textContent = 'Caliente Listo';
+            hotBtn.className = 'finish-btn hot-kitchen';
+            
+            // Deshabilitar si ya está completado
+            if (order.hotComplete) {
+                hotBtn.disabled = true;
+                hotBtn.style.opacity = '0.5';
+            }
+            
+            hotBtn.onclick = function() {
+                if (Avika.orders && typeof Avika.orders.markComboPartComplete === 'function') {
+                    Avika.orders.markComboPartComplete(index, 'caliente');
+                }
+            };
+            
+            actionsCell.appendChild(coldBtn);
+            actionsCell.appendChild(document.createElement('br'));
+            actionsCell.appendChild(hotBtn);
+        } else {
+            // Botón estándar para marcar como completado
+            var completeBtn = document.createElement('button');
+            completeBtn.textContent = 'Listo';
+            completeBtn.className = 'finish-btn';
+            
+            // Deshabilitar si ya está completado
+            if (order.completed) {
+                completeBtn.disabled = true;
+                completeBtn.style.opacity = '0.5';
+            }
+            
+            completeBtn.onclick = function() {
+                if (Avika.orders && typeof Avika.orders.completeOrder === 'function') {
+                    Avika.orders.completeOrder(index);
+                }
+            };
+            
+            actionsCell.appendChild(completeBtn);
+        }
         
-        completeBtn.onclick = function() {
-            Avika.ui.completeOrder(index);
-        };
-        
-        actionsCell.appendChild(completeBtn);
+        return row;
+    },
+
+    // Actualizar colores de temporizadores según tiempo
+    updateTimerColors: function() {
+        document.querySelectorAll('.timer-cell').forEach(function(cell) {
+            var timeText = cell.textContent;
+            
+            // Quitar clases previas
+            cell.classList.remove('time-excellent', 'time-good', 'time-warning', 'time-bad');
+            
+            // Parsear tiempo
+            var hasHours = timeText.includes('h');
+            var minutesMatch = timeText.match(/(\d+):/);
+            
+            if (minutesMatch) {
+                var minutes = parseInt(minutesMatch[1]);
+                
+                if (hasHours || minutes >= 15) {
+                    cell.classList.add('time-bad');
+                    cell.classList.add('alert');
+                } else if (minutes >= 10) {
+                    cell.classList.add('time-warning');
+                } else if (minutes >= 5) {
+                    cell.classList.add('time-good');
+                } else {
+                    cell.classList.add('time-excellent');
+                }
+            }
+        });
+    },
+
+    // Mostrar indicador del tiempo objetivo
+    showTargetTimeIndicator: function(order) {
+        try {
+            if (!order) return null;
+            
+            // Determinar tipo de cocina
+            var kitchenType = order.kitchenType || 'unknown';
+            if (!kitchenType || kitchenType === 'unknown') {
+                if (order.isSpecialCombo) {
+                    kitchenType = 'both';
+                } else {
+                    // Intentar determinar por categoría
+                    for (var category in Avika.config.dishes) {
+                        if (Avika.config.dishes[category].includes(order.dish)) {
+                            if (Avika.config.kitchenTypes && Avika.config.kitchenTypes[category]) {
+                                kitchenType = Avika.config.kitchenTypes[category];
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // Determinar tiempo objetivo según tipo de cocina
+            var targetTime = 0;
+            if (Avika.config.targetTimes && Avika.config.targetTimes[kitchenType]) {
+                targetTime = Avika.config.targetTimes[kitchenType];
+            } else {
+                // Tiempos por defecto si no hay configuración
+                switch (kitchenType) {
+                    case 'cold': targetTime = 7; break; // 7 minutos
+                    case 'hot': targetTime = 12; break; // 12 minutos
+                    case 'both': targetTime = 15; break; // 15 minutos
+                    default: targetTime = 10; // 10 minutos por defecto
+                }
+            }
+            
+            // Crear elemento indicador
+            var indicator = document.createElement('div');
+            indicator.className = 'target-time-indicator';
+            indicator.style.fontSize = '0.8rem';
+            indicator.style.marginTop = '5px';
+            indicator.style.color = '#2980b9';
+            
+            // Añadir color según tipo de cocina
+            if (kitchenType === 'cold') {
+                indicator.style.color = '#3498db';
+            } else if (kitchenType === 'hot') {
+                indicator.style.color = '#e74c3c';
+            } else if (kitchenType === 'both') {
+                indicator.style.color = '#9b59b6';
+            }
+            
+            // Texto del indicador
+            indicator.innerHTML = '<i class="fas fa-stopwatch"></i> Tiempo objetivo: ' + targetTime + ' min';
+            
+            return indicator;
+        } catch (e) {
+            console.error("Error al mostrar indicador de tiempo objetivo:", e);
+            return null;
+        }
+    },
+    
+    // Implementar la función addOrderRow correctamente
+    calculateElapsedTime: function(startTimeStr) {
+        try {
+            var startTime = startTimeStr instanceof Date ? startTimeStr : new Date(startTimeStr);
+            
+            // Verificar fecha válida
+            if (isNaN(startTime.getTime())) {
+                console.warn("Fecha de inicio inválida en calculateElapsedTime:", startTimeStr);
+                return '--:--';
+            }
+            
+            var now = new Date();
+            var elapsed = Math.floor((now - startTime) / 1000); // en segundos
+            
+            var hours = Math.floor(elapsed / 3600);
+            var minutes = Math.floor((elapsed % 3600) / 60);
+            var seconds = elapsed % 60;
+            
+            var timeStr = '';
+            
+            if (hours > 0) {
+                timeStr += hours + 'h ';
+            }
+            
+            timeStr += this.padZero(minutes) + ':' + this.padZero(seconds);
+            
+            return timeStr;
+        } catch (e) {
+            console.error("Error al calcular tiempo transcurrido:", e);
+            return "--:--";
+        }
     },
     
     // Eliminar item del ticket
@@ -1198,6 +1447,196 @@ Avika.ui = {
         return ticketsMap;
     },
 
+    // Seleccionar categoría
+    selectCategory: function(category) {
+        try {
+            // Verificar que la categoría existe
+            if (!category || !Avika.config.categoryNames || !Avika.config.categoryNames[category]) {
+                console.error("Error: Categoría no válida:", category);
+                this.showNotification("Error: Categoría no válida.");
+                return;
+            }
+            
+            // Actualizar estado actual
+            Avika.data.currentCategory = category;
+            
+            // Mostrar sección de platillos
+            var categoriesSection = document.getElementById('categories-section');
+            var dishesSection = document.getElementById('dishes-section');
+            
+            if (categoriesSection && dishesSection) {
+                categoriesSection.style.display = 'none';
+                dishesSection.style.display = 'block';
+            }
+            
+            // Actualizar título
+            var titleElement = document.getElementById('selected-category-title');
+            if (titleElement) {
+                titleElement.textContent = Avika.config.categoryNames[category];
+            }
+            
+            // Actualizar botones de platos
+            this.updateDishButtons(category);
+            
+        } catch (e) {
+            console.error("Error al seleccionar categoría:", e);
+            this.showErrorMessage("Error al seleccionar categoría: " + e.message);
+        }
+    },
+    
+    // Actualizar botones de platos
+    updateDishButtons: function(category) {
+        try {
+            var dishesContainer = document.getElementById('dishes-container');
+            if (!dishesContainer) {
+                console.error("Contenedor de platillos no encontrado");
+                return;
+            }
+            
+            // Limpiar contenedor
+            dishesContainer.innerHTML = '';
+            
+            // Verificar si hay platillos en esta categoría
+            if (!Avika.config || !Avika.config.dishes || !Avika.config.dishes[category] || Avika.config.dishes[category].length === 0) {
+                dishesContainer.innerHTML = '<p>No hay platillos en esta categoría</p>';
+                return;
+            }
+            
+            // Si hay subcategorías, mostrarlas
+            if (Avika.config.subCategories && Avika.config.subCategories[category] && Avika.config.subCategories[category].length > 0) {
+                // Crear contenedor para subcategorías
+                var subCatContainer = document.createElement('div');
+                subCatContainer.className = 'subcategories-container';
+                
+                // Añadir botones para cada subcategoría
+                Avika.config.subCategories[category].forEach(function(subCat, index) {
+                    var button = document.createElement('button');
+                    button.className = 'subcategory-btn';
+                    button.textContent = subCat.name;
+                    button.setAttribute('data-index', index);
+                    
+                    // Activar la primera subcategoría
+                    if (index === 0) {
+                        button.classList.add('active');
+                    }
+                    
+                    button.addEventListener('click', function() {
+                        // Actualizar estado visual
+                        document.querySelectorAll('.subcategory-btn').forEach(function(btn) {
+                            btn.classList.remove('active');
+                        });
+                        this.classList.add('active');
+                        
+                        // Mostrar platillos de esta subcategoría
+                        var subCatIndex = parseInt(this.getAttribute('data-index'));
+                        showSubCategoryDishes(subCatIndex);
+                    });
+                    
+                    subCatContainer.appendChild(button);
+                });
+                
+                // Añadir contenedor de subcategorías
+                dishesContainer.appendChild(subCatContainer);
+                
+                // Crear contenedor para los botones de platillos
+                var dishesButtonsContainer = document.createElement('div');
+                dishesButtonsContainer.className = 'dishes-buttons-container';
+                dishesButtonsContainer.id = 'dishes-buttons-container';
+                dishesContainer.appendChild(dishesButtonsContainer);
+                
+                // Función para mostrar platillos de una subcategoría
+                function showSubCategoryDishes(index) {
+                    var subCat = Avika.config.subCategories[category][index];
+                    var container = document.getElementById('dishes-buttons-container');
+                    
+                    if (!container) return;
+                    
+                    // Limpiar contenedor
+                    container.innerHTML = '';
+                    
+                    // Añadir botón para cada platillo
+                    if (subCat.items && subCat.items.length > 0) {
+                        subCat.items.forEach(function(dish) {
+                            var button = document.createElement('button');
+                            button.className = 'dish-btn';
+                            button.textContent = dish;
+                            
+                            // Verificar si es un combo especial
+                            if (Avika.config.specialCombos && Avika.config.specialCombos.includes(dish)) {
+                                button.classList.add('special-combo');
+                            }
+                            
+                            button.addEventListener('click', function() {
+                                if (Avika.orders && typeof Avika.orders.selectDish === 'function') {
+                                    Avika.orders.selectDish(dish);
+                                } else {
+                                    console.error("Función selectDish no encontrada");
+                                }
+                            });
+                            
+                            container.appendChild(button);
+                        });
+                    } else {
+                        container.innerHTML = '<p>No hay platillos en esta subcategoría</p>';
+                    }
+                }
+                
+                // Mostrar platillos de la primera subcategoría
+                showSubCategoryDishes(0);
+                
+            } else {
+                // No hay subcategorías, mostrar todos los platillos de la categoría
+                Avika.config.dishes[category].forEach(function(dish) {
+                    var button = document.createElement('button');
+                    button.className = 'dish-btn';
+                    button.textContent = dish;
+                    
+                    // Verificar si es un combo especial
+                    if (Avika.config.specialCombos && Avika.config.specialCombos.includes(dish)) {
+                        button.classList.add('special-combo');
+                    }
+                    
+                    button.addEventListener('click', function() {
+                        if (Avika.orders && typeof Avika.orders.selectDish === 'function') {
+                            Avika.orders.selectDish(dish);
+                        } else {
+                            console.error("Función selectDish no encontrada");
+                        }
+                    });
+                    
+                    dishesContainer.appendChild(button);
+                });
+            }
+        } catch (e) {
+            console.error("Error al actualizar botones de platillos:", e);
+            this.showErrorMessage("Error: " + e.message);
+        }
+    },
+    
+    // Cambiar cantidad
+    changeQuantity: function(delta) {
+        try {
+            var quantityDisplay = document.getElementById('quantity-display');
+            if (!quantityDisplay) return;
+            
+            var currentQuantity = parseInt(quantityDisplay.textContent) || 1;
+            var newQuantity = currentQuantity + delta;
+            
+            // Límites
+            if (newQuantity < 1) newQuantity = 1;
+            if (newQuantity > 10) newQuantity = 10;
+            
+            // Actualizar display
+            quantityDisplay.textContent = newQuantity;
+            
+            // Actualizar dato guardado
+            Avika.data.currentQuantity = newQuantity;
+            
+        } catch (e) {
+            console.error("Error al cambiar cantidad:", e);
+        }
+    },
+    
     // Función para forzar completado de un ticket específico
     forceCompleteTicket: function(ticketId) {
         console.log("Forzando completado del ticket:", ticketId);
@@ -1380,6 +1819,597 @@ Avika.ui = {
         } catch (e) {
             console.error("Error al actualizar lista de tickets para forzar completado:", e);
             this.showErrorMessage("Error: " + e.message);
+        }
+    },
+    
+    // Activar modo ticket
+    enableTicketMode: function() {
+        try {
+            console.log("Activando modo ticket");
+            
+            // Actualizar estado
+            this.state.ticketMode = true;
+            this.state.ticketItems = [];
+            
+            // Verificar si existe el modal de ticket
+            var ticketModal = document.getElementById('ticket-modal');
+            
+            // Si no existe, crearlo
+            if (!ticketModal) {
+                this.createTicketModal();
+                ticketModal = document.getElementById('ticket-modal');
+            }
+            
+            // Mostrar modal
+            if (ticketModal) {
+                ticketModal.style.display = 'block';
+                
+                // Inicializar la primera categoría
+                if (Avika.config && Avika.config.dishes) {
+                    var firstCategory = Object.keys(Avika.config.dishes)[0];
+                    this.showTicketDishes(firstCategory);
+                }
+            } else {
+                console.error("Modal de ticket no encontrado");
+                this.showNotification("Error: No se pudo abrir el modal de ticket");
+            }
+            
+        } catch (e) {
+            console.error("Error al activar modo ticket:", e);
+            this.showErrorMessage("Error al activar modo ticket: " + e.message);
+        }
+    },
+    
+    // Crear modal de ticket
+    createTicketModal: function() {
+        try {
+            // Crear modal
+            var modal = document.createElement('div');
+            modal.id = 'ticket-modal';
+            modal.className = 'modal';
+            modal.style.display = 'none';
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.backgroundColor = 'rgba(0,0,0,0.7)';
+            modal.style.zIndex = '9999';
+            
+            // Contenido del modal
+            var modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
+            modalContent.style.backgroundColor = 'white';
+            modalContent.style.margin = '5% auto';
+            modalContent.style.padding = '20px';
+            modalContent.style.width = '90%';
+            modalContent.style.maxWidth = '800px';
+            modalContent.style.maxHeight = '90vh';
+            modalContent.style.overflowY = 'auto';
+            modalContent.style.borderRadius = '8px';
+            modalContent.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+            
+            // Título
+            var title = document.createElement('h2');
+            title.textContent = 'Crear Ticket / Comanda';
+            title.style.color = '#333';
+            title.style.marginTop = '0';
+            title.style.marginBottom = '15px';
+            
+            // Botón para cerrar
+            var closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '&times;';
+            closeBtn.style.position = 'absolute';
+            closeBtn.style.top = '15px';
+            closeBtn.style.right = '20px';
+            closeBtn.style.background = 'none';
+            closeBtn.style.border = 'none';
+            closeBtn.style.fontSize = '24px';
+            closeBtn.style.fontWeight = 'bold';
+            closeBtn.style.color = '#999';
+            closeBtn.style.cursor = 'pointer';
+            
+            closeBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+            
+            // Contenedor para categorías
+            var categoriesContainer = document.createElement('div');
+            categoriesContainer.className = 'category-container';
+            categoriesContainer.style.display = 'flex';
+            categoriesContainer.style.flexWrap = 'wrap';
+            categoriesContainer.style.gap = '10px';
+            categoriesContainer.style.marginBottom = '20px';
+            
+            // Añadir botones de categoría
+            if (Avika.config && Avika.config.categoryNames) {
+                var self = this;
+                Object.keys(Avika.config.categoryNames).forEach(function(category) {
+                    var btn = document.createElement('button');
+                    btn.className = 'category-btn';
+                    btn.textContent = Avika.config.categoryNames[category];
+                    btn.setAttribute('data-category', category);
+                    
+                    btn.addEventListener('click', function() {
+                        self.showTicketDishes(this.getAttribute('data-category'));
+                    });
+                    
+                    categoriesContainer.appendChild(btn);
+                });
+            }
+            
+            // Contenedor para platillos
+            var dishesGrid = document.createElement('div');
+            dishesGrid.id = 'ticket-dishes-grid';
+            dishesGrid.style.display = 'grid';
+            dishesGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(150px, 1fr))';
+            dishesGrid.style.gap = '10px';
+            dishesGrid.style.marginBottom = '20px';
+            
+            // Separador
+            var separator = document.createElement('hr');
+            separator.style.margin = '20px 0';
+            separator.style.border = 'none';
+            separator.style.borderTop = '1px solid #eee';
+            
+            // Sección para items del ticket
+            var ticketSection = document.createElement('div');
+            ticketSection.style.marginBottom = '20px';
+            
+            // Título de items
+            var itemsTitle = document.createElement('h3');
+            itemsTitle.textContent = 'Platillos en este ticket';
+            itemsTitle.style.color = '#333';
+            itemsTitle.style.marginTop = '0';
+            
+            // Tabla para items
+            var itemsTable = document.createElement('table');
+            itemsTable.style.width = '100%';
+            itemsTable.style.borderCollapse = 'collapse';
+            itemsTable.style.marginBottom = '15px';
+            
+            // Cabecera de tabla
+            var thead = document.createElement('thead');
+            var headerRow = document.createElement('tr');
+            
+            ['Platillo', 'Cantidad', 'Detalles', 'Inicio', 'Acciones'].forEach(function(text) {
+                var th = document.createElement('th');
+                th.textContent = text;
+                th.style.padding = '8px';
+                th.style.backgroundColor = '#f5f5f5';
+                th.style.color = '#333';
+                th.style.textAlign = 'left';
+                th.style.border = '1px solid #ddd';
+                headerRow.appendChild(th);
+            });
+            
+            thead.appendChild(headerRow);
+            itemsTable.appendChild(thead);
+            
+            // Cuerpo de tabla
+            var tbody = document.createElement('tbody');
+            tbody.id = 'ticket-items-body';
+            itemsTable.appendChild(tbody);
+            
+            // Opciones de servicio
+            var serviceSection = document.createElement('div');
+            serviceSection.className = 'option-group';
+            
+            var serviceTitle = document.createElement('div');
+            serviceTitle.className = 'option-title';
+            serviceTitle.textContent = 'Tipo de servicio para todo el ticket:';
+            
+            var serviceBtns = document.createElement('div');
+            serviceBtns.className = 'option-btns';
+            
+            var serviceTypes = [
+                { id: 'ticket-btn-comedor', text: 'Comedor', value: 'comedor' },
+                { id: 'ticket-btn-domicilio', text: 'Domicilio', value: 'domicilio' },
+                { id: 'ticket-btn-para-llevar', text: 'Ordena y Espera', value: 'para-llevar' }
+            ];
+            
+            var self = this;
+            serviceTypes.forEach(function(service, index) {
+                var btn = document.createElement('button');
+                btn.id = service.id;
+                btn.className = 'option-btn';
+                btn.textContent = service.text;
+                
+                // Activar el primer servicio
+                if (index === 0) {
+                    btn.classList.add('selected');
+                    self.state.ticketService = service.value;
+                }
+                
+                btn.addEventListener('click', function() {
+                    self.selectTicketService(this, service.value);
+                });
+                
+                serviceBtns.appendChild(btn);
+            });
+            
+            serviceSection.appendChild(serviceTitle);
+            serviceSection.appendChild(serviceBtns);
+            
+            // Notas generales
+            var notesSection = document.createElement('div');
+            notesSection.className = 'option-group';
+            
+            var notesTitle = document.createElement('div');
+            notesTitle.className = 'option-title';
+            notesTitle.textContent = 'Notas generales para el ticket:';
+            
+            var notesInput = document.createElement('textarea');
+            notesInput.id = 'ticket-notes';
+            notesInput.className = 'notes-input';
+            notesInput.placeholder = 'Notas o instrucciones para todos los platillos...';
+            
+            notesSection.appendChild(notesTitle);
+            notesSection.appendChild(notesInput);
+            
+            // Hora de inicio
+            var timeSection = document.createElement('div');
+            timeSection.className = 'option-group';
+            
+            var timeTitle = document.createElement('div');
+            timeTitle.className = 'option-title';
+            timeTitle.textContent = 'Hora de inicio para nuevos platillos:';
+            
+            var timeControls = document.createElement('div');
+            timeControls.style.display = 'flex';
+            timeControls.style.alignItems = 'center';
+            timeControls.style.justifyContent = 'flex-start';
+            timeControls.style.gap = '5px';
+            
+            // Hora
+            var hourInput = document.createElement('input');
+            hourInput.id = 'ticket-hour-input';
+            hourInput.type = 'number';
+            hourInput.min = '0';
+            hourInput.max = '23';
+            hourInput.value = new Date().getHours();
+            hourInput.style.width = '60px';
+            hourInput.style.padding = '8px';
+            hourInput.style.textAlign = 'center';
+            
+            // Minutos
+            var minuteInput = document.createElement('input');
+            minuteInput.id = 'ticket-minute-input';
+            minuteInput.type = 'number';
+            minuteInput.min = '0';
+            minuteInput.max = '59';
+            minuteInput.value = new Date().getMinutes();
+            minuteInput.style.width = '60px';
+            minuteInput.style.padding = '8px';
+            minuteInput.style.textAlign = 'center';
+            
+            // Separadores
+            var separator1 = document.createElement('span');
+            separator1.textContent = ':';
+            separator1.style.fontSize = '20px';
+            separator1.style.fontWeight = 'bold';
+            
+            // Botón para actualizar a hora actual
+            var nowBtn = document.createElement('button');
+            nowBtn.textContent = 'Hora actual';
+            nowBtn.style.marginLeft = '15px';
+            nowBtn.style.padding = '8px 12px';
+            nowBtn.style.backgroundColor = '#4CAF50';
+            nowBtn.style.color = 'white';
+            nowBtn.style.border = 'none';
+            nowBtn.style.borderRadius = '4px';
+            nowBtn.style.cursor = 'pointer';
+            
+            nowBtn.addEventListener('click', function() {
+                var now = new Date();
+                hourInput.value = now.getHours();
+                minuteInput.value = now.getMinutes();
+            });
+            
+            timeControls.appendChild(hourInput);
+            timeControls.appendChild(separator1);
+            timeControls.appendChild(minuteInput);
+            timeControls.appendChild(nowBtn);
+            
+            timeSection.appendChild(timeTitle);
+            timeSection.appendChild(timeControls);
+            
+            // Botones de acción
+            var actionButtons = document.createElement('div');
+            actionButtons.className = 'modal-action-btns';
+            
+            // Botón para cancelar
+            var cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancelar';
+            cancelBtn.className = 'action-btn cancel-btn';
+            cancelBtn.style.backgroundColor = '#e74c3c';
+            
+            cancelBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+            
+            // Botón para guardar
+            var saveBtn = document.createElement('button');
+            saveBtn.textContent = 'Guardar Ticket';
+            saveBtn.className = 'action-btn start-btn';
+            saveBtn.style.backgroundColor = '#2ecc71';
+            
+            saveBtn.addEventListener('click', function() {
+                self.saveTicket();
+            });
+            
+            actionButtons.appendChild(cancelBtn);
+            actionButtons.appendChild(saveBtn);
+            
+            // Ensamblar todo
+            ticketSection.appendChild(itemsTitle);
+            ticketSection.appendChild(itemsTable);
+            
+            modalContent.appendChild(title);
+            modalContent.appendChild(closeBtn);
+            modalContent.appendChild(categoriesContainer);
+            modalContent.appendChild(dishesGrid);
+            modalContent.appendChild(separator);
+            modalContent.appendChild(ticketSection);
+            modalContent.appendChild(serviceSection);
+            modalContent.appendChild(timeSection);
+            modalContent.appendChild(notesSection);
+            modalContent.appendChild(actionButtons);
+            
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+        } catch (e) {
+            console.error("Error al crear modal de ticket:", e);
+            this.showErrorMessage("Error: " + e.message);
+        }
+    },
+    
+    // Actualizar tabla de items del ticket
+    updateTicketItems: function() {
+        try {
+            var itemsBody = document.getElementById('ticket-items-body');
+            if (!itemsBody) {
+                console.error("Cuerpo de tabla de items no encontrado");
+                return;
+            }
+            
+            // Limpiar tabla
+            itemsBody.innerHTML = '';
+            
+            // Si no hay items, mostrar mensaje
+            if (this.state.ticketItems.length === 0) {
+                var emptyRow = document.createElement('tr');
+                var emptyCell = document.createElement('td');
+                emptyCell.colSpan = 5;
+                emptyCell.textContent = 'Agrega platillos al ticket desde las categorías';
+                emptyCell.style.textAlign = 'center';
+                emptyCell.style.padding = '10px';
+                emptyRow.appendChild(emptyCell);
+                itemsBody.appendChild(emptyRow);
+                return;
+            }
+            
+            // Añadir filas para cada item
+            var self = this;
+            this.state.ticketItems.forEach(function(item, index) {
+                var row = document.createElement('tr');
+                
+                // Platillo
+                var dishCell = document.createElement('td');
+                dishCell.textContent = item.dish;
+                dishCell.style.padding = '8px';
+                dishCell.style.border = '1px solid #ddd';
+                row.appendChild(dishCell);
+                
+                // Cantidad
+                var qtyCell = document.createElement('td');
+                qtyCell.textContent = item.quantity;
+                qtyCell.style.padding = '8px';
+                qtyCell.style.border = '1px solid #ddd';
+                row.appendChild(qtyCell);
+                
+                // Detalles
+                var detailsCell = document.createElement('td');
+                detailsCell.style.padding = '8px';
+                detailsCell.style.border = '1px solid #ddd';
+                
+                // Personalización
+                if (item.customizationText) {
+                    detailsCell.innerHTML += item.customizationText + '<br>';
+                }
+                
+                // Notas
+                if (item.notes) {
+                    detailsCell.innerHTML += 'Nota: ' + item.notes;
+                }
+                
+                // Si no hay detalles, mostrar mensaje
+                if (!detailsCell.innerHTML) {
+                    detailsCell.textContent = 'Sin personalización';
+                }
+                
+                row.appendChild(detailsCell);
+                
+                // Hora de inicio
+                var timeCell = document.createElement('td');
+                timeCell.textContent = item.startTimeFormatted || (item.startTime ? Avika.ui.formatTime(item.startTime) : '');
+                timeCell.style.padding = '8px';
+                timeCell.style.border = '1px solid #ddd';
+                row.appendChild(timeCell);
+                
+                // Acciones
+                var actionsCell = document.createElement('td');
+                actionsCell.style.padding = '8px';
+                actionsCell.style.border = '1px solid #ddd';
+                
+                // Botón para eliminar
+                var deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Eliminar';
+                deleteBtn.style.backgroundColor = '#e74c3c';
+                deleteBtn.style.color = 'white';
+                deleteBtn.style.border = 'none';
+                deleteBtn.style.padding = '5px 10px';
+                deleteBtn.style.borderRadius = '4px';
+                deleteBtn.style.cursor = 'pointer';
+                
+                deleteBtn.addEventListener('click', function() {
+                    self.removeTicketItem(index);
+                });
+                
+                actionsCell.appendChild(deleteBtn);
+                row.appendChild(actionsCell);
+                
+                // Añadir fila a la tabla
+                itemsBody.appendChild(row);
+            });
+            
+        } catch (e) {
+            console.error("Error al actualizar items del ticket:", e);
+            this.showErrorMessage("Error: " + e.message);
+        }
+    },
+    
+    // Actualizar tabla de órdenes completadas
+    updateCompletedTable: function(showAll) {
+        try {
+            var completedBody = document.getElementById('completed-body');
+            if (!completedBody) return;
+            
+            completedBody.innerHTML = '';
+            
+            if (!Avika.data.completedOrders || Avika.data.completedOrders.length === 0) {
+                var emptyRow = document.createElement('tr');
+                var emptyCell = document.createElement('td');
+                emptyCell.colSpan = 5;
+                emptyCell.textContent = 'No hay platillos completados';
+                emptyCell.style.textAlign = 'center';
+                emptyRow.appendChild(emptyCell);
+                completedBody.appendChild(emptyRow);
+                return;
+            }
+            
+            // Determinar cuántos mostrar
+            var ordersToShow = showAll ? 
+                Avika.data.completedOrders : 
+                Avika.data.completedOrders.slice(0, 20);
+            
+            // Añadir filas
+            ordersToShow.forEach(function(order) {
+                var row = document.createElement('tr');
+                
+                // Platillo
+                var dishCell = document.createElement('td');
+                dishCell.textContent = order.dish + (order.quantity > 1 ? ' (' + order.quantity + ')' : '');
+                dishCell.style.padding = '8px';
+                dishCell.style.border = '1px solid #ddd';
+                row.appendChild(dishCell);
+                
+                // Hora de inicio
+                var startCell = document.createElement('td');
+                startCell.textContent = Avika.dateUtils.formatTime(order.startTime);
+                startCell.style.padding = '8px';
+                startCell.style.border = '1px solid #ddd';
+                row.appendChild(startCell);
+                
+                // Hora de fin
+                var endCell = document.createElement('td');
+                endCell.textContent = Avika.dateUtils.formatTime(order.finishTime);
+                endCell.style.padding = '8px';
+                endCell.style.border = '1px solid #ddd';
+                row.appendChild(endCell);
+                
+                // Tiempo total
+                var timeCell = document.createElement('td');
+                timeCell.textContent = order.prepTime || '--:--';
+                timeCell.style.padding = '8px';
+                timeCell.style.border = '1px solid #ddd';
+                
+                // Colorear según tiempo
+                if (order.prepTime) {
+                    var parts = order.prepTime.split(':');
+                    if (parts.length === 2) {
+                        var minutes = parseInt(parts[0]);
+                        
+                        if (minutes < 5) {
+                            timeCell.style.color = '#2ecc71'; // Verde
+                            timeCell.style.fontWeight = 'bold';
+                        } else if (minutes < 10) {
+                            timeCell.style.color = '#3498db'; // Azul
+                        } else if (minutes < 15) {
+                            timeCell.style.color = '#f39c12'; // Naranja
+                        } else {
+                            timeCell.style.color = '#e74c3c'; // Rojo
+                            timeCell.style.fontWeight = 'bold';
+                        }
+                    }
+                }
+                
+                row.appendChild(timeCell);
+                
+                // Detalles
+                var detailsCell = document.createElement('td');
+                detailsCell.style.padding = '8px';
+                detailsCell.style.border = '1px solid #ddd';
+                
+                // Servicio
+                var serviceText = '';
+                if (order.service) {
+                    switch (order.service) {
+                        case 'comedor': serviceText = 'Comedor'; break;
+                        case 'domicilio': serviceText = 'Domicilio'; break;
+                        case 'para-llevar': serviceText = 'Ordena y Espera'; break;
+                        default: serviceText = order.service;
+                    }
+                }
+                
+                // Personalización
+                var customText = '';
+                if (order.customizations && order.customizations.length > 0) {
+                    order.customizations.forEach(function(code) {
+                        if (Avika.config && Avika.config.customizationOptions && Avika.config.customizationOptions[code]) {
+                            customText += Avika.config.customizationOptions[code] + ', ';
+                        } else {
+                            customText += code + ', ';
+                        }
+                    });
+                    customText = customText.slice(0, -2); // Eliminar última coma y espacio
+                }
+                
+                // Notas
+                var notesText = order.notes ? '<br>Nota: ' + order.notes : '';
+                
+                // Ticket ID
+                var ticketText = order.ticketId ? '<br><small>Ticket: ' + order.ticketId.split('-')[1] + '</small>' : '';
+                
+                // Tiempo de entrega
+                var deliveryText = '';
+                if (order.service === 'domicilio' && order.deliveryDepartureTime && order.deliveryArrivalTime) {
+                    var departureTime = Avika.dateUtils.formatTime(order.deliveryDepartureTime);
+                    var arrivalTime = Avika.dateUtils.formatTime(order.deliveryArrivalTime);
+                    deliveryText = '<br><span style="color:#27ae60;">Entrega: ' + order.deliveryTime + '</span>';
+                }
+                
+                // Combinar toda la información
+                detailsCell.innerHTML = '<strong>' + serviceText + '</strong>' + 
+                                      (customText ? '<br>' + customText : '') + 
+                                      notesText + 
+                                      ticketText +
+                                      deliveryText;
+                
+                row.appendChild(detailsCell);
+                
+                // Añadir fila a la tabla
+                completedBody.appendChild(row);
+            });
+            
+        } catch (e) {
+            console.error("Error al actualizar tabla de completados:", e);
+            
+            // En caso de error, mostrar mensaje
+            if (completedBody) {
+                completedBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:red;">Error al cargar datos completados</td></tr>';
+            }
         }
     }
 };

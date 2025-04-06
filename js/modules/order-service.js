@@ -296,9 +296,30 @@
             
             Avika.data.isSpecialCombo = isSpecial;
             
-            // Si es un combo especial, mostrar indicador visual
-            if (isSpecial && dishTitle) {
-                dishTitle.innerHTML = dish + ' <span style="color:#e74c3c;font-size:0.8em;">(Combo Especial)</span>';
+            // Detectar tipo de cocina
+            var kitchenType = 'unknown';
+            
+            // Buscar la categoría del platillo
+            for (var category in Avika.config.dishes) {
+                if (Avika.config.dishes[category].includes(dish)) {
+                    if (Avika.config.kitchenTypes && Avika.config.kitchenTypes[category]) {
+                        kitchenType = Avika.config.kitchenTypes[category];
+                    }
+                    break;
+                }
+            }
+            
+            Avika.data.currentKitchenType = kitchenType;
+            
+            // Si es un combo especial o tiene tipo de cocina, mostrar indicador visual
+            if (dishTitle) {
+                if (isSpecial) {
+                    dishTitle.innerHTML = dish + ' <span style="color:#e74c3c;font-size:0.8em;">(Combo Especial)</span>';
+                } else if (kitchenType === 'cold') {
+                    dishTitle.innerHTML = dish + ' <span style="color:#3498db;font-size:0.8em;">(Cocina Fría)</span>';
+                } else if (kitchenType === 'hot') {
+                    dishTitle.innerHTML = dish + ' <span style="color:#e67e22;font-size:0.8em;">(Cocina Caliente)</span>';
+                }
             }
             
             return true;
@@ -373,7 +394,9 @@
                     quantity: Avika.data.currentQuantity,
                     customizations: Avika.data.currentCustomizations,
                     service: Avika.data.currentService,
-                    notes: document.getElementById('notes-input') ? document.getElementById('notes-input').value.trim() : ''
+                    notes: document.getElementById('notes-input') ? document.getElementById('notes-input').value.trim() : '',
+                    isSpecialCombo: Avika.data.isSpecialCombo,
+                    kitchenType: Avika.data.currentKitchenType
                 };
                 
                 // Agregar al ticket actual
@@ -389,8 +412,16 @@
                 customizations: Avika.data.currentCustomizations,
                 service: Avika.data.currentService,
                 notes: document.getElementById('notes-input') ? document.getElementById('notes-input').value.trim() : '',
-                startTime: new Date()
+                startTime: new Date(),
+                isSpecialCombo: Avika.data.isSpecialCombo,
+                kitchenType: Avika.data.currentKitchenType
             };
+            
+            // Inicializar flags para cocinas especiales
+            if (newOrder.isSpecialCombo) {
+                newOrder.coldComplete = false;
+                newOrder.hotComplete = false;
+            }
             
             // Agregar orden
             return Avika.orders.createOrder(newOrder);
@@ -536,7 +567,175 @@
             console.error("Error al inicializar eventos del servicio de órdenes:", e);
         }
     });
-    
+    // Registrar llegada de repartidor
+Avika.orders.registerDeliveryArrival = function(orderId) {
+    try {
+        if (!orderId) {
+            console.error("Error: Se requiere ID de orden para registrar llegada");
+            return false;
+        }
+        
+        // Buscar la orden en completadas (normalmente ya estará completada)
+        var orderIndex = -1;
+        if (Avika.data.completedOrders) {
+            for (var i = 0; i < Avika.data.completedOrders.length; i++) {
+                if (Avika.data.completedOrders[i].id === orderId) {
+                    orderIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        if (orderIndex === -1) {
+            // Si no está en completadas, buscar en pendientes
+            if (Avika.data.pendingOrders) {
+                for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                    if (Avika.data.pendingOrders[i].id === orderId) {
+                        orderIndex = i;
+                        
+                        // Registrar llegada
+                        Avika.data.pendingOrders[i].deliveryArrivalTime = new Date();
+                        
+                        // Calcular tiempo de entrega
+                        if (Avika.data.pendingOrders[i].deliveryDepartureTime) {
+                            var departureTime = new Date(Avika.data.pendingOrders[i].deliveryDepartureTime);
+                            var arrivalTime = Avika.data.pendingOrders[i].deliveryArrivalTime;
+                            
+                            var timeDiff = Math.floor((arrivalTime - departureTime) / 1000);
+                            var mins = Math.floor(timeDiff / 60);
+                            var secs = timeDiff % 60;
+                            
+                            Avika.data.pendingOrders[i].deliveryTime = Avika.dateUtils.padZero(mins) + ':' + Avika.dateUtils.padZero(secs);
+                        }
+                        
+                        // Guardar datos
+                        if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+                            Avika.storage.guardarDatosLocales();
+                        }
+                        
+                        // Actualizar UI
+                        if (Avika.ui && typeof Avika.ui.updatePendingTable === 'function') {
+                            Avika.ui.updatePendingTable();
+                        }
+                        
+                        Avika.ui.showNotification("Llegada de repartidor registrada correctamente");
+                        return true;
+                    }
+                }
+            }
+            
+            console.error("Orden no encontrada:", orderId);
+            return false;
+        }
+        
+        // Registrar llegada en orden completada
+        Avika.data.completedOrders[orderIndex].deliveryArrivalTime = new Date();
+        
+        // Calcular tiempo de entrega
+        if (Avika.data.completedOrders[orderIndex].deliveryDepartureTime) {
+            var departureTime = new Date(Avika.data.completedOrders[orderIndex].deliveryDepartureTime);
+            var arrivalTime = Avika.data.completedOrders[orderIndex].deliveryArrivalTime;
+            
+            var timeDiff = Math.floor((arrivalTime - departureTime) / 1000);
+            var mins = Math.floor(timeDiff / 60);
+            var secs = timeDiff % 60;
+            
+            Avika.data.completedOrders[orderIndex].deliveryTime = Avika.dateUtils.padZero(mins) + ':' + Avika.dateUtils.padZero(secs);
+        }
+        
+        // Guardar datos
+        if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+            Avika.storage.guardarDatosLocales();
+        }
+        
+        // Actualizar UI
+        if (Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
+            Avika.ui.updateCompletedTable(false);
+        }
+        
+        Avika.ui.showNotification("Llegada de repartidor registrada correctamente");
+        return true;
+    } catch (e) {
+        console.error("Error al registrar llegada de repartidor:", e);
+        if (Avika.ui && typeof Avika.ui.showErrorMessage === 'function') {
+            Avika.ui.showErrorMessage("Error al registrar llegada: " + e.message);
+        }
+        return false;
+    }
+};
+
+// Registrar salida de repartidor
+Avika.orders.registerDeliveryDeparture = function(orderId) {
+    try {
+        if (!orderId) {
+            console.error("Error: Se requiere ID de orden para registrar salida");
+            return false;
+        }
+        
+        // Buscar la orden en completadas
+        var orderIndex = -1;
+        if (Avika.data.completedOrders) {
+            for (var i = 0; i < Avika.data.completedOrders.length; i++) {
+                if (Avika.data.completedOrders[i].id === orderId) {
+                    orderIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        if (orderIndex === -1) {
+            // Si no está en completadas, buscar en pendientes
+            if (Avika.data.pendingOrders) {
+                for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                    if (Avika.data.pendingOrders[i].id === orderId) {
+                        orderIndex = i;
+                        
+                        // Registrar salida
+                        Avika.data.pendingOrders[i].deliveryDepartureTime = new Date();
+                        
+                        // Guardar datos
+                        if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+                            Avika.storage.guardarDatosLocales();
+                        }
+                        
+                        // Actualizar UI
+                        if (Avika.ui && typeof Avika.ui.updatePendingTable === 'function') {
+                            Avika.ui.updatePendingTable();
+                        }
+                        
+                        Avika.ui.showNotification("Salida de repartidor registrada correctamente");
+                        return true;
+                    }
+                }
+            }
+            
+            console.error("Orden no encontrada:", orderId);
+            return false;
+        }
+        
+        // Registrar salida en orden completada
+        Avika.data.completedOrders[orderIndex].deliveryDepartureTime = new Date();
+        
+        // Guardar datos
+        if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+            Avika.storage.guardarDatosLocales();
+        }
+        
+        // Actualizar UI
+        if (Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
+            Avika.ui.updateCompletedTable(false);
+        }
+        
+        Avika.ui.showNotification("Salida de repartidor registrada correctamente");
+        return true;
+    } catch (e) {
+        console.error("Error al registrar salida de repartidor:", e);
+        if (Avika.ui && typeof Avika.ui.showErrorMessage === 'function') {
+            Avika.ui.showErrorMessage("Error al registrar salida: " + e.message);
+        }
+        return false;
+    }
+};
     // Marcar que el módulo está listo
     Avika.orders.initialized = true;
     console.log("Módulo de órdenes inicializado");

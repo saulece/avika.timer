@@ -25,7 +25,7 @@ Avika.storage = {
             var processedData = JSON.stringify(dataToSave, function(key, value) {
                 // Convertir objetos Date a strings ISO
                 if (value instanceof Date) {
-                    return value.toISOString();
+                    return { "__type": "Date", "iso": value.toISOString() };
                 }
                 return value;
             });
@@ -59,9 +59,16 @@ Avika.storage = {
             
             // Parsear los datos guardados
             var parsedData = JSON.parse(savedData, function(key, value) {
-                // Revisar propiedades que deberían ser fechas
+                // Revisar si es un objeto Date serializado
+                if (value && typeof value === "object" && value.__type === "Date") {
+                    return new Date(value.iso);
+                }
+                
+                // Para mantener compatibilidad con formato antiguo
                 if (key === 'startTime' || key === 'finishTime' || key === 'lastSaved') {
-                    return new Date(value);
+                    if (typeof value === 'string') {
+                        return new Date(value);
+                    }
                 }
                 return value;
             });

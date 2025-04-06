@@ -146,6 +146,22 @@ Avika.config = {
         'para-llevar': 'Ordena y Espera'
     },
     
+    // Tipos de cocina para cada categoría
+    kitchenTypes: {
+        'frio': 'cold',
+        'entrada-fria': 'cold',
+        'caliente': 'hot',
+        'entrada-caliente': 'hot',
+        'combos': 'both' // Los combos requieren ambas cocinas
+    },
+
+    // Tiempos objetivo para cada tipo de cocina (en minutos)
+    targetTimes: {
+        'cold': 7,  // 7 minutos para cocina fría
+        'hot': 12,  // 12 minutos para cocina caliente
+        'both': 15  // 15 minutos para combos
+    },
+    
     // Intervalo de actualización de temporizadores (en milisegundos)
     timerInterval: 1000,
     

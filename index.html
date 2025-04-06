@@ -6,6 +6,7 @@
     <title>Avika - Temporizador de Sushi</title>
     <link rel="stylesheet" href="avika-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="icon" href="data:,">
 </head>
 <body>
@@ -13,6 +14,7 @@
         <h1>Avika - Temporizador de Sushi</h1>
         <div class="header-controls">
             <button id="btn-help" class="icon-btn" title="Mostrar ayuda"><i class="fas fa-question-circle"></i></button>
+            <button id="btn-dashboard" class="icon-btn" title="Mostrar/ocultar tablero de monitoreo"><i class="fas fa-chart-line"></i></button>
         </div>
     </header>
     
@@ -61,6 +63,7 @@
                     <button id="btn-show-all-history" class="filter-btn" data-tooltip="Ver todas las órdenes completadas">Ver historial completo</button>
                     <button id="btn-show-recent" class="filter-btn active" data-tooltip="Ver solo las órdenes más recientes">Ver recientes</button>
                     <button id="btn-show-stats" class="filter-btn" data-tooltip="Ver estadísticas de tiempos promedios">Ver promedios</button>
+                    <button id="btn-show-detailed-stats" class="filter-btn" data-tooltip="Ver estadísticas detalladas por tipo de cocina">Estadísticas detalladas</button>
                     <button id="btn-clear-history" class="filter-btn" data-tooltip="Eliminar historial de órdenes completadas">Limpiar historial</button>
                 </div>
                 <table>
@@ -78,6 +81,8 @@
                     </tbody>
                 </table>
                 <button class="back-btn" id="btn-export" data-tooltip="Exportar datos para análisis">Exportar datos</button>
+                <button class="back-btn" id="btn-export-enhanced" data-tooltip="Exportar datos con formato mejorado">Exportar detallado</button>
+                <button class="back-btn" id="btn-export-excel" data-tooltip="Exportar datos en formato Excel">Exportar Excel</button>
             </div>
         </div>
         
@@ -174,21 +179,42 @@
                     <li><strong>Listo para salida:</strong> Para domicilios, indica que está listo para entregar al repartidor</li>
                 </ul>
             </div>
+            
+            <div class="help-section">
+                <h3>Tipos de cocina</h3>
+                <ul>
+                    <li><strong>Cocina Fría:</strong> Platillos que se preparan sin calor (makis, rollos, ceviches)</li>
+                    <li><strong>Cocina Caliente:</strong> Platillos que requieren cocción (arroces, sopas)</li>
+                    <li><strong>Combos Especiales:</strong> Requieren preparación en ambas cocinas</li>
+                </ul>
+            </div>
+            
+            <div class="help-section">
+                <h3>Tiempos objetivo</h3>
+                <ul>
+                    <li>Cocina Fría: 7 minutos</li>
+                    <li>Cocina Caliente: 12 minutos</li>
+                    <li>Combos Especiales: 15 minutos</li>
+                </ul>
+            </div>
         </div>
     </div>
     
     <!-- Cargar módulos en orden correcto -->
     <script src="js/avika-core.js"></script>
-    <script src="js/fix.js"></script>
+    <script src="js/modules/logger.js"></script>
     <script src="js/modules/config.js"></script>
     <script src="js/modules/date-utils.js"></script>
     <script src="js/modules/notification.js"></script>
+    <script src="js/modules/storage.js"></script>
     <script src="js/modules/ui-controller.js"></script>
     <script src="js/modules/order-service.js"></script>
-    <script src="js/modules/storage.js"></script>
-    <script src="js/modules/stats.js"></script>
     <script src="js/modules/ticket-service.js"></script>
     <script src="js/modules/combo-handler.js"></script>
+    <script src="js/modules/stats.js"></script>
+    <script src="js/modules/stats-enhanced.js"></script>
+    <script src="js/modules/dashboard.js"></script>
+    <script src="js/fix.js"></script>
     <script src="js/modules/avika-fixes.js"></script>
     <script src="js/avika-init.js"></script>
     

@@ -18,22 +18,25 @@
     // ====================================================================
     
     // Fix para actualizar todos los temporizadores de manera eficiente
-    Avika.ui.updateAllTimers = function() {
-        try {
-            document.querySelectorAll('.timer-cell[data-start-time]').forEach(function(cell) {
-                var startTime = cell.getAttribute('data-start-time');
-                if (startTime) {
-                    if (Avika.dateUtils && typeof Avika.dateUtils.calculateElapsedTime === 'function') {
-                        cell.textContent = Avika.dateUtils.calculateElapsedTime(startTime);
-                    } else if (typeof calculateElapsedTime === 'function') {
-                        cell.textContent = calculateElapsedTime(startTime);
-                    }
-                }
-            });
-        } catch (e) {
-            console.error("Error al actualizar temporizadores:", e);
+    A// Fix para actualizar todos los temporizadores de manera eficiente
+Avika.ui.updateAllTimers = function() {
+    try {
+        // Actualizar todos los temporizadores
+        document.querySelectorAll('.timer-cell[data-start-time]').forEach(function(cell) {
+            var startTime = cell.getAttribute('data-start-time');
+            if (startTime) {
+                cell.textContent = Avika.dateUtils.calculateElapsedTime(startTime);
+            }
+        });
+        
+        // Actualizar colores de temporizadores
+        if (Avika.ui && typeof Avika.ui.updateTimerColors === 'function') {
+            Avika.ui.updateTimerColors();
         }
-    };
+    } catch (e) {
+        console.error("Error al actualizar temporizadores:", e);
+    }
+};
     
     // Fix para las tablas de órdenes - asegura que los datos se muestran correctamente
     const originalUpdatePendingTable = Avika.ui.updatePendingTable;
@@ -928,11 +931,28 @@
             }
             
             // Inicializar botones para tabla de completados
-            var btnShowAllHistory = document.getElementById('btn-show-all-history');
-            var btnShowRecent = document.getElementById('btn-show-recent');
-            var btnShowStats = document.getElementById('btn-show-stats');
-            var btnClearHistory = document.getElementById('btn-clear-history');
-            
+var btnShowAllHistory = document.getElementById('btn-show-all-history');
+var btnShowRecent = document.getElementById('btn-show-recent');
+var btnShowStats = document.getElementById('btn-show-stats');
+var btnClearHistory = document.getElementById('btn-clear-history');
+var btnShowDetailedStats = document.getElementById('btn-show-detailed-stats');
+if (btnShowDetailedStats) {
+    btnShowDetailedStats.addEventListener('click', function() {
+        if (Avika.statsEnhanced && typeof Avika.statsEnhanced.showDetailedStats === 'function') {
+            Avika.statsEnhanced.showDetailedStats();
+        } else {
+            if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                Avika.ui.showNotification("Función de estadísticas detalladas no disponible");
+            }
+        }
+        
+        // Actualizar clases de botones
+        document.querySelectorAll('.filter-btn').forEach(function(btn) {
+            btn.classList.remove('active');
+        });
+        this.classList.add('active');
+    });
+}          
             if (btnShowAllHistory) {
                 btnShowAllHistory.addEventListener('click', function() {
                     if (typeof Avika.ui.updateCompletedTable === 'function') {
@@ -1004,6 +1024,52 @@
             console.error("Error al inicializar eventos de correcciones:", e);
         }
     });
-    
+    // Inicializar botón de exportación mejorada
+document.addEventListener('DOMContentLoaded', function() {
+    var btnExportEnhanced = document.getElementById('btn-export-enhanced');
+    // Inicializar botón de exportación Excel
+var btnExportExcel = document.getElementById('btn-export-excel');
+if (btnExportExcel) {
+    btnExportExcel.addEventListener('click', function() {
+        if (Avika.statsEnhanced && typeof Avika.statsEnhanced.exportToExcel === 'function') {
+            Avika.statsEnhanced.exportToExcel();
+        } else {
+            if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                Avika.ui.showNotification("Función de exportación Excel no disponible");
+            }
+        }
+    });
+}
+    if (btnExportEnhanced) {
+        btnExportEnhanced.addEventListener('click', function() {
+            if (Avika.statsEnhanced && typeof Avika.statsEnhanced.exportToCSV === 'function') {
+                Avika.statsEnhanced.exportToCSV();
+            } else {
+                if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                    Avika.ui.showNotification("Función de exportación mejorada no disponible");
+                }
+            }
+        });
+    }
+});
+// Inicializar botón de tablero
+document.addEventListener('DOMContentLoaded', function() {
+    var dashboardBtn = document.getElementById('btn-dashboard');
+    if (dashboardBtn) {
+        dashboardBtn.addEventListener('click', function() {
+            if (Avika.dashboard) {
+                if (Avika.dashboard.isActive) {
+                    Avika.dashboard.stop();
+                } else {
+                    Avika.dashboard.start();
+                }
+            } else {
+                if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                    Avika.ui.showNotification("Función de tablero no disponible");
+                }
+            }
+        });
+    }
+});
     console.log("Módulo de correcciones cargado correctamente");
 })();
