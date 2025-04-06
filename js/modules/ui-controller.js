@@ -1860,309 +1860,138 @@ Avika.ui = {
         }
     },
     
-    // Crear modal de ticket
+    // Crear modal de ticket (versión simplificada)
     createTicketModal: function() {
         try {
-            // Crear modal
-            var modal = document.createElement('div');
-            modal.id = 'ticket-modal';
-            modal.className = 'modal';
-            modal.style.display = 'none';
-            modal.style.position = 'fixed';
-            modal.style.top = '0';
-            modal.style.left = '0';
-            modal.style.width = '100%';
-            modal.style.height = '100%';
-            modal.style.backgroundColor = 'rgba(0,0,0,0.7)';
-            modal.style.zIndex = '9999';
+            // Crear html del modal directamente
+            var modalHtml = `
+                <div id="ticket-modal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 9999;">
+                    <div class="modal-content" style="background-color: white; margin: 5% auto; padding: 20px; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); position: relative;">
+                        <h2 style="color: #333; margin-top: 0; margin-bottom: 15px;">Crear Ticket / Comanda</h2>
+                        <button id="close-ticket-modal" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 24px; font-weight: bold; color: #999; cursor: pointer;">&times;</button>
+                        
+                        <div class="category-container" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                            ${this.generateCategoryButtonsHtml()}
+                        </div>
+                        
+                        <div id="ticket-dishes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px;"></div>
+                        
+                        <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+                        
+                        <div style="margin-bottom: 20px;">
+                            <h3 style="color: #333; margin-top: 0;">Platillos en este ticket</h3>
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+                                <thead>
+                                    <tr>
+                                        <th style="padding: 8px; background-color: #f5f5f5; color: #333; text-align: left; border: 1px solid #ddd;">Platillo</th>
+                                        <th style="padding: 8px; background-color: #f5f5f5; color: #333; text-align: left; border: 1px solid #ddd;">Cantidad</th>
+                                        <th style="padding: 8px; background-color: #f5f5f5; color: #333; text-align: left; border: 1px solid #ddd;">Detalles</th>
+                                        <th style="padding: 8px; background-color: #f5f5f5; color: #333; text-align: left; border: 1px solid #ddd;">Inicio</th>
+                                        <th style="padding: 8px; background-color: #f5f5f5; color: #333; text-align: left; border: 1px solid #ddd;">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ticket-items-body"></tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="option-group">
+                            <div class="option-title">Tipo de servicio para todo el ticket:</div>
+                            <div class="option-btns">
+                                <button id="ticket-btn-comedor" class="option-btn selected">Comedor</button>
+                                <button id="ticket-btn-domicilio" class="option-btn">Domicilio</button>
+                                <button id="ticket-btn-para-llevar" class="option-btn">Ordena y Espera</button>
+                            </div>
+                        </div>
+                        
+                        <div class="option-group">
+                            <div class="option-title">Hora de inicio para nuevos platillos:</div>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <input id="ticket-hour-input" type="number" min="0" max="23" style="width: 60px; padding: 8px; text-align: center;" value="${new Date().getHours()}">
+                                <span style="font-size: 20px; font-weight: bold;">:</span>
+                                <input id="ticket-minute-input" type="number" min="0" max="59" style="width: 60px; padding: 8px; text-align: center;" value="${new Date().getMinutes()}">
+                                <button id="ticket-now-btn" style="margin-left: 15px; padding: 8px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Hora actual</button>
+                            </div>
+                        </div>
+                        
+                        <div class="option-group">
+                            <div class="option-title">Notas generales para el ticket:</div>
+                            <textarea id="ticket-notes" class="notes-input" placeholder="Notas o instrucciones para todos los platillos..."></textarea>
+                        </div>
+                        
+                        <div class="modal-action-btns">
+                            <button id="ticket-cancel-btn" class="action-btn cancel-btn" style="background-color: #e74c3c;">Cancelar</button>
+                            <button id="ticket-save-btn" class="action-btn start-btn" style="background-color: #2ecc71;">Guardar Ticket</button>
+                        </div>
+                    </div>
+                </div>
+            `;
             
-            // Contenido del modal
-            var modalContent = document.createElement('div');
-            modalContent.className = 'modal-content';
-            modalContent.style.backgroundColor = 'white';
-            modalContent.style.margin = '5% auto';
-            modalContent.style.padding = '20px';
-            modalContent.style.width = '90%';
-            modalContent.style.maxWidth = '800px';
-            modalContent.style.maxHeight = '90vh';
-            modalContent.style.overflowY = 'auto';
-            modalContent.style.borderRadius = '8px';
-            modalContent.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+            // Insertar modal en el documento
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
             
-            // Título
-            var title = document.createElement('h2');
-            title.textContent = 'Crear Ticket / Comanda';
-            title.style.color = '#333';
-            title.style.marginTop = '0';
-            title.style.marginBottom = '15px';
-            
-            // Botón para cerrar
-            var closeBtn = document.createElement('button');
-            closeBtn.innerHTML = '&times;';
-            closeBtn.style.position = 'absolute';
-            closeBtn.style.top = '15px';
-            closeBtn.style.right = '20px';
-            closeBtn.style.background = 'none';
-            closeBtn.style.border = 'none';
-            closeBtn.style.fontSize = '24px';
-            closeBtn.style.fontWeight = 'bold';
-            closeBtn.style.color = '#999';
-            closeBtn.style.cursor = 'pointer';
-            
-            closeBtn.addEventListener('click', function() {
-                modal.style.display = 'none';
-            });
-            
-            // Contenedor para categorías
-            var categoriesContainer = document.createElement('div');
-            categoriesContainer.className = 'category-container';
-            categoriesContainer.style.display = 'flex';
-            categoriesContainer.style.flexWrap = 'wrap';
-            categoriesContainer.style.gap = '10px';
-            categoriesContainer.style.marginBottom = '20px';
-            
-            // Añadir botones de categoría
-            if (Avika.config && Avika.config.categoryNames) {
-                var self = this;
-                Object.keys(Avika.config.categoryNames).forEach(function(category) {
-                    var btn = document.createElement('button');
-                    btn.className = 'category-btn';
-                    btn.textContent = Avika.config.categoryNames[category];
-                    btn.setAttribute('data-category', category);
-                    
-                    btn.addEventListener('click', function() {
-                        self.showTicketDishes(this.getAttribute('data-category'));
-                    });
-                    
-                    categoriesContainer.appendChild(btn);
-                });
-            }
-            
-            // Contenedor para platillos
-            var dishesGrid = document.createElement('div');
-            dishesGrid.id = 'ticket-dishes-grid';
-            dishesGrid.style.display = 'grid';
-            dishesGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(150px, 1fr))';
-            dishesGrid.style.gap = '10px';
-            dishesGrid.style.marginBottom = '20px';
-            
-            // Separador
-            var separator = document.createElement('hr');
-            separator.style.margin = '20px 0';
-            separator.style.border = 'none';
-            separator.style.borderTop = '1px solid #eee';
-            
-            // Sección para items del ticket
-            var ticketSection = document.createElement('div');
-            ticketSection.style.marginBottom = '20px';
-            
-            // Título de items
-            var itemsTitle = document.createElement('h3');
-            itemsTitle.textContent = 'Platillos en este ticket';
-            itemsTitle.style.color = '#333';
-            itemsTitle.style.marginTop = '0';
-            
-            // Tabla para items
-            var itemsTable = document.createElement('table');
-            itemsTable.style.width = '100%';
-            itemsTable.style.borderCollapse = 'collapse';
-            itemsTable.style.marginBottom = '15px';
-            
-            // Cabecera de tabla
-            var thead = document.createElement('thead');
-            var headerRow = document.createElement('tr');
-            
-            ['Platillo', 'Cantidad', 'Detalles', 'Inicio', 'Acciones'].forEach(function(text) {
-                var th = document.createElement('th');
-                th.textContent = text;
-                th.style.padding = '8px';
-                th.style.backgroundColor = '#f5f5f5';
-                th.style.color = '#333';
-                th.style.textAlign = 'left';
-                th.style.border = '1px solid #ddd';
-                headerRow.appendChild(th);
-            });
-            
-            thead.appendChild(headerRow);
-            itemsTable.appendChild(thead);
-            
-            // Cuerpo de tabla
-            var tbody = document.createElement('tbody');
-            tbody.id = 'ticket-items-body';
-            itemsTable.appendChild(tbody);
-            
-            // Opciones de servicio
-            var serviceSection = document.createElement('div');
-            serviceSection.className = 'option-group';
-            
-            var serviceTitle = document.createElement('div');
-            serviceTitle.className = 'option-title';
-            serviceTitle.textContent = 'Tipo de servicio para todo el ticket:';
-            
-            var serviceBtns = document.createElement('div');
-            serviceBtns.className = 'option-btns';
-            
-            var serviceTypes = [
-                { id: 'ticket-btn-comedor', text: 'Comedor', value: 'comedor' },
-                { id: 'ticket-btn-domicilio', text: 'Domicilio', value: 'domicilio' },
-                { id: 'ticket-btn-para-llevar', text: 'Ordena y Espera', value: 'para-llevar' }
-            ];
-            
+            // Configurar eventos
             var self = this;
-            serviceTypes.forEach(function(service, index) {
-                var btn = document.createElement('button');
-                btn.id = service.id;
-                btn.className = 'option-btn';
-                btn.textContent = service.text;
-                
-                // Activar el primer servicio
-                if (index === 0) {
-                    btn.classList.add('selected');
-                    self.state.ticketService = service.value;
-                }
-                
-                btn.addEventListener('click', function() {
-                    self.selectTicketService(this, service.value);
-                });
-                
-                serviceBtns.appendChild(btn);
+            
+            // Evento para cerrar
+            document.getElementById('close-ticket-modal').addEventListener('click', function() {
+                document.getElementById('ticket-modal').style.display = 'none';
             });
             
-            serviceSection.appendChild(serviceTitle);
-            serviceSection.appendChild(serviceBtns);
-            
-            // Notas generales
-            var notesSection = document.createElement('div');
-            notesSection.className = 'option-group';
-            
-            var notesTitle = document.createElement('div');
-            notesTitle.className = 'option-title';
-            notesTitle.textContent = 'Notas generales para el ticket:';
-            
-            var notesInput = document.createElement('textarea');
-            notesInput.id = 'ticket-notes';
-            notesInput.className = 'notes-input';
-            notesInput.placeholder = 'Notas o instrucciones para todos los platillos...';
-            
-            notesSection.appendChild(notesTitle);
-            notesSection.appendChild(notesInput);
-            
-            // Hora de inicio
-            var timeSection = document.createElement('div');
-            timeSection.className = 'option-group';
-            
-            var timeTitle = document.createElement('div');
-            timeTitle.className = 'option-title';
-            timeTitle.textContent = 'Hora de inicio para nuevos platillos:';
-            
-            var timeControls = document.createElement('div');
-            timeControls.style.display = 'flex';
-            timeControls.style.alignItems = 'center';
-            timeControls.style.justifyContent = 'flex-start';
-            timeControls.style.gap = '5px';
-            
-            // Hora
-            var hourInput = document.createElement('input');
-            hourInput.id = 'ticket-hour-input';
-            hourInput.type = 'number';
-            hourInput.min = '0';
-            hourInput.max = '23';
-            hourInput.value = new Date().getHours();
-            hourInput.style.width = '60px';
-            hourInput.style.padding = '8px';
-            hourInput.style.textAlign = 'center';
-            
-            // Minutos
-            var minuteInput = document.createElement('input');
-            minuteInput.id = 'ticket-minute-input';
-            minuteInput.type = 'number';
-            minuteInput.min = '0';
-            minuteInput.max = '59';
-            minuteInput.value = new Date().getMinutes();
-            minuteInput.style.width = '60px';
-            minuteInput.style.padding = '8px';
-            minuteInput.style.textAlign = 'center';
-            
-            // Separadores
-            var separator1 = document.createElement('span');
-            separator1.textContent = ':';
-            separator1.style.fontSize = '20px';
-            separator1.style.fontWeight = 'bold';
-            
-            // Botón para actualizar a hora actual
-            var nowBtn = document.createElement('button');
-            nowBtn.textContent = 'Hora actual';
-            nowBtn.style.marginLeft = '15px';
-            nowBtn.style.padding = '8px 12px';
-            nowBtn.style.backgroundColor = '#4CAF50';
-            nowBtn.style.color = 'white';
-            nowBtn.style.border = 'none';
-            nowBtn.style.borderRadius = '4px';
-            nowBtn.style.cursor = 'pointer';
-            
-            nowBtn.addEventListener('click', function() {
-                var now = new Date();
-                hourInput.value = now.getHours();
-                minuteInput.value = now.getMinutes();
+            // Evento para cancelar
+            document.getElementById('ticket-cancel-btn').addEventListener('click', function() {
+                document.getElementById('ticket-modal').style.display = 'none';
             });
             
-            timeControls.appendChild(hourInput);
-            timeControls.appendChild(separator1);
-            timeControls.appendChild(minuteInput);
-            timeControls.appendChild(nowBtn);
-            
-            timeSection.appendChild(timeTitle);
-            timeSection.appendChild(timeControls);
-            
-            // Botones de acción
-            var actionButtons = document.createElement('div');
-            actionButtons.className = 'modal-action-btns';
-            
-            // Botón para cancelar
-            var cancelBtn = document.createElement('button');
-            cancelBtn.textContent = 'Cancelar';
-            cancelBtn.className = 'action-btn cancel-btn';
-            cancelBtn.style.backgroundColor = '#e74c3c';
-            
-            cancelBtn.addEventListener('click', function() {
-                modal.style.display = 'none';
-            });
-            
-            // Botón para guardar
-            var saveBtn = document.createElement('button');
-            saveBtn.textContent = 'Guardar Ticket';
-            saveBtn.className = 'action-btn start-btn';
-            saveBtn.style.backgroundColor = '#2ecc71';
-            
-            saveBtn.addEventListener('click', function() {
+            // Evento para guardar
+            document.getElementById('ticket-save-btn').addEventListener('click', function() {
                 self.saveTicket();
             });
             
-            actionButtons.appendChild(cancelBtn);
-            actionButtons.appendChild(saveBtn);
+            // Evento para actualizar hora actual
+            document.getElementById('ticket-now-btn').addEventListener('click', function() {
+                var now = new Date();
+                document.getElementById('ticket-hour-input').value = now.getHours();
+                document.getElementById('ticket-minute-input').value = now.getMinutes();
+            });
             
-            // Ensamblar todo
-            ticketSection.appendChild(itemsTitle);
-            ticketSection.appendChild(itemsTable);
+            // Configurar botones de servicio
+            document.getElementById('ticket-btn-comedor').addEventListener('click', function() {
+                self.selectTicketService(this, 'comedor');
+            });
             
-            modalContent.appendChild(title);
-            modalContent.appendChild(closeBtn);
-            modalContent.appendChild(categoriesContainer);
-            modalContent.appendChild(dishesGrid);
-            modalContent.appendChild(separator);
-            modalContent.appendChild(ticketSection);
-            modalContent.appendChild(serviceSection);
-            modalContent.appendChild(timeSection);
-            modalContent.appendChild(notesSection);
-            modalContent.appendChild(actionButtons);
+            document.getElementById('ticket-btn-domicilio').addEventListener('click', function() {
+                self.selectTicketService(this, 'domicilio');
+            });
             
-            modal.appendChild(modalContent);
-            document.body.appendChild(modal);
+            document.getElementById('ticket-btn-para-llevar').addEventListener('click', function() {
+                self.selectTicketService(this, 'para-llevar');
+            });
+            
+            // Configurar botones de categoría
+            document.querySelectorAll('#ticket-modal .category-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var category = this.getAttribute('data-category');
+                    self.showTicketDishes(category);
+                });
+            });
             
         } catch (e) {
             console.error("Error al crear modal de ticket:", e);
             this.showErrorMessage("Error: " + e.message);
         }
+    },
+
+    // Generar HTML para botones de categoría
+    generateCategoryButtonsHtml: function() {
+        var html = '';
+        
+        if (Avika.config && Avika.config.categoryNames) {
+            Object.keys(Avika.config.categoryNames).forEach(function(category) {
+                html += `<button class="category-btn" data-category="${category}">${Avika.config.categoryNames[category]}</button>`;
+            });
+        }
+        
+        return html;
     },
     
     // Actualizar tabla de items del ticket
