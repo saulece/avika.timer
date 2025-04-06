@@ -11,126 +11,150 @@
     
     // Función para configurar el ticket al iniciarlo
     Avika.ui.configureTicket = function() {
-        // Mostrar un modal para la configuración del ticket completo
-        var modalHTML = `
-            <div id="ticket-config-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;display:flex;justify-content:center;align-items:center;">
-                <div style="background:white;padding:20px;border-radius:8px;width:90%;max-width:500px;">
-                    <h3 style="margin-top:0;">Configuración del Ticket</h3>
-                    <p>Configura los datos para todos los platillos de este ticket:</p>
-                    
-                    <div style="margin:15px 0;">
-                        <h4 style="margin:5px 0;">Tipo de servicio:</h4>
-                        <div style="display:flex;gap:10px;">
-                            <button id="config-btn-comedor" class="option-btn selected" style="flex:1;padding:8px;background:#4CAF50;color:white;border:none;border-radius:4px;cursor:pointer;">Comedor</button>
-                            <button id="config-btn-domicilio" class="option-btn" style="flex:1;padding:8px;background:#ddd;color:black;border:none;border-radius:4px;cursor:pointer;">Domicilio</button>
-                            <button id="config-btn-para-llevar" class="option-btn" style="flex:1;padding:8px;background:#ddd;color:black;border:none;border-radius:4px;cursor:pointer;">Ordena y Espera</button>
+        try {
+            console.log("Configurando ticket...");
+            
+            // Crear el modal si no existe
+            if (!document.getElementById('ticket-config-modal')) {
+                // Mostrar un modal para la configuración del ticket completo
+                var modalHTML = `
+                    <div id="ticket-config-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;display:flex;justify-content:center;align-items:center;">
+                        <div style="background:white;padding:20px;border-radius:8px;width:90%;max-width:500px;">
+                            <h3 style="margin-top:0;">Configuración del Ticket</h3>
+                            <p>Configura los datos para todos los platillos de este ticket:</p>
+                            
+                            <div style="margin:15px 0;">
+                                <h4 style="margin:5px 0;">Tipo de servicio:</h4>
+                                <div style="display:flex;gap:10px;">
+                                    <button id="config-btn-comedor" class="option-btn selected" style="flex:1;padding:8px;background:#4CAF50;color:white;border:none;border-radius:4px;cursor:pointer;">Comedor</button>
+                                    <button id="config-btn-domicilio" class="option-btn" style="flex:1;padding:8px;background:#ddd;color:black;border:none;border-radius:4px;cursor:pointer;">Domicilio</button>
+                                    <button id="config-btn-para-llevar" class="option-btn" style="flex:1;padding:8px;background:#ddd;color:black;border:none;border-radius:4px;cursor:pointer;">Ordena y Espera</button>
+                                </div>
+                            </div>
+                            
+                            <div style="margin:15px 0;">
+                                <h4 style="margin:5px 0;">Hora de ingreso:</h4>
+                                <div style="display:flex;gap:10px;">
+                                    <input type="number" id="config-hour" min="0" max="23" value="${new Date().getHours()}" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;"> :
+                                    <input type="number" id="config-minute" min="0" max="59" value="${new Date().getMinutes()}" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                                </div>
+                            </div>
+                            
+                            <div style="display:flex;justify-content:flex-end;margin-top:20px;">
+                                <button id="config-btn-save" style="padding:10px 20px;background:#4CAF50;color:white;border:none;border-radius:4px;cursor:pointer;">Guardar y Continuar</button>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div style="margin:15px 0;">
-                        <h4 style="margin:5px 0;">Hora de ingreso:</h4>
-                        <div style="display:flex;gap:10px;">
-                            <input type="number" id="config-hour" min="0" max="23" value="${new Date().getHours()}" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;"> :
-                            <input type="number" id="config-minute" min="0" max="59" value="${new Date().getMinutes()}" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;">
-                        </div>
-                    </div>
-                    
-                    <div style="display:flex;justify-content:flex-end;margin-top:20px;">
-                        <button id="config-btn-save" style="padding:10px 20px;background:#4CAF50;color:white;border:none;border-radius:4px;cursor:pointer;">Guardar y Continuar</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // Agregar el modal al DOM
-        var modalContainer = document.createElement('div');
-        modalContainer.innerHTML = modalHTML;
-        document.body.appendChild(modalContainer.firstChild);
-        
-        // Configurar eventos de los botones de servicio
-        document.getElementById('config-btn-comedor').addEventListener('click', function() {
-            document.querySelectorAll('#ticket-config-modal .option-btn').forEach(btn => {
-                btn.classList.remove('selected');
-                btn.style.background = '#ddd';
-                btn.style.color = 'black';
-            });
-            this.classList.add('selected');
-            this.style.background = '#4CAF50';
-            this.style.color = 'white';
-            ticketConfig.service = 'comedor';
-        });
-        
-        document.getElementById('config-btn-domicilio').addEventListener('click', function() {
-            document.querySelectorAll('#ticket-config-modal .option-btn').forEach(btn => {
-                btn.classList.remove('selected');
-                btn.style.background = '#ddd';
-                btn.style.color = 'black';
-            });
-            this.classList.add('selected');
-            this.style.background = '#4CAF50';
-            this.style.color = 'white';
-            ticketConfig.service = 'domicilio';
-        });
-        
-        document.getElementById('config-btn-para-llevar').addEventListener('click', function() {
-            document.querySelectorAll('#ticket-config-modal .option-btn').forEach(btn => {
-                btn.classList.remove('selected');
-                btn.style.background = '#ddd';
-                btn.style.color = 'black';
-            });
-            this.classList.add('selected');
-            this.style.background = '#4CAF50';
-            this.style.color = 'white';
-            ticketConfig.service = 'para-llevar';
-        });
-        
-        // Configurar evento del botón guardar
-        document.getElementById('config-btn-save').addEventListener('click', function() {
-            var hour = parseInt(document.getElementById('config-hour').value);
-            var minute = parseInt(document.getElementById('config-minute').value);
-            
-            if (isNaN(hour) || hour < 0 || hour > 23) {
-                if (Avika.ui && typeof Avika.ui.showErrorMessage === 'function') {
-                    Avika.ui.showErrorMessage("Hora inválida. Debe estar entre 0 y 23.");
+                `;
+                
+                // Crear contenedor y añadir al DOM
+                var modalContainer = document.createElement('div');
+                modalContainer.innerHTML = modalHTML;
+                document.body.appendChild(modalContainer.firstElementChild);
+                
+                // Ahora configurar los eventos
+                var btnComedor = document.getElementById('config-btn-comedor');
+                var btnDomicilio = document.getElementById('config-btn-domicilio');
+                var btnParaLlevar = document.getElementById('config-btn-para-llevar');
+                var btnSave = document.getElementById('config-btn-save');
+                
+                if (btnComedor) {
+                    btnComedor.addEventListener('click', function() {
+                        document.querySelectorAll('#ticket-config-modal .option-btn').forEach(function(btn) {
+                            btn.classList.remove('selected');
+                            btn.style.background = '#ddd';
+                            btn.style.color = 'black';
+                        });
+                        this.classList.add('selected');
+                        this.style.background = '#4CAF50';
+                        this.style.color = 'white';
+                        ticketConfig.service = 'comedor';
+                    });
                 }
-                return;
-            }
-            
-            if (isNaN(minute) || minute < 0 || minute > 59) {
-                if (Avika.ui && typeof Avika.ui.showErrorMessage === 'function') {
-                    Avika.ui.showErrorMessage("Minutos inválidos. Deben estar entre 0 y 59.");
+                
+                if (btnDomicilio) {
+                    btnDomicilio.addEventListener('click', function() {
+                        document.querySelectorAll('#ticket-config-modal .option-btn').forEach(function(btn) {
+                            btn.classList.remove('selected');
+                            btn.style.background = '#ddd';
+                            btn.style.color = 'black';
+                        });
+                        this.classList.add('selected');
+                        this.style.background = '#4CAF50';
+                        this.style.color = 'white';
+                        ticketConfig.service = 'domicilio';
+                    });
                 }
-                return;
+                
+                if (btnParaLlevar) {
+                    btnParaLlevar.addEventListener('click', function() {
+                        document.querySelectorAll('#ticket-config-modal .option-btn').forEach(function(btn) {
+                            btn.classList.remove('selected');
+                            btn.style.background = '#ddd';
+                            btn.style.color = 'black';
+                        });
+                        this.classList.add('selected');
+                        this.style.background = '#4CAF50';
+                        this.style.color = 'white';
+                        ticketConfig.service = 'para-llevar';
+                    });
+                }
+                
+                if (btnSave) {
+                    btnSave.addEventListener('click', function() {
+                        var hour = parseInt(document.getElementById('config-hour').value);
+                        var minute = parseInt(document.getElementById('config-minute').value);
+                        
+                        if (isNaN(hour) || hour < 0 || hour > 23) {
+                            if (Avika.ui && typeof Avika.ui.showErrorMessage === 'function') {
+                                Avika.ui.showErrorMessage("Hora inválida. Debe estar entre 0 y 23.");
+                            }
+                            return;
+                        }
+                        
+                        if (isNaN(minute) || minute < 0 || minute > 59) {
+                            if (Avika.ui && typeof Avika.ui.showErrorMessage === 'function') {
+                                Avika.ui.showErrorMessage("Minutos inválidos. Deben estar entre 0 y 59.");
+                            }
+                            return;
+                        }
+                        
+                        // Establecer hora
+                        var selectedTime = new Date();
+                        selectedTime.setHours(hour, minute, 0);
+                        ticketConfig.startTime = selectedTime;
+                        
+                        // Marcar como configurado
+                        ticketConfig.configured = true;
+                        
+                        // Aplicar configuración al ticket actual
+                        Avika.orders.currentTicket.service = ticketConfig.service;
+                        Avika.orders.currentTicket.startTime = ticketConfig.startTime;
+                        
+                        // Mostrar notificación
+                        if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                            Avika.ui.showNotification("Ticket configurado correctamente");
+                        }
+                        
+                        // Cerrar modal
+                        var modal = document.getElementById('ticket-config-modal');
+                        if (modal && modal.parentNode) {
+                            modal.parentNode.removeChild(modal);
+                        }
+                        
+                        // Activar modo ticket normal
+                        if (Avika.ui && typeof Avika.ui.enableTicketModeWithConfig === 'function') {
+                            Avika.ui.enableTicketModeWithConfig();
+                        }
+                    });
+                }
             }
-            
-            // Establecer hora
-            var selectedTime = new Date();
-            selectedTime.setHours(hour, minute, 0);
-            ticketConfig.startTime = selectedTime;
-            
-            // Marcar como configurado
-            ticketConfig.configured = true;
-            
-            // Aplicar configuración al ticket actual
-            Avika.orders.currentTicket.service = ticketConfig.service;
-            Avika.orders.currentTicket.startTime = ticketConfig.startTime;
-            
-            // Mostrar notificación
-            if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
-                Avika.ui.showNotification("Ticket configurado correctamente");
+        } catch (e) {
+            console.error("Error al configurar ticket:", e);
+            if (Avika.ui && typeof Avika.ui.showErrorMessage === 'function') {
+                Avika.ui.showErrorMessage("Error al configurar ticket: " + e.message);
             }
-            
-            // Cerrar modal
-            var modal = document.getElementById('ticket-config-modal');
-            if (modal && modal.parentNode) {
-                modal.parentNode.removeChild(modal);
-            }
-            
-            // Activar modo ticket normal
-            if (Avika.ui && typeof Avika.ui.enableTicketModeWithConfig === 'function') {
-                Avika.ui.enableTicketModeWithConfig();
-            }
-        });
+        }
     };
     
     // Versión modificada de enableTicketMode
@@ -370,33 +394,37 @@
     
     // Fix for Nuevo Ticket/Comanda button
     document.addEventListener('DOMContentLoaded', function() {
-        // Get the button element
-        var btnNewTicket = document.getElementById('btn-new-ticket');
-        
-        if (btnNewTicket) {
-            console.log("Applying Nuevo Ticket/Comanda button fix");
-            
-            // Remove all existing event listeners by cloning the button
-            var newBtn = btnNewTicket.cloneNode(true);
-            if (btnNewTicket.parentNode) {
-                btnNewTicket.parentNode.replaceChild(newBtn, btnNewTicket);
-            }
-            
-            // Add a new, proper click handler
-            newBtn.addEventListener('click', function() {
-                console.log("Nuevo Ticket/Comanda button clicked");
-                if (this.textContent.includes('Guardar')) {
-                    console.log("Saving current ticket");
-                    if (Avika.orders && typeof Avika.orders.saveCurrentTicket === 'function') {
-                        Avika.orders.saveCurrentTicket();
-                    }
-                } else {
-                    console.log("Starting new ticket");
-                    if (Avika.ui && typeof Avika.ui.enableTicketMode === 'function') {
-                        Avika.ui.enableTicketMode();
-                    }
+        try {
+            var btnNewTicket = document.getElementById('btn-new-ticket');
+            if (btnNewTicket) {
+                console.log("Configurando botón Nuevo Ticket/Comanda");
+                
+                // Eliminar cualquier listener previo clonando el botón
+                var newBtn = btnNewTicket.cloneNode(true);
+                if (btnNewTicket.parentNode) {
+                    btnNewTicket.parentNode.replaceChild(newBtn, btnNewTicket);
                 }
-            });
+                
+                // Asignar el nuevo handler
+                newBtn.addEventListener('click', function() {
+                    console.log("Nuevo Ticket/Comanda button clicked");
+                    if (this.textContent.includes('Guardar')) {
+                        console.log("Saving current ticket");
+                        if (Avika.orders && typeof Avika.orders.saveCurrentTicket === 'function') {
+                            Avika.orders.saveCurrentTicket();
+                        }
+                    } else {
+                        console.log("Starting new ticket");
+                        if (Avika.ui && typeof Avika.ui.enableTicketMode === 'function') {
+                            Avika.ui.enableTicketMode();
+                        }
+                    }
+                });
+                
+                console.log("Botón Nuevo Ticket/Comanda configurado correctamente");
+            }
+        } catch (e) {
+            console.error("Error al configurar botón de nuevo ticket:", e);
         }
     });
     
