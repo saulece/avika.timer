@@ -3,264 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avika Timer - Control de Tiempos</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#3498db">
-    <link rel="icon" href="icons/favicon.ico">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <title>Avika - Temporizador de Sushi</title>
+    <link rel="stylesheet" href="avika-style.css">
 </head>
 <body>
     <header>
-        <h1>Avika Timer</h1>
-        <div class="header-actions">
-            <button id="btnExport" class="btn-icon" title="Exportar datos">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            </button>
-            <button id="btnHelp" class="btn-icon" title="Ayuda">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-            </button>
-        </div>
+        <h1>Avika - Temporizador de Sushi</h1>
     </header>
-
-    <main>
-        <!-- Panel de comandas en proceso -->
-        <section id="active-tickets" class="section">
-            <div class="section-header">
-                <h2>Comandas en Proceso</h2>
-                <button id="btnNewTicket" class="btn primary">Nueva Comanda</button>
+    
+    <div class="container">
+        <!-- Notificaciones -->
+        <div id="notification"></div>
+        
+        <!-- Sección de categorías -->
+        <div id="categories-section">
+            <h2>Selecciona una categoría</h2>
+            <div class="category-container">
+                <button class="category-btn" id="btn-frio">Platillos Fríos</button>
+                <button class="category-btn" id="btn-entrada-fria">Entradas Frías</button>
+                <button class="category-btn" id="btn-caliente">Platillos Calientes</button>
+                <button class="category-btn" id="btn-entrada-caliente">Entradas Calientes</button>
+                <button class="category-btn" id="btn-combos">Combos</button>
             </div>
-            <div class="tickets-container">
-                <table class="data-table" id="activeTicketsTable">
-                    <thead>
-                        <tr>
-                            <th>Comanda #</th>
-                            <th>Servicio</th>
-                            <th>Inicio</th>
-                            <th>Estado</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Se llenará dinámicamente -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Panel de platillos en preparación -->
-        <section id="active-dishes" class="section">
-            <div class="section-header">
-                <h2>Platillos en Preparación</h2>
-                <button id="btnNewDish" class="btn secondary">Agregar Platillo</button>
-            </div>
-            <div class="dishes-container">
-                <table class="data-table" id="activeDishesTable">
-                    <thead>
-                        <tr>
-                            <th>Platillo</th>
-                            <th>Categoría</th>
-                            <th>Comanda</th>
-                            <th>Inicio</th>
-                            <th>Tiempo</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Se llenará dinámicamente -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Panel de historial -->
-        <section id="history" class="section">
-            <div class="section-header">
-                <h2>Historial de Tiempos</h2>
-                <div class="actions">
-                    <button id="btnStats" class="btn info">Ver Estadísticas</button>
-                    <button id="btnExportData" class="btn success">Exportar Datos</button>
+            
+            <!-- Órdenes pendientes -->
+            <div class="pending-orders-section">
+                <h2>Platillos en preparación <span id="pending-count">0</span></h2>
+                <div class="action-btns" style="margin-bottom: 10px;">
+                    <button class="action-btn" id="btn-new-ticket">Nuevo Ticket/Comanda</button>
+                    <button class="action-btn" id="btn-force-complete" style="background-color: #ff9800;" title="Solo usar en casos excepcionales cuando un ticket quedó atorado y no se puede completar normalmente">Emergencia: Desbloquear</button>
                 </div>
-            </div>
-            <div class="history-container">
-                <table class="data-table" id="historyTable">
+                <table>
                     <thead>
                         <tr>
                             <th>Platillo</th>
-                            <th>Categoría</th>
-                            <th>Comanda</th>
+                            <th>Inicio</th>
+                            <th>Tiempo</th> <!-- Modificado para acortar el texto -->
+                            <th>Detalles</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pending-body">
+                        <!-- Se llenará con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Órdenes completadas -->
+            <div class="pending-orders-section">
+                <h2>Platillos completados</h2>
+                <div class="filter-controls">
+                    <button id="btn-show-all-history" class="filter-btn">Ver historial completo</button>
+                    <button id="btn-show-recent" class="filter-btn active">Ver recientes</button>
+                    <button id="btn-show-stats" class="filter-btn">Ver promedios</button>
+                    <button id="btn-clear-history" class="filter-btn">Limpiar historial</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Platillo</th>
                             <th>Inicio</th>
                             <th>Fin</th>
-                            <th>Tiempo</th>
-                            <th>Servicio</th>
+                            <th>Tiempo total</th>
+                            <th>Detalles</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <!-- Se llenará dinámicamente -->
+                    <tbody id="completed-body">
+                        <!-- Se llenará con JavaScript -->
                     </tbody>
                 </table>
+                <button class="back-btn" id="btn-export">Exportar datos</button>
             </div>
-        </section>
-    </main>
-
-    <!-- Modal de Nueva Comanda -->
-    <div id="newTicketModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Nueva Comanda</h2>
-                <button class="close-modal">&times;</button>
+        </div>
+        
+        <!-- Sección de platillos -->
+        <div id="dishes-section" style="display: none;">
+            <h2 id="selected-category-title">Categoría</h2>
+            <div id="dishes-container" class="dishes-container" style="display: block;">
+                <!-- Se llenará con JavaScript -->
+                <div id="debug-info" style="margin-top: 20px; padding: 10px; background-color: #f9f9f9; border: 1px solid #ddd;">
+                    <p>Si no ves los platillos, actualiza la página con Ctrl+F5</p>
+                </div>
             </div>
-            <div class="modal-body">
-                <form id="newTicketForm">
-                    <div class="form-group">
-                        <label for="ticketService">Tipo de Servicio:</label>
-                        <div class="service-selector">
-                            <button type="button" class="service-btn active" data-service="comedor">Comedor</button>
-                            <button type="button" class="service-btn" data-service="domicilio">Domicilio</button>
-                            <button type="button" class="service-btn" data-service="ordenaRecoge">Ordena y Recoge</button>
+            
+            <button class="back-btn" id="btn-back-to-categories">Volver a Categorías</button>
+        </div>
+        
+        <!-- Sección de preparación - Modificada para un diseño más compacto -->
+        <div id="preparation-section" class="preparation-section">
+            <h2 id="selected-dish-title">Platillo</h2>
+            
+            <!-- Contenedor principal más compacto -->
+            <div class="compact-form-container">
+                <div id="personalization-section">
+                    <div class="option-group">
+                        <div class="option-title">Personalización</div>
+                        <div class="option-btns" id="personalization-options">
+                            <!-- Se llenará dinámicamente con JS -->
                         </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="ticketTime">Hora de entrada:</label>
-                        <input type="time" id="ticketTime" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Platillos:</label>
-                        <div id="ticketDishes" class="ticket-dishes">
-                            <!-- Platillos añadidos dinámicamente -->
-                        </div>
-                        <button type="button" id="btnAddDishToTicket" class="btn secondary">Añadir Platillo</button>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="button" class="btn cancel close-modal">Cancelar</button>
-                        <button type="submit" class="btn primary">Crear Comanda</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de Agregar Platillo -->
-    <div id="addDishModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Agregar Platillo</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="addDishForm">
-                    <div class="form-group">
-                        <label for="dishCategory">Categoría:</label>
-                        <select id="dishCategory" required>
-                            <option value="">Seleccionar categoría</option>
-                            <option value="entradaFria">Entrada de Cocina Fría</option>
-                            <option value="entradaCaliente">Entrada de Cocina Caliente</option>
-                            <option value="platilloFrio">Platillo de Cocina Fría</option>
-                            <option value="platilloCaliente">Platillo de Cocina Caliente</option>
-                            <option value="combo">Combo</option>
-                            <option value="comboEspecial">Combo Especial</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="dishName">Platillo:</label>
-                        <select id="dishName" required disabled>
-                            <option value="">Primero seleccione categoría</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="dishTicket">Comanda (opcional):</label>
-                        <select id="dishTicket">
-                            <option value="">Seleccionar comanda</option>
-                            <!-- Se llenará dinámicamente -->
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="dishTime">Hora de inicio:</label>
-                        <input type="time" id="dishTime" required>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="button" class="btn cancel close-modal">Cancelar</button>
-                        <button type="submit" class="btn primary">Agregar Platillo</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de Estadísticas -->
-    <div id="statsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Estadísticas de Tiempos</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="stats-container">
-                    <!-- Se llenará dinámicamente -->
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn cancel close-modal">Cerrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de Ayuda -->
-    <div id="helpModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Ayuda y Guía de Uso</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="help-section">
-                    <h3>Flujo de trabajo</h3>
-                    <ol>
-                        <li><strong>Crear una comanda</strong> - Agrupa varios platillos en una comanda</li>
-                        <li><strong>Agregar platillos</strong> - Individualmente o a una comanda existente</li>
-                        <li><strong>Registrar tiempos</strong> - Marca cuando un platillo está completado</li>
-                        <li><strong>Ver estadísticas</strong> - Analiza tiempos de preparación</li>
-                        <li><strong>Exportar datos</strong> - Guarda la información para análisis posterior</li>
-                    </ol>
                 </div>
                 
-                <div class="help-section">
-                    <h3>Tiempos objetivo</h3>
-                    <ul>
-                        <li><strong>Cocina Fría:</strong> 7 minutos</li>
-                        <li><strong>Cocina Caliente:</strong> 12 minutos</li>
-                        <li><strong>Combos Especiales:</strong> 15 minutos</li>
-                    </ul>
+                <div class="option-group">
+                    <div class="option-title">Tipo de Servicio</div>
+                    <div class="option-btns">
+                        <button class="option-btn selected" id="btn-comedor">Comedor</button>
+                        <button class="option-btn" id="btn-domicilio">Domicilio</button>
+                        <button class="option-btn" id="btn-para-llevar">Ordena y Espera</button>
+                    </div>
                 </div>
                 
-                <div class="help-section">
-                    <h3>Tipos de Servicios</h3>
-                    <ul>
-                        <li><strong>Comedor:</strong> Consumo dentro del restaurante</li>
-                        <li><strong>Domicilio:</strong> Entrega a través de repartidor</li>
-                        <li><strong>Ordena y Recoge:</strong> Cliente pasa a recoger el pedido</li>
-                    </ul>
+                <div class="option-group">
+                    <div class="option-title">Cantidad</div>
+                    <div class="qty-control">
+                        <button class="qty-btn" id="btn-decrease">-</button>
+                        <span class="qty-display" id="quantity-display">1</span>
+                        <button class="qty-btn" id="btn-increase">+</button>
+                    </div>
+                </div>
+                
+                <div class="option-group">
+                    <div class="option-title">Notas Especiales</div>
+                    <textarea class="notes-input" id="notes-input" placeholder="Ej: Cliente alérgico a mariscos" rows="2"></textarea>
+                </div>
+                
+                <!-- Botones de acción siempre visibles -->
+                <div class="action-btns">
+                    <button class="action-btn cancel-btn" id="btn-cancel">Cancelar</button>
+                    <button class="action-btn start-btn" id="btn-start">Iniciar Preparación</button>
+                    <button class="action-btn back-btn" id="btn-back-to-dishes">Atrás</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="js/config.js"></script>
-    <script src="js/storage.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/tickets.js"></script>
-    <script src="js/dishes.js"></script>
-    <script src="js/stats.js"></script>
-    <script src="js/export.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/service-worker-reg.js"></script>
+    <!-- Cargar módulos en orden correcto -->
+    <script src="avika-core.js"></script>
+    <script src="js/modules/config.js"></script>
+    <script src="js/modules/ui-controller.js"></script>
+    <script src="js/modules/order-service.js"></script>
+    <script src="js/modules/storage.js"></script>
+    <script src="js/modules/stats.js"></script>
+    <script src="avika-init.js"></script>
 </body>
 </html>
