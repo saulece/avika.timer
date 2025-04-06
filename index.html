@@ -267,5 +267,36 @@
         });
     });
     </script>
+
+    <script>
+    // Fix for category buttons not working
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Applying category buttons fix");
+        
+        // Directly attach click handlers to category buttons
+        document.querySelectorAll('.category-btn[data-category]').forEach(function(btn) {
+            // Clone the button to remove any existing listeners
+            var newBtn = btn.cloneNode(true);
+            if (btn.parentNode) {
+                btn.parentNode.replaceChild(newBtn, btn);
+            }
+            
+            // Add new click event listener
+            newBtn.addEventListener('click', function() {
+                var category = this.getAttribute('data-category');
+                console.log("Category button clicked:", category);
+                
+                if (window.Avika && Avika.ui && typeof Avika.ui.selectCategory === 'function') {
+                    Avika.ui.selectCategory(category);
+                } else if (window.selectCategory) {
+                    selectCategory(category);
+                } else {
+                    console.error("selectCategory function not found");
+                    alert("Error: No se pudo encontrar la función para seleccionar categoría");
+                }
+            });
+        });
+    });
+    </script>
 </body>
 </html>
