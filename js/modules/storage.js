@@ -2,6 +2,7 @@
 window.Avika = window.Avika || {};
 Avika.storage = {
     lastSavedState: '',
+    autoSaveTimer: null,
     
     // Función para guardar datos automáticamente en el almacenamiento local
     guardarDatosLocales: function() {
@@ -19,34 +20,201 @@ Avika.storage = {
         }
     },
 
-    // Función para cargar datos guardados
+    // Función para cargar datos guardados con verificación de integridad
     cargarDatosGuardados: function() {
         try {
             var savedPending = localStorage.getItem('avika_pendingOrders');
             var savedCompleted = localStorage.getItem('avika_completedOrders');
             
             if (savedPending) {
-                Avika.data.pendingOrders = JSON.parse(savedPending);
-                Avika.ui.updatePendingTable();
+                try {
+                    Avika.data.pendingOrders = JSON.parse(savedPending);
+                    // Restaurar fechas como objetos Date
+                    Avika.data.pendingOrders.forEach(function(order) {
+                        if (order.startTime) order.startTime = new Date(order.startTime);
+                        if (order.finishTime) order.finishTime = new Date(order.finishTime);
+                        if (order.deliveryDepartureTime) order.deliveryDepartureTime = new Date(order.deliveryDepartureTime);
+                        if (order.deliveryArrivalTime) order.deliveryArrivalTime = new Date(order.deliveryArrivalTime);
+                    });
+                } catch (parseError) {
+                    console.error('Error al analizar órdenes pendientes:', parseError);
+                    Avika.data.pendingOrders = [];
+                }
+            } else {
+                Avika.data.pendingOrders = [];
             }
             
             if (savedCompleted) {
-                Avika.data.completedOrders = JSON.parse(savedCompleted);
-                Avika.ui.updateCompletedTable();
+                try {
+                    Avika.data.completedOrders = JSON.parse(savedCompleted);
+                    // Restaurar fechas como objetos Date
+                    Avika.data.completedOrders.forEach(function(order) {
+                        if (order.startTime) order.startTime = new Date(order.startTime);
+                        if (order.finishTime) order.finishTime = new Date(order.finishTime);
+                        if (order.deliveryDepartureTime) order.deliveryDepartureTime = new Date(order.deliveryDepartureTime);
+                        if (order.deliveryArrivalTime) order.deliveryArrivalTime = new Date(order.deliveryArrivalTime);
+                    });
+                } catch (parseError) {
+                    console.error('Error al analizar órdenes completadas:', parseError);
+                    Avika.data.completedOrders = [];
+                }
+            } else {
+                Avika.data.completedOrders = [];
             }
+            
+            // Verificar integridad de datos
+            var reparacionesRealizadas = this.verificarIntegridad();
+            
+            // Actualizar interfaz
+            Avika.ui.updatePendingTable();
+            Avika.ui.updateCompletedTable();
             
             var lastSaved = localStorage.getItem('avika_lastSaved');
             if (lastSaved) {
-                Avika.ui.showNotification('Datos cargados de ' + new Date(lastSaved).toLocaleString());
+                if (reparacionesRealizadas) {
+                    Avika.ui.showNotification('Datos cargados y reparados. Última actualización: ' + new Date(lastSaved).toLocaleString());
+                } else {
+                    Avika.ui.showNotification('Datos cargados de ' + new Date(lastSaved).toLocaleString());
+                }
             }
             
             // Actualizar el estado guardado
             this.lastSavedState = JSON.stringify(Avika.data.pendingOrders) + JSON.stringify(Avika.data.completedOrders);
         } catch (e) {
             console.error('Error al cargar datos guardados:', e);
+            // Reiniciar datos en caso de error grave
+            Avika.data.pendingOrders = [];
+            Avika.data.completedOrders = [];
+            Avika.ui.showNotification('Error al cargar datos. Se han reiniciado los datos.');
         }
     },
-    
+
+    // Verificar y reparar integridad de datos
+    verificarIntegridad: function() {
+        console.log("Verificando integridad de datos...");
+        try {
+            var reparaciones = 0;
+            
+            // Verificar órdenes pendientes
+            if (Avika.data.pendingOrders && Array.isArray(Avika.data.pendingOrders)) {
+                var indicesInvalidos = [];
+                
+                // Detectar entradas inválidas
+                for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                    var orden = Avika.data.pendingOrders[i];
+                    
+                    // Verificar campos obligatorios
+                    if (!orden || !orden.id || !orden.dish || !orden.startTime) {
+                        indicesInvalidos.push(i);
+                        continue;
+                    }
+                    
+                    // Reparar timestamps si son inválidos
+                    if (orden.startTime && isNaN(new Date(orden.startTime).getTime())) {
+                        orden.startTime = new Date().toISOString();
+                        orden.startTimeFormatted = this.formatTime(new Date());
+                        reparaciones++;
+                    }
+                    
+                    // Verificar campos específicos para combos especiales
+                    if (orden.isSpecialCombo === true) {
+                        if (orden.hotKitchenFinished === undefined) {
+                            orden.hotKitchenFinished = false;
+                            reparaciones++;
+                        }
+                        if (orden.coldKitchenFinished === undefined) {
+                            orden.coldKitchenFinished = false;
+                            reparaciones++;
+                        }
+                    }
+                    
+                    // Verificar campos de servicio
+                    if (!orden.serviceType) {
+                        orden.serviceType = 'comedor'; // Valor predeterminado
+                        reparaciones++;
+                    }
+                }
+                
+                // Eliminar entradas inválidas (de atrás hacia adelante)
+                for (var j = indicesInvalidos.length - 1; j >= 0; j--) {
+                    Avika.data.pendingOrders.splice(indicesInvalidos[j], 1);
+                    reparaciones++;
+                }
+            } else {
+                // Si no existe o no es un array, inicializarlo
+                Avika.data.pendingOrders = [];
+                reparaciones++;
+            }
+            
+            // Verificar órdenes completadas (similar a pendientes)
+            if (Avika.data.completedOrders && Array.isArray(Avika.data.completedOrders)) {
+                var indicesInvalidos = [];
+                
+                for (var i = 0; i < Avika.data.completedOrders.length; i++) {
+                    var orden = Avika.data.completedOrders[i];
+                    
+                    if (!orden || !orden.id || !orden.dish || !orden.startTime || !orden.finishTime) {
+                        indicesInvalidos.push(i);
+                        continue;
+                    }
+                    
+                    // Reparar campos específicos
+                    if (!orden.prepTime) {
+                        var tiempoMillis = new Date(orden.finishTime) - new Date(orden.startTime);
+                        var tiempoSecs = Math.floor(tiempoMillis / 1000);
+                        var mins = Math.floor(tiempoSecs / 60);
+                        var secs = tiempoSecs % 60;
+                        
+                        orden.prepTime = this.padZero(mins) + ':' + this.padZero(secs) + ' minutos';
+                        reparaciones++;
+                    }
+                }
+                
+                // Eliminar entradas inválidas
+                for (var j = indicesInvalidos.length - 1; j >= 0; j--) {
+                    Avika.data.completedOrders.splice(indicesInvalidos[j], 1);
+                    reparaciones++;
+                }
+            } else {
+                Avika.data.completedOrders = [];
+                reparaciones++;
+            }
+            
+            // Guardar datos reparados
+            if (reparaciones > 0) {
+                this.guardarDatosLocales();
+                console.log("Se realizaron " + reparaciones + " reparaciones en los datos.");
+                return true;
+            }
+            
+            console.log("Verificación completada. No se encontraron inconsistencias.");
+            return false;
+            
+        } catch (e) {
+            console.error("Error al verificar integridad:", e);
+            // En caso de error grave, reiniciar datos
+            Avika.data.pendingOrders = [];
+            Avika.data.completedOrders = [];
+            this.guardarDatosLocales();
+            return true;
+        }
+    },
+
+    // Función auxiliar para formatear tiempo
+    formatTime: function(date) {
+        if (!date) return '--:--:--';
+        
+        var hours = this.padZero(date.getHours());
+        var minutes = this.padZero(date.getMinutes());
+        var seconds = this.padZero(date.getSeconds());
+        return hours + ':' + minutes + ':' + seconds;
+    },
+
+    // Función auxiliar para añadir ceros a números
+    padZero: function(num) {
+        return (num < 10 ? '0' : '') + num;
+    },
+
     // Función para limpiar historial
     limpiarHistorial: function() {
         if (confirm('¿Estás seguro de que deseas borrar todo el historial completado?')) {
@@ -55,5 +223,21 @@ Avika.storage = {
             Avika.storage.guardarDatosLocales();
             Avika.ui.showNotification('Historial limpiado');
         }
+    },
+    
+    // Inicializar el autoguardado
+    iniciarAutoguardado: function() {
+        // Limpiar cualquier temporizador existente
+        if (this.autoSaveTimer) {
+            clearInterval(this.autoSaveTimer);
+        }
+        
+        // Configurar nuevo temporizador
+        var intervalo = Avika.config && Avika.config.autoSaveInterval ? Avika.config.autoSaveInterval : 30000;
+        this.autoSaveTimer = setInterval(function() {
+            Avika.storage.guardarDatosLocales();
+        }, intervalo);
+        
+        console.log('Autoguardado iniciado con intervalo de ' + intervalo + 'ms');
     }
 };
