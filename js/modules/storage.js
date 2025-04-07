@@ -7,6 +7,12 @@ Avika.storage = {
     // Función para guardar datos automáticamente en el almacenamiento local
 guardarDatosLocales: function() {
     try {
+        // Verificar que window.Avika existe
+        if (!window.Avika) {
+            window.Avika = {};
+            console.warn('window.Avika no existe, inicializando objeto global');
+        }
+        
         // Verificar que Avika.data existe y está inicializado
         if (!Avika.data) {
             Avika.data = {};
@@ -39,6 +45,12 @@ guardarDatosLocales: function() {
 // Función para cargar datos guardados
 cargarDatosGuardados: function() {
     try {
+        // Verificar que window.Avika existe
+        if (!window.Avika) {
+            window.Avika = {};
+            console.warn('window.Avika no existe, inicializando objeto global');
+        }
+        
         // Asegurar que Avika.data existe
         if (!Avika.data) {
             Avika.data = {};
@@ -64,15 +76,30 @@ cargarDatosGuardados: function() {
         
         // Cargar datos guardados si existen
         if (savedPending) {
-            Avika.data.pendingOrders = JSON.parse(savedPending);
+            try {
+                Avika.data.pendingOrders = JSON.parse(savedPending);
+            } catch (parseError) {
+                console.error('Error al parsear pendingOrders:', parseError);
+                Avika.data.pendingOrders = [];
+            }
         }
         
         if (savedDelivery) {
-            Avika.data.deliveryOrders = JSON.parse(savedDelivery);
+            try {
+                Avika.data.deliveryOrders = JSON.parse(savedDelivery);
+            } catch (parseError) {
+                console.error('Error al parsear deliveryOrders:', parseError);
+                Avika.data.deliveryOrders = [];
+            }
         }
         
         if (savedCompleted) {
-            Avika.data.completedOrders = JSON.parse(savedCompleted);
+            try {
+                Avika.data.completedOrders = JSON.parse(savedCompleted);
+            } catch (parseError) {
+                console.error('Error al parsear completedOrders:', parseError);
+                Avika.data.completedOrders = [];
+            }
         }
         
         // Verificar que la UI esté inicializada antes de actualizar tablas

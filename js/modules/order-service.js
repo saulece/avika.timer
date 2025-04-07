@@ -1,71 +1,53 @@
-// ui-controller.js - Funciones de interfaz de usuario con soporte para subcategorías
+// order-service.js - Funciones para el manejo de órdenes y tickets
 window.Avika = window.Avika || {};
 
-Avika.ui = {
-    // Estado de la UI
-    state: {
-        lastSavedState: '',
-        currentSubCategory: null, // Añadido para el seguimiento de subcategorías
-        ticketMode: false, // Añadido para modo ticket
-        ticketItems: [], // Añadido para almacenar elementos del ticket
-        ticketService: 'comedor', // Servicio predeterminado para el ticket
-        selectedTicketItem: {}, // Item seleccionado actualmente
-        expandedTickets: {}
-    },
-    
-    // Funciones básicas de UI
-    showSection: function(sectionId) {
-        console.log("Mostrando sección:", sectionId); // Añadido para depuración
+Avika.orderService = {
+    // Función para crear una nueva orden
+    createOrder: function(dish, category, serviceType, notes, quantity, isSpecialCombo) {
+        console.log("Creando nueva orden:", dish);
         
-        // Ocultar todas las secciones primero
-        document.getElementById('categories-section').style.display = 'none';
-        document.getElementById('dishes-section').style.display = 'none';
-        document.getElementById('preparation-section').style.display = 'none';
-        
-        // Mostrar la sección solicitada
-        var section = document.getElementById(sectionId);
-        if (section) {
-            section.style.display = 'block';
-            
-            // Forzar un reflow para asegurar que los cambios de CSS se apliquen
-            void section.offsetWidth;
-            
-            console.log("Sección " + sectionId + " configurada como visible");
-            
-            // Verificación adicional para dishes-section
-            if (sectionId === 'dishes-section') {
-                var dishesContainer = document.getElementById('dishes-container');
-                if (dishesContainer) {
-                    console.log("Contenedor de platillos encontrado, cantidad de hijos:", dishesContainer.children.length);
-                    
-                    // Verificar los botones de platillos
-                    var buttons = dishesContainer.querySelectorAll('.dish-btn');
-                    console.log("Botones de platillos encontrados:", buttons.length);
-                    
-                    // Verificar si los botones tienen estilos que los ocultan
-                    if (buttons.length > 0) {
-                        var buttonStyle = window.getComputedStyle(buttons[0]);
-                        console.log("Estilo de botón:", 
-                                    "display=" + buttonStyle.display, 
-                                    "visibility=" + buttonStyle.visibility,
-                                    "opacity=" + buttonStyle.opacity);
-                    }
-                } else {
-                    console.error("No se encontró el contenedor de platillos");
-                }
-            }
-        } else {
-            console.error("Sección no encontrada:", sectionId);
+        // Verificar que Avika.data existe y está inicializado
+        if (!Avika.data) {
+            Avika.data = {};
+            console.warn('Avika.data no existe, inicializando objeto vacío');
         }
-    },
-    showNotification: function(message) {
-        var notification = document.getElementById('notification');
-        notification.textContent = message;
-        notification.style.display = 'block';
         
-        setTimeout(function() {
-            notification.style.display = 'none';
-        }, 3000);
+        // Verificar que pendingOrders existe
+        if (!Avika.data.pendingOrders) {
+            Avika.data.pendingOrders = [];
+        }
+        
+        var now = new Date();
+        var order = {
+            id: now.getTime().toString() + Math.floor(Math.random() * 1000),
+            dish: dish,
+            category: category,
+            categoryDisplay: Avika.config.categoryNames[category],
+            quantity: quantity || 1,
+            customizations: [],
+            serviceType: serviceType || 'comedor',
+            notes: notes || '',
+            startTime: now,
+            startTimeFormatted: Avika.ui.formatTime(now),
+            isSpecialCombo: isSpecialCombo || false,
+            finished: false
+        };
+        
+        // Si es un combo especial, inicializar estados de cocinas
+        if (isSpecialCombo) {
+            order.hotKitchenFinished = false;
+            order.coldKitchenFinished = false;
+        }
+        
+        // Agregar a órdenes pendientes
+        Avika.data.pendingOrders.push(order);
+        
+        // Guardar datos
+        if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+            Avika.storage.guardarDatosLocales();
+        }
+        
+        return order;
     },
     
     padZero: function(num) {
@@ -1541,64 +1523,31 @@ Avika.ui = {
         // Deshabilitar botón de guardar si no hay items
         document.getElementById('btn-save-ticket').disabled = (this.state.ticketItems.length === 0);
     },
-    saveTicket: function() {
-        // Deshabilitar botón inmediatamente para evitar múltiples envíos
-        var saveButton = document.getElementById('btn-save-ticket');
-        if (saveButton) {
-            saveButton.disabled = true;
+    // Función para guardar un ticket completo
+    saveTicket: function(ticketItems, ticketService, ticketNotes, ticketTime) {
+        console.log("Guardando ticket con", ticketItems.length, "items");
+        
+        // Verificar que Avika.data existe y está inicializado
+        if (!Avika.data) {
+            Avika.data = {};
+            console.warn('Avika.data no existe, inicializando objeto vacío');
+        }
+        
+        // Verificar que pendingOrders existe
+        if (!Avika.data.pendingOrders) {
+            Avika.data.pendingOrders = [];
         }
         
         // Validar que haya platillos en el ticket
-        if (!this.state.ticketItems || this.state.ticketItems.length === 0) {
-            this.showNotification('El ticket debe contener al menos un platillo');
-            if (saveButton) {
-                saveButton.disabled = false;
-            }
-            return;
+        if (!ticketItems || ticketItems.length === 0) {
+            console.error('El ticket debe contener al menos un platillo');
+            return false;
         }
-        
-        // Obtener datos del ticket
-        var ticketTime = new Date();
-        
-        // Obtener hora seleccionada con validación
-        var hourElement = document.getElementById('ticket-hour');
-        var minuteElement = document.getElementById('ticket-minute');
-        
-        if (!hourElement || !minuteElement) {
-            this.showNotification('Error al obtener la hora seleccionada');
-            if (saveButton) {
-                saveButton.disabled = false;
-            }
-            return;
-        }
-        
-        var hour = parseInt(hourElement.value);
-        var minute = parseInt(minuteElement.value);
-        
-        // Validar valores
-        if (isNaN(hour) || hour < 0 || hour > 23 || isNaN(minute) || minute < 0 || minute > 59) {
-            this.showNotification('Por favor ingrese valores válidos para la hora');
-            if (saveButton) {
-                saveButton.disabled = false;
-            }
-            return;
-        }
-        
-        // Establecer hora y minutos
-        ticketTime.setHours(hour);
-        ticketTime.setMinutes(minute);
-        ticketTime.setSeconds(0);
-        
-        var ticketService = this.state.ticketService || 'comedor';
-        var ticketNotes = document.getElementById('ticket-notes-input')?.value || '';
         
         // Validar que haya una fecha válida
-        if (isNaN(ticketTime.getTime())) {
-            this.showNotification('Por favor ingrese una hora válida');
-            if (saveButton) {
-                saveButton.disabled = false; // Re-habilitar el botón si hay error
-            }
-            return;
+        if (!ticketTime || isNaN(ticketTime.getTime())) {
+            console.error('La hora del ticket no es válida');
+            return false;
         }
         
         // Generar un ID de ticket único para agrupar los platillos
@@ -1606,7 +1555,7 @@ Avika.ui = {
         
         try {
             // Procesar cada item del ticket
-            this.state.ticketItems.forEach(function(item) {
+            ticketItems.forEach(function(item) {
                 var preparation = {
                     id: Date.now().toString() + Math.floor(Math.random() * 1000),
                     ticketId: ticketId, // Añadir ID del ticket para agrupar
@@ -1615,7 +1564,7 @@ Avika.ui = {
                     categoryDisplay: Avika.config.categoryNames[item.category],
                     quantity: item.quantity,
                     customizations: [],
-                    serviceType: ticketService,
+                    serviceType: ticketService || 'comedor',
                     notes: item.notes + (ticketNotes ? ' | ' + ticketNotes : ''),
                     startTime: ticketTime,
                     startTimeFormatted: Avika.ui.formatTime(ticketTime),
@@ -1633,35 +1582,192 @@ Avika.ui = {
                 Avika.data.pendingOrders.push(JSON.parse(JSON.stringify(preparation)));
             });
             
-            // Actualizar la UI
-            Avika.ui.updatePendingTable();
-            Avika.storage.guardarDatosLocales();
-            
-            // Mostrar notificación
-            this.showNotification('Ticket agregado con ' + this.state.ticketItems.length + ' platillos');
-            
-            // Cerrar modal - Primero verificar que todavía existe
-            var modal = document.getElementById('ticket-modal');
-            if (modal) {
-                modal.style.display = 'none';
+            // Guardar datos
+            if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+                Avika.storage.guardarDatosLocales();
             }
             
-            // Restablecer estado
-            this.state.ticketMode = false;
-            this.state.ticketItems = [];
+            return true;
             
         } catch (error) {
-            // Capturar cualquier error y mostrar una notificación
             console.error('Error al guardar ticket:', error);
-            this.showNotification('Error al guardar ticket: ' + (error.message || 'Error desconocido'));
-            
-            // Re-habilitar el botón si hay error
-            if (saveButton) {
-                saveButton.disabled = false;
-            }
+            return false;
         }
     },
     
+    // Función para finalizar una orden
+    finishOrder: function(orderId) {
+        console.log("Finalizando orden:", orderId);
+        
+        // Verificar que Avika.data existe y está inicializado
+        if (!Avika.data) {
+            Avika.data = {};
+            console.warn('Avika.data no existe, inicializando objeto vacío');
+            return false;
+        }
+        
+        // Verificar que los arrays existen
+        if (!Avika.data.pendingOrders) Avika.data.pendingOrders = [];
+        if (!Avika.data.completedOrders) Avika.data.completedOrders = [];
+        
+        // Buscar la orden en pendientes
+        var orderIndex = -1;
+        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+            if (Avika.data.pendingOrders[i].id === orderId) {
+                orderIndex = i;
+                break;
+            }
+        }
+        
+        if (orderIndex === -1) {
+            console.error("No se encontró la orden con ID:", orderId);
+            return false;
+        }
+        
+        var order = Avika.data.pendingOrders[orderIndex];
+        
+        // Calcular tiempo de preparación
+        var endTime = new Date();
+        order.endTime = endTime;
+        order.preparationTime = Math.floor((endTime - new Date(order.startTime)) / 1000);
+        order.preparationTimeFormatted = Avika.ui.formatElapsedTime(order.preparationTime);
+        
+        // Mover a completadas
+        Avika.data.completedOrders.unshift(order);
+        Avika.data.pendingOrders.splice(orderIndex, 1);
+        
+        // Guardar datos
+        if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+            Avika.storage.guardarDatosLocales();
+        }
+        
+        return true;
+    },
+    
+    // Función para marcar una orden como lista para entrega
+    markOrderForDelivery: function(orderId) {
+        console.log("Marcando orden para entrega:", orderId);
+        
+        // Verificar que Avika.data existe y está inicializado
+        if (!Avika.data) {
+            Avika.data = {};
+            console.warn('Avika.data no existe, inicializando objeto vacío');
+            return false;
+        }
+        
+        // Verificar que los arrays existen
+        if (!Avika.data.pendingOrders) Avika.data.pendingOrders = [];
+        if (!Avika.data.deliveryOrders) Avika.data.deliveryOrders = [];
+        
+        // Buscar la orden en pendientes
+        var orderIndex = -1;
+        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+            if (Avika.data.pendingOrders[i].id === orderId) {
+                orderIndex = i;
+                break;
+            }
+        }
+        
+        if (orderIndex === -1) {
+            console.error("No se encontró la orden con ID:", orderId);
+            return false;
+        }
+        
+        var order = Avika.data.pendingOrders[orderIndex];
+        
+        // Registrar tiempo de preparación
+        var readyTime = new Date();
+        order.readyTime = readyTime;
+        order.readyTimeFormatted = Avika.ui.formatTime(readyTime);
+        order.preparationTime = Math.floor((readyTime - new Date(order.startTime)) / 1000);
+        order.preparationTimeFormatted = Avika.ui.formatElapsedTime(order.preparationTime);
+        
+        // Mover a reparto
+        Avika.data.deliveryOrders.push(order);
+        Avika.data.pendingOrders.splice(orderIndex, 1);
+        
+        // Guardar datos
+        if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+            Avika.storage.guardarDatosLocales();
+        }
+        
+        return true;
+    },
+    
+    // Función para completar una entrega
+    completeDelivery: function(orderId) {
+        console.log("Completando entrega:", orderId);
+        
+        // Verificar que Avika.data existe y está inicializado
+        if (!Avika.data) {
+            Avika.data = {};
+            console.warn('Avika.data no existe, inicializando objeto vacío');
+            return false;
+        }
+        
+        // Verificar que los arrays existen
+        if (!Avika.data.deliveryOrders) Avika.data.deliveryOrders = [];
+        if (!Avika.data.completedOrders) Avika.data.completedOrders = [];
+        
+        // Buscar la orden en reparto
+        var orderIndex = -1;
+        for (var i = 0; i < Avika.data.deliveryOrders.length; i++) {
+            if (Avika.data.deliveryOrders[i].id === orderId) {
+                orderIndex = i;
+                break;
+            }
+        }
+        
+        if (orderIndex === -1) {
+            console.error("No se encontró la orden con ID:", orderId);
+            return false;
+        }
+        
+        var order = Avika.data.deliveryOrders[orderIndex];
+        
+        // Registrar tiempo de entrega
+        var deliveryTime = new Date();
+        order.deliveryTime = deliveryTime;
+        order.deliveryTimeFormatted = Avika.ui.formatTime(deliveryTime);
+        order.totalTime = Math.floor((deliveryTime - new Date(order.startTime)) / 1000);
+        order.totalTimeFormatted = Avika.ui.formatElapsedTime(order.totalTime);
+        
+        // Mover a completadas
+        Avika.data.completedOrders.unshift(order);
+        Avika.data.deliveryOrders.splice(orderIndex, 1);
+        
+        // Guardar datos
+        if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+            Avika.storage.guardarDatosLocales();
+        }
+        
+        return true;
+    },
+    
+    // Función para limpiar órdenes completadas
+    clearCompletedOrders: function() {
+        console.log("Limpiando órdenes completadas");
+        
+        // Verificar que Avika.data existe y está inicializado
+        if (!Avika.data) {
+            Avika.data = {};
+            console.warn('Avika.data no existe, inicializando objeto vacío');
+            return false;
+        }
+        
+        // Verificar que el array existe
+        if (!Avika.data.completedOrders) Avika.data.completedOrders = [];
+        
+        // Vaciar array
+        Avika.data.completedOrders = [];
+        
+        // Guardar datos
+        if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+            Avika.storage.guardarDatosLocales();
+        }
+        
+        return true;
+    },
     cancelTicket: function() {
         document.getElementById('ticket-modal').style.display = 'none';
         this.state.ticketMode = false;

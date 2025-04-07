@@ -2,6 +2,57 @@
 window.Avika = window.Avika || {};
 
 Avika.orders = {
+    // Función para iniciar la preparación de un platillo
+    startPreparation: function() {
+        console.log("Iniciando preparación de platillo");
+        
+        try {
+            // Obtener datos del formulario
+            var selectedDish = document.getElementById('selected-dish').textContent;
+            var quantity = parseInt(document.getElementById('quantity-value').textContent, 10);
+            var serviceType = document.querySelector('.service-button.selected').getAttribute('data-service');
+            
+            // Validar datos
+            if (!selectedDish || selectedDish === '') {
+                Avika.ui.showNotification('Error: No se ha seleccionado un platillo', 'error');
+                return;
+            }
+            
+            if (isNaN(quantity) || quantity <= 0) {
+                Avika.ui.showNotification('Error: La cantidad debe ser mayor a 0', 'error');
+                return;
+            }
+            
+            if (!serviceType) {
+                Avika.ui.showNotification('Error: No se ha seleccionado un tipo de servicio', 'error');
+                return;
+            }
+            
+            // Usar el orderService para crear la orden
+            if (Avika.orderService && typeof Avika.orderService.createOrder === 'function') {
+                var order = Avika.orderService.createOrder(selectedDish, quantity, serviceType);
+                
+                // Actualizar la interfaz
+                Avika.ui.updatePendingTable();
+                
+                // Guardar cambios
+                Avika.storage.guardarDatosLocales();
+                
+                // Mostrar notificación
+                Avika.ui.showNotification('¡' + selectedDish + ' en preparación!');
+                
+                // Volver a la sección de categorías
+                Avika.ui.showSection('categories-section');
+            } else {
+                console.error("Error: orderService no está disponible o no tiene la función createOrder");
+                Avika.ui.showNotification('Error al crear la orden. Consulta la consola para más detalles.', 'error');
+            }
+        } catch (e) {
+            console.error("Error al iniciar preparación:", e);
+            Avika.ui.showNotification('Error al crear la orden: ' + e.message, 'error');
+        }
+    },
+    
     // Función para marcar un platillo individual como terminado (para tickets)
     finishIndividualItem: function(orderId) {
         console.log("Finalizando item individual:", orderId);
@@ -57,7 +108,7 @@ Avika.orders = {
         Avika.ui.updatePendingTable();
         
         // Guardar cambios
-        Avika.ui.saveLocalData();
+        Avika.storage.guardarDatosLocales();
         
         // Mostrar notificación
         Avika.ui.showNotification('¡' + order.dish + ' marcado como listo!');
@@ -98,7 +149,7 @@ Avika.orders = {
         Avika.ui.updateCompletedTable();
         
         // Guardar cambios
-        Avika.ui.saveLocalData();
+        Avika.storage.guardarDatosLocales();
         
         // Mostrar notificación
         Avika.ui.showNotification('¡' + order.dish + ' terminado! Tiempo: ' + 
@@ -135,7 +186,7 @@ Avika.orders = {
         Avika.ui.updatePendingTable();
         
         // Guardar cambios
-        Avika.ui.saveLocalData();
+        Avika.storage.guardarDatosLocales();
         
         // Mostrar notificación
         Avika.ui.showNotification('¡Cocina Caliente de ' + order.dish + ' terminada!');
@@ -171,7 +222,7 @@ Avika.orders = {
         Avika.ui.updatePendingTable();
         
         // Guardar cambios
-        Avika.ui.saveLocalData();
+        Avika.storage.guardarDatosLocales();
         
         // Mostrar notificación
         Avika.ui.showNotification('¡Cocina Fría de ' + order.dish + ' terminada!');
@@ -243,7 +294,7 @@ Avika.orders = {
         Avika.ui.updatePendingTable();
         
         // Guardar cambios
-        Avika.ui.saveLocalData();
+        Avika.storage.guardarDatosLocales();
         
         // Mostrar notificación
         Avika.ui.showNotification('¡' + order.dish + ' listo para entregar! Preparación: ' + 
@@ -313,7 +364,7 @@ Avika.orders = {
         Avika.ui.updateDeliveryTable();
         
         // Guardar cambios
-        Avika.ui.saveLocalData();
+        Avika.storage.guardarDatosLocales();
         
         // Mostrar notificación
         Avika.ui.showNotification('¡Salida registrada para ' + order.dish + '!');
@@ -392,7 +443,7 @@ Avika.orders = {
         Avika.ui.updateCompletedTable();
         
         // Guardar cambios
-        Avika.ui.saveLocalData();
+        Avika.storage.guardarDatosLocales();
         
         // Mostrar notificación
         Avika.ui.showNotification('¡Entrega completada para ' + order.dish + '! Tiempo de entrega: ' + 
@@ -410,7 +461,7 @@ Avika.orders = {
         Avika.ui.updateCompletedTable();
         
         // Guardar cambios
-        Avika.ui.saveLocalData();
+        Avika.storage.guardarDatosLocales();
         
         // Mostrar notificación
         Avika.ui.showNotification('Historial de órdenes limpiado');

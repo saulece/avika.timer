@@ -1,14 +1,20 @@
 // ====== PROBLEMA 1: CORREGIR EL INIT.JS ======
-// Reemplaza completamente el archivo avika-init.js con este código
-
 // avika-init.js - Script de inicialización para la aplicación Avika
 // Este script debe cargarse después de todos los demás scripts de Avika
 
-// Esperamos a que el DOM esté completamente cargado
-window.Avika = window.Avika || {};
+// Aseguramos que el objeto global Avika exista
+if (!window.Avika) {
+    window.Avika = {};
+    console.warn('window.Avika no existía, inicializando objeto global');
+}
 
 // Inicialización de estructuras de datos principales
-Avika.data = Avika.data || {};
+if (!Avika.data) {
+    Avika.data = {};
+    console.warn('Avika.data no existía, inicializando objeto de datos');
+}
+
+// Asegurar que todos los arrays existan
 Avika.data.pendingOrders = Avika.data.pendingOrders || [];
 Avika.data.deliveryOrders = Avika.data.deliveryOrders || [];
 Avika.data.completedOrders = Avika.data.completedOrders || [];
@@ -26,7 +32,9 @@ document.addEventListener('DOMContentLoaded', function() {
         ui: !!Avika.ui,
         data: !!Avika.data,
         config: !!Avika.config,
-        orders: !!Avika.orders
+        orders: !!Avika.orders,
+        orderService: !!Avika.orderService,
+        storage: !!Avika.storage
     });
     
     // Comprobar inicialización de datos
@@ -199,46 +207,82 @@ document.getElementById('btn-clear-delivery-filter').addEventListener('click', f
     }
     
     // Cargar datos guardados
-    function loadSavedData() {
-        console.log("Cargando datos guardados...");
-        try {
-            // Verificar que el módulo de almacenamiento esté disponible
-            if (Avika.storage && typeof Avika.storage.cargarDatosGuardados === 'function') {
-                Avika.storage.cargarDatosGuardados();
-                console.log("Datos cargados correctamente");
-            } else {
-                console.warn("Módulo de almacenamiento no disponible, no se pudieron cargar datos");
-                // Inicializar arrays vacíos si no existen
-                Avika.data = Avika.data || {};
-                Avika.data.pendingOrders = Avika.data.pendingOrders || [];
-                Avika.data.deliveryOrders = Avika.data.deliveryOrders || [];
-                Avika.data.completedOrders = Avika.data.completedOrders || [];
-            }
-        } catch (e) {
-            console.error("Error al cargar datos:", e);
-            // Inicializar arrays vacíos en caso de error
-            Avika.data = Avika.data || {};
-            Avika.data.pendingOrders = Avika.data.pendingOrders || [];
-            Avika.data.deliveryOrders = Avika.data.deliveryOrders || [];
-            Avika.data.completedOrders = Avika.data.completedOrders || [];
+function loadSavedData() {
+    console.log("Cargando datos guardados...");
+    try {
+        // Verificar que Avika y Avika.data existen
+        if (!window.Avika) {
+            window.Avika = {};
+            console.warn('window.Avika no existía durante loadSavedData, inicializando objeto global');
         }
+        
+        if (!Avika.data) {
+            Avika.data = {};
+            console.warn('Avika.data no existía durante loadSavedData, inicializando objeto de datos');
+        }
+        
+        // Verificar que los arrays existen
+        if (!Array.isArray(Avika.data.pendingOrders)) {
+            Avika.data.pendingOrders = [];
+            console.warn('Avika.data.pendingOrders no era un array, inicializando');
+        }
+        
+        if (!Array.isArray(Avika.data.deliveryOrders)) {
+            Avika.data.deliveryOrders = [];
+            console.warn('Avika.data.deliveryOrders no era un array, inicializando');
+        }
+        
+        if (!Array.isArray(Avika.data.completedOrders)) {
+            Avika.data.completedOrders = [];
+            console.warn('Avika.data.completedOrders no era un array, inicializando');
+        }
+        
+        // Verificar que el módulo de almacenamiento esté disponible
+        if (Avika.storage && typeof Avika.storage.cargarDatosGuardados === 'function') {
+            Avika.storage.cargarDatosGuardados();
+            console.log("Datos cargados correctamente");
+        } else {
+            console.warn("Módulo de almacenamiento no disponible, no se pudieron cargar datos");
+        }
+    } catch (e) {
+        console.error("Error al cargar datos:", e);
+        // Asegurar que los arrays existen en caso de error
+        if (!Avika.data) Avika.data = {};
+        if (!Array.isArray(Avika.data.pendingOrders)) Avika.data.pendingOrders = [];
+        if (!Array.isArray(Avika.data.deliveryOrders)) Avika.data.deliveryOrders = [];
+        if (!Array.isArray(Avika.data.completedOrders)) Avika.data.completedOrders = [];
     }
-    
+}
+
+// Inicialización de la aplicación
     // Inicialización de la aplicación
     function initApp() {
         console.log("Inicializando aplicación...");
         
         // Asegurar que las estructuras de datos están inicializadas
+        if (!window.Avika) {
+            window.Avika = {};
+            console.warn('window.Avika no existía durante initApp, inicializando objeto global');
+        }
+        
         if (!Avika.data) {
             Avika.data = {};
+            console.warn('Avika.data no existía durante initApp, inicializando objeto de datos');
         }
-        if (!Avika.data.pendingOrders) {
+        
+        // Verificar y crear arrays si no existen
+        if (!Array.isArray(Avika.data.pendingOrders)) {
+            console.warn('Avika.data.pendingOrders no era un array, inicializando');
             Avika.data.pendingOrders = [];
         }
-        if (!Avika.data.deliveryOrders) {
+        
+        if (!Array.isArray(Avika.data.deliveryOrders)) {
+            console.warn('Avika.data.deliveryOrders no era un array, inicializando');
             Avika.data.deliveryOrders = [];
         }
-        if (!Avika.data.completedOrders) {
+        
+        if (!Array.isArray(Avika.data.completedOrders)) {
+            console.warn('Avika.data.completedOrders no era un array, inicializando');
             Avika.data.completedOrders = [];
         }
         
@@ -251,11 +295,10 @@ document.getElementById('btn-clear-delivery-filter').addEventListener('click', f
         // Cargar datos guardados
         loadSavedData();
         
-
-// Configurar actualizaciones periódicas (optimizadas)
-setInterval(function() {
-    Avika.ui.updateAllTimers();
-}, 2000); // Actualizamos cada 2 segundos en lugar de cada segundo
+        // Configurar actualizaciones periódicas (optimizadas)
+        setInterval(function() {
+            Avika.ui.updateAllTimers();
+        }, 2000); // Actualizamos cada 2 segundos en lugar de cada segundo
         
         // Configurar autoguardado
         setInterval(function() {
@@ -272,14 +315,15 @@ setInterval(function() {
         console.error("Error fatal durante la inicialización:", e);
         alert("Error al inicializar la aplicación. Consulta la consola para más detalles.");
     }
+    
     // Botón para modo compacto
-document.getElementById('btn-compact-mode').addEventListener('click', function() {
-    Avika.ui.toggleCompactMode();
-});
+    document.getElementById('btn-compact-mode').addEventListener('click', function() {
+        Avika.ui.toggleCompactMode();
+    });
 
-// Restaurar preferencias de modo compacto si existe
-if (localStorage.getItem('avika_compact_mode') === 'true') {
-    document.body.classList.add('ultra-compact-mode');
-    document.getElementById('compact-icon').textContent = '📱';
-}
+    // Restaurar preferencias de modo compacto si existe
+    if (localStorage.getItem('avika_compact_mode') === 'true') {
+        document.body.classList.add('ultra-compact-mode');
+        document.getElementById('compact-icon').textContent = '📱';
+    }
 });
