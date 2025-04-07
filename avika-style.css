@@ -1919,3 +1919,24 @@ tr:hover td {
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
 }
+/* Estilos para la sección de reparto */
+.delivery-section {
+    border-left: 4px solid #f39c12;
+    background-color: rgba(243, 156, 18, 0.05);
+}
+
+.delivery-section h2 {
+    color: #d35400;
+}
+
+/* Estilo para el contador de tiempo en reparto */
+.delivery-timer {
+    font-weight: bold;
+    color: #d35400;
+    font-family: var(--font-monospace);
+}
+
+.delivery-timer.warning {
+    color: #e74c3c;
+    animation: pulse 1.5s infinite;
+}

@@ -693,70 +693,60 @@ Avika.ui = {
    
    // Actualizar tabla de órdenes completadas
    updateCompletedTable: function(showAll) {
-       var completedBody = document.getElementById('completed-body');
-       completedBody.innerHTML = '';
-       
-       var displayOrders = showAll ? Avika.data.completedOrders : Avika.data.completedOrders.slice(0, 5);
-       
-       for (var i = 0; i < displayOrders.length; i++) {
-           var order = displayOrders[i];
-           var row = document.createElement('tr');
-           
-           // Celda del platillo
-           var dishCell = document.createElement('td');
-           dishCell.textContent = order.dish + (order.quantity > 1 ? ' (' + order.quantity + ')' : '');
-           row.appendChild(dishCell);
-           
-           // Celda de inicio
-           var startCell = document.createElement('td');
-           startCell.textContent = order.startTimeFormatted;
-           row.appendChild(startCell);
-           
-           // Celda de fin
-           var endCell = document.createElement('td');
-           endCell.textContent = order.endTimeFormatted;
-           row.appendChild(endCell);
-           
-           // Celda de tiempo total
-           var timeCell = document.createElement('td');
-           timeCell.textContent = order.prepTime;
-           row.appendChild(timeCell);
-           
-           // Celda de detalles
-           var detailsCell = document.createElement('td');
-           var details = Avika.config.serviceNames[order.serviceType] + ', ' + Avika.config.categoryNames[order.category];
-           
-           if (order.isSpecialCombo) {
-               details += ' (Combo Especial)';
-           }
-           
-           if (order.customizations && order.customizations.length > 0) {
-               details += ', ' + order.customizations.map(function(code) {
-                   return Avika.config.customizationOptions[code] || code;
-               }).join(', ');
-           }
-           
-           if (order.notes) {
-               details += ' - ' + order.notes;
-           }
-           
-           if (order.deliveryDepartureTimeFormatted) {
-               details += ' | Salida: ' + order.deliveryDepartureTimeFormatted;
-           }
-           
-           if (order.deliveryArrivalTimeFormatted) {
-               details += ' | Entrega: ' + order.deliveryArrivalTimeFormatted;
-               
-               if (order.deliveryTime) {
-                   details += ' | Tiempo de entrega: ' + order.deliveryTime;
-               }
-           }
-           
-           detailsCell.textContent = details;
-           row.appendChild(detailsCell);
-           
-           completedBody.appendChild(row);
-       }
+    var completedBody = document.getElementById('completed-body');
+    completedBody.innerHTML = '';
+    
+    var displayOrders = showAll ? Avika.data.completedOrders : Avika.data.completedOrders.slice(0, 5);
+    
+    for (var i = 0; i < displayOrders.length; i++) {
+        var order = displayOrders[i];
+        var row = document.createElement('tr');
+        
+        // Celda del platillo
+        var dishCell = document.createElement('td');
+        dishCell.textContent = order.dish + (order.quantity > 1 ? ' (' + order.quantity + ')' : '');
+        row.appendChild(dishCell);
+        
+        // Celda de fin (hora de finalización) - CORREGIDO
+        var endCell = document.createElement('td');
+        endCell.textContent = order.endTimeFormatted;
+        row.appendChild(endCell);
+        
+        // Celda de detalles - CORREGIDO
+        var detailsCell = document.createElement('td');
+        var details = Avika.config.serviceNames[order.serviceType] + ', ' + Avika.config.categoryNames[order.category];
+        
+        if (order.isSpecialCombo) {
+            details += ' (Combo Especial)';
+        }
+        
+        if (order.customizations && order.customizations.length > 0) {
+            details += ', ' + order.customizations.map(function(code) {
+                return Avika.config.customizationOptions[code] || code;
+            }).join(', ');
+        }
+        
+        if (order.notes) {
+            details += ' - ' + order.notes;
+        }
+        
+        if (order.deliveryDepartureTimeFormatted) {
+            details += ' | Salida: ' + order.deliveryDepartureTimeFormatted;
+        }
+        
+        if (order.deliveryArrivalTimeFormatted) {
+            details += ' | Entrega: ' + order.deliveryArrivalTimeFormatted;
+            
+            if (order.deliveryTime) {
+                details += ' | Tiempo de entrega: ' + order.deliveryTime;
+            }
+        }
+        
+        detailsCell.textContent = details;
+        row.appendChild(detailsCell);
+        
+        completedBody.appendChild(row);
+    }
        
        // Añadir botón para limpiar historial si hay pedidos completados
        if (Avika.data.completedOrders.length > 0) {
@@ -791,52 +781,91 @@ Avika.ui = {
    },
 
    // Actualizar todos los temporizadores - Versión optimizada
-   updateAllTimers: function() {
-       if (Avika.data.pendingOrders.length === 0) return;
-       
-       var timerCells = document.getElementById('pending-body').querySelectorAll('.timer-cell');
-       var now = new Date(); // Calcular la hora actual una sola vez
-       var visibleTimers = 0;
-       
-       for (var i = 0; i < timerCells.length; i++) {
-           var timerCell = timerCells[i];
-           
-           // Solo actualizar temporizadores visibles (mejora de rendimiento)
-           var isVisible = this.isElementInViewport(timerCell);
-           if (!isVisible && visibleTimers > 10) continue; // Limitar a 10 temporizadores invisibles
-           
-           var orderId = timerCell.getAttribute('data-id');
-           if (!orderId) continue;
-           
-           // Buscar la orden por ID usando una referencia indexada (más eficiente)
-           var order = this.findOrderById(orderId);
-           if (!order) continue;
-           
-           visibleTimers++;
-           
-           var elapsedMillis = now - new Date(order.startTime);
-           var elapsedSeconds = Math.floor(elapsedMillis / 1000);
-           
-           var hours = Math.floor(elapsedSeconds / 3600);
-           var minutes = Math.floor((elapsedSeconds % 3600) / 60);
-           var seconds = elapsedSeconds % 60;
-           
-           timerCell.textContent = this.padZero(hours) + ':' + this.padZero(minutes) + ':' + this.padZero(seconds);
-           
-           // Añadir clases de advertencia según el tiempo transcurrido
-           timerCell.classList.remove('warning', 'alert');
-           
-           // Más de 10 minutos: advertencia
-           if (minutes >= 10 || hours > 0) {
-               timerCell.classList.add('warning');
-           }
-           
-           // Más de 15 minutos: alerta
-           if (minutes >= 15 || hours > 0) {
-               timerCell.classList.add('alert');
-           }
-       }
-   },
+   // Actualizar todos los temporizadores - Versión optimizada
+updateAllTimers: function() {
+    // Actualizar temporizadores de platillos en preparación
+    if (Avika.data.pendingOrders.length > 0) {
+        this.updatePendingTimers();
+    }
+    
+    // Actualizar temporizadores de platillos en reparto
+    this.updateDeliveryTimers();
+},
+
+// Función separada para los temporizadores de pendientes
+updatePendingTimers: function() {
+    var timerCells = document.getElementById('pending-body').querySelectorAll('.timer-cell');
+    var now = new Date(); // Calcular la hora actual una sola vez
+    var visibleTimers = 0;
+    
+    for (var i = 0; i < timerCells.length; i++) {
+        var timerCell = timerCells[i];
+        
+        // Solo actualizar temporizadores visibles (mejora de rendimiento)
+        var isVisible = this.isElementInViewport(timerCell);
+        if (!isVisible && visibleTimers > 10) continue; // Limitar a 10 temporizadores invisibles
+        
+        var orderId = timerCell.getAttribute('data-id');
+        if (!orderId) continue;
+        
+        // Buscar la orden por ID usando una referencia indexada (más eficiente)
+        var order = this.findOrderById(orderId);
+        if (!order) continue;
+        
+        visibleTimers++;
+        
+        var elapsedMillis = now - new Date(order.startTime);
+        var elapsedSeconds = Math.floor(elapsedMillis / 1000);
+        
+        var hours = Math.floor(elapsedSeconds / 3600);
+        var minutes = Math.floor((elapsedSeconds % 3600) / 60);
+        var seconds = elapsedSeconds % 60;
+        
+        timerCell.textContent = this.padZero(hours) + ':' + this.padZero(minutes) + ':' + this.padZero(seconds);
+        
+        // Añadir clases de advertencia según el tiempo transcurrido
+        timerCell.classList.remove('warning', 'alert');
+        
+        // Más de 10 minutos: advertencia
+        if (minutes >= 10 || hours > 0) {
+            timerCell.classList.add('warning');
+        }
+        
+        // Más de 15 minutos: alerta
+        if (minutes >= 15 || hours > 0) {
+            timerCell.classList.add('alert');
+        }
+    }
+},
+
+// Actualizar temporizadores de reparto
+updateDeliveryTimers: function() {
+    var timerCells = document.getElementById('delivery-body').querySelectorAll('.delivery-timer');
+    var now = new Date();
+    
+    for (var i = 0; i < timerCells.length; i++) {
+        var timerCell = timerCells[i];
+        var departureTimeStr = timerCell.getAttribute('data-departure-time');
+        
+        if (!departureTimeStr) continue;
+        
+        var departureTime = new Date(departureTimeStr);
+        var elapsedMillis = now - departureTime;
+        var elapsedSeconds = Math.floor(elapsedMillis / 1000);
+        
+        var hours = Math.floor(elapsedSeconds / 3600);
+        var minutes = Math.floor((elapsedSeconds % 3600) / 60);
+        var seconds = elapsedSeconds % 60;
+        
+        timerCell.textContent = this.padZero(hours) + ':' + this.padZero(minutes) + ':' + this.padZero(seconds);
+        
+        // Añadir clase de advertencia para tiempos largos
+        timerCell.classList.remove('warning');
+        if (minutes >= 30 || hours > 0) {
+            timerCell.classList.add('warning');
+        }
+    }
+},
 
    // Verificar si un elemento está visible en el viewport
    isElementInViewport: function(el) {
@@ -1938,4 +1967,164 @@ filterTicketDishes: function(searchText) {
         noResultsMsg.remove();
     }
 },
+// Función para actualizar la tabla de órdenes en reparto
+updateDeliveryTable: function() {
+    // Actualizar contador primero
+    var deliveryOrders = Avika.data.pendingOrders.filter(function(order) {
+        return order.serviceType === 'domicilio' && 
+               order.kitchenFinished && 
+               order.deliveryDepartureTime && 
+               !order.deliveryArrivalTime;
+    });
+    
+    document.getElementById('delivery-count').textContent = deliveryOrders.length;
+    
+    var deliveryBody = document.getElementById('delivery-body');
+    
+    // Si no hay órdenes en reparto, limpiamos la tabla
+    if (deliveryOrders.length === 0) {
+        deliveryBody.innerHTML = '';
+        return;
+    }
+    
+    // Reconstruir la tabla completamente
+    deliveryBody.innerHTML = '';
+    
+    // Agregar todas las órdenes en reparto desde cero
+    for (var i = 0; i < deliveryOrders.length; i++) {
+        var order = deliveryOrders[i];
+        var row = this.createDeliveryRow(order);
+        deliveryBody.appendChild(row);
+    }
+},
+
+// Crear fila para una orden en reparto
+createDeliveryRow: function(order) {
+    var row = document.createElement('tr');
+    
+    // Celda del platillo
+    var dishCell = document.createElement('td');
+    dishCell.textContent = order.dish + (order.quantity > 1 ? ' (' + order.quantity + ')' : '');
+    row.appendChild(dishCell);
+    
+    // Celda de hora de salida
+    var departureCell = document.createElement('td');
+    departureCell.textContent = order.deliveryDepartureTimeFormatted || '--:--:--';
+    row.appendChild(departureCell);
+    
+    // Celda de tiempo en reparto
+    var timerCell = document.createElement('td');
+    timerCell.className = 'delivery-timer';
+    timerCell.setAttribute('data-departure-time', order.deliveryDepartureTime);
+    timerCell.setAttribute('data-id', order.id);
+    timerCell.textContent = '00:00:00';
+    row.appendChild(timerCell);
+    
+    // Celda de detalles
+    var detailsCell = document.createElement('td');
+    var detailsText = '';
+    
+    // Añadir información de categoría
+    detailsText += Avika.config.categoryNames[order.category] || order.category;
+    
+    // Añadir personalizaciones si existen
+    if (order.customizations && order.customizations.length) {
+        detailsText += ', ' + order.customizations.join(', ');
+    }
+    
+    // Añadir notas si existen
+    if (order.notes) {
+        detailsText += '<br><span class="notes">' + order.notes + '</span>';
+    }
+    
+    // Añadir información del ticket
+    if (order.ticketId) {
+        detailsText += '<br><span class="ticket-info">Ticket #' + order.ticketId.substring(order.ticketId.length - 5) + '</span>';
+    }
+    
+    detailsCell.innerHTML = detailsText;
+    row.appendChild(detailsCell);
+    
+    // Celda de acción (registrar entrega)
+    var actionCell = document.createElement('td');
+    var arrivalBtn = document.createElement('button');
+    arrivalBtn.className = 'action-btn arrival-btn';
+    arrivalBtn.textContent = 'Registrar Entrega';
+    arrivalBtn.onclick = function() {
+        Avika.orders.markDeliveryArrival(order.id);
+    };
+    actionCell.appendChild(arrivalBtn);
+    row.appendChild(actionCell);
+    
+    return row;
+},
+
+// Actualizar temporizadores de reparto
+updateDeliveryTimers: function() {
+    var timerCells = document.getElementById('delivery-body').querySelectorAll('.delivery-timer');
+    var now = new Date();
+    
+    for (var i = 0; i < timerCells.length; i++) {
+        var timerCell = timerCells[i];
+        var departureTimeStr = timerCell.getAttribute('data-departure-time');
+        
+        if (!departureTimeStr) continue;
+        
+        var departureTime = new Date(departureTimeStr);
+        var elapsedMillis = now - departureTime;
+        var elapsedSeconds = Math.floor(elapsedMillis / 1000);
+        
+        var hours = Math.floor(elapsedSeconds / 3600);
+        var minutes = Math.floor((elapsedSeconds % 3600) / 60);
+        var seconds = elapsedSeconds % 60;
+        
+        timerCell.textContent = this.padZero(hours) + ':' + this.padZero(minutes) + ':' + this.padZero(seconds);
+        
+        // Añadir clase de advertencia para tiempos largos
+        timerCell.classList.remove('warning');
+        if (minutes >= 30 || hours > 0) {
+            timerCell.classList.add('warning');
+        }
+    }
+},
+// Función para filtrar órdenes en reparto por tiempo
+filtrarReparto: function(tiempoMinutos) {
+    if (tiempoMinutos === 'todos') {
+        this.limpiarFiltrosReparto();
+        return;
+    }
+    
+    var filas = document.querySelectorAll('#delivery-body tr');
+    var totalFiltrado = 0;
+    var totalFilas = filas.length;
+    var tiempoLimite = parseInt(tiempoMinutos) * 60; // Convertir a segundos
+    
+    filas.forEach(function(fila) {
+        var timerCell = fila.querySelector('.delivery-timer');
+        if (!timerCell) return;
+        
+        var tiempoTexto = timerCell.textContent;
+        var partes = tiempoTexto.split(':');
+        var tiempoTotal = parseInt(partes[0]) * 3600 + parseInt(partes[1]) * 60 + parseInt(partes[2]);
+        
+        if (tiempoTotal >= tiempoLimite) {
+            fila.classList.remove('row-filtered');
+            totalFiltrado++;
+        } else {
+            fila.classList.add('row-filtered');
+        }
+    });
+    
+    this.showNotification('Mostrando ' + totalFiltrado + ' de ' + totalFilas + ' repartos');
+},
+
+// Función para limpiar filtros de reparto
+limpiarFiltrosReparto: function() {
+    var filas = document.querySelectorAll('#delivery-body tr');
+    filas.forEach(function(fila) {
+        fila.classList.remove('row-filtered');
+    });
+    
+    this.showNotification('Filtros de reparto eliminados');
+}
 };

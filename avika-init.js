@@ -160,6 +160,16 @@ document.getElementById('btn-clear-filter').addEventListener('click', function()
                 Avika.stats.calcularPromedios();
             });
         }
+        // Botones de filtrado para reparto
+document.getElementById('btn-apply-delivery-filter').addEventListener('click', function() {
+    var tiempoSeleccionado = document.getElementById('filter-delivery-time').value;
+    Avika.ui.filtrarReparto(tiempoSeleccionado);
+});
+
+document.getElementById('btn-clear-delivery-filter').addEventListener('click', function() {
+    document.getElementById('filter-delivery-time').value = 'todos';
+    Avika.ui.limpiarFiltrosReparto();
+});
 
         // Botón para limpiar historial
         var btnClearHistory = document.getElementById('btn-clear-history');

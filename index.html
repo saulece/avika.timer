@@ -74,6 +74,34 @@
                 </table>
             </div>
             
+            <!-- NUEVA SECCIÓN: Órdenes en reparto -->
+<div class="pending-orders-section delivery-section">
+    <h2>Platillos en reparto <span id="delivery-count">0</span></h2>
+    <div class="filter-panel">
+        <select id="filter-delivery-time" class="filter-select">
+            <option value="todos">Todos los tiempos</option>
+            <option value="15">+15 minutos</option>
+            <option value="30">+30 minutos</option>
+            <option value="45">+45 minutos</option>
+        </select>
+        <button id="btn-apply-delivery-filter" class="filter-btn">Aplicar filtro</button>
+        <button id="btn-clear-delivery-filter" class="filter-btn">Limpiar filtro</button>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Platillo</th>
+                <th>Salida</th>
+                <th>Tiempo en reparto</th>
+                <th>Detalles</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody id="delivery-body">
+            <!-- Se llenará con JavaScript -->
+        </tbody>
+    </table>
+</div>
             <!-- Órdenes completadas -->
             <div class="pending-orders-section">
                 <h2>Platillos completados</h2>
@@ -87,9 +115,7 @@
                     <thead>
                         <tr>
                             <th>Platillo</th>
-                            <th>Inicio</th>
                             <th>Fin</th>
-                            <th>Tiempo total</th>
                             <th>Detalles</th>
                         </tr>
                     </thead>
