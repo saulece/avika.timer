@@ -5,89 +5,64 @@ Avika.storage = {
     autoSaveTimer: null,
     
     // Función para guardar datos automáticamente en el almacenamiento local
-    guardarDatosLocales: function() {
-        try {
-            // Verificar si hay cambios antes de guardar
-            var currentState = JSON.stringify(Avika.data.pendingOrders) + JSON.stringify(Avika.data.completedOrders);
-            if (currentState !== this.lastSavedState) {
-                localStorage.setItem('avika_pendingOrders', JSON.stringify(Avika.data.pendingOrders));
-                localStorage.setItem('avika_completedOrders', JSON.stringify(Avika.data.completedOrders));
-                localStorage.setItem('avika_lastSaved', new Date().toString());
-                this.lastSavedState = currentState;
-            }
-        } catch (e) {
-            console.error('Error al guardar datos localmente:', e);
+guardarDatosLocales: function() {
+    try {
+        // Verificar si hay cambios antes de guardar
+        var currentState = JSON.stringify(Avika.data.pendingOrders) + 
+                          JSON.stringify(Avika.data.deliveryOrders) + 
+                          JSON.stringify(Avika.data.completedOrders);
+        
+        if (currentState !== this.lastSavedState) {
+            localStorage.setItem('avika_pendingOrders', JSON.stringify(Avika.data.pendingOrders));
+            localStorage.setItem('avika_deliveryOrders', JSON.stringify(Avika.data.deliveryOrders));
+            localStorage.setItem('avika_completedOrders', JSON.stringify(Avika.data.completedOrders));
+            localStorage.setItem('avika_lastSaved', new Date().toString());
+            this.lastSavedState = currentState;
         }
-    },
+    } catch (e) {
+        console.error('Error al guardar datos localmente:', e);
+    }
+},
 
-    // Función para cargar datos guardados con verificación de integridad
-    cargarDatosGuardados: function() {
-        try {
-            var savedPending = localStorage.getItem('avika_pendingOrders');
-            var savedCompleted = localStorage.getItem('avika_completedOrders');
-            
-            if (savedPending) {
-                try {
-                    Avika.data.pendingOrders = JSON.parse(savedPending);
-                    // Restaurar fechas como objetos Date
-                    Avika.data.pendingOrders.forEach(function(order) {
-                        if (order.startTime) order.startTime = new Date(order.startTime);
-                        if (order.finishTime) order.finishTime = new Date(order.finishTime);
-                        if (order.deliveryDepartureTime) order.deliveryDepartureTime = new Date(order.deliveryDepartureTime);
-                        if (order.deliveryArrivalTime) order.deliveryArrivalTime = new Date(order.deliveryArrivalTime);
-                    });
-                } catch (parseError) {
-                    console.error('Error al analizar órdenes pendientes:', parseError);
-                    Avika.data.pendingOrders = [];
-                }
-            } else {
-                Avika.data.pendingOrders = [];
-            }
-            
-            if (savedCompleted) {
-                try {
-                    Avika.data.completedOrders = JSON.parse(savedCompleted);
-                    // Restaurar fechas como objetos Date
-                    Avika.data.completedOrders.forEach(function(order) {
-                        if (order.startTime) order.startTime = new Date(order.startTime);
-                        if (order.finishTime) order.finishTime = new Date(order.finishTime);
-                        if (order.deliveryDepartureTime) order.deliveryDepartureTime = new Date(order.deliveryDepartureTime);
-                        if (order.deliveryArrivalTime) order.deliveryArrivalTime = new Date(order.deliveryArrivalTime);
-                    });
-                } catch (parseError) {
-                    console.error('Error al analizar órdenes completadas:', parseError);
-                    Avika.data.completedOrders = [];
-                }
-            } else {
-                Avika.data.completedOrders = [];
-            }
-            
-            // Verificar integridad de datos
-            var reparacionesRealizadas = this.verificarIntegridad();
-            
-            // Actualizar interfaz
-            Avika.ui.updatePendingTable();
-            Avika.ui.updateCompletedTable();
-            
-            var lastSaved = localStorage.getItem('avika_lastSaved');
-            if (lastSaved) {
-                if (reparacionesRealizadas) {
-                    Avika.ui.showNotification('Datos cargados y reparados. Última actualización: ' + new Date(lastSaved).toLocaleString());
-                } else {
-                    Avika.ui.showNotification('Datos cargados de ' + new Date(lastSaved).toLocaleString());
-                }
-            }
-            
-            // Actualizar el estado guardado
-            this.lastSavedState = JSON.stringify(Avika.data.pendingOrders) + JSON.stringify(Avika.data.completedOrders);
-        } catch (e) {
-            console.error('Error al cargar datos guardados:', e);
-            // Reiniciar datos en caso de error grave
-            Avika.data.pendingOrders = [];
-            Avika.data.completedOrders = [];
-            Avika.ui.showNotification('Error al cargar datos. Se han reiniciado los datos.');
+// Función para cargar datos guardados
+cargarDatosGuardados: function() {
+    try {
+        var savedPending = localStorage.getItem('avika_pendingOrders');
+        var savedDelivery = localStorage.getItem('avika_deliveryOrders');
+        var savedCompleted = localStorage.getItem('avika_completedOrders');
+        
+        if (savedPending) {
+            Avika.data.pendingOrders = JSON.parse(savedPending);
         }
-    },
+        
+        if (savedDelivery) {
+            Avika.data.deliveryOrders = JSON.parse(savedDelivery);
+        } else {
+            Avika.data.deliveryOrders = []; // Inicializar si no existe
+        }
+        
+        if (savedCompleted) {
+            Avika.data.completedOrders = JSON.parse(savedCompleted);
+        }
+        
+        // Actualizar las interfaces
+        Avika.ui.updatePendingTable();
+        Avika.ui.updateDeliveryTable();
+        Avika.ui.updateCompletedTable();
+        
+        var lastSaved = localStorage.getItem('avika_lastSaved');
+        if (lastSaved) {
+            Avika.ui.showNotification('Datos cargados de ' + new Date(lastSaved).toLocaleString());
+        }
+        
+        // Actualizar el estado guardado
+        this.lastSavedState = JSON.stringify(Avika.data.pendingOrders) + 
+                             JSON.stringify(Avika.data.deliveryOrders) + 
+                             JSON.stringify(Avika.data.completedOrders);
+    } catch (e) {
+        console.error('Error al cargar datos guardados:', e);
+    }
+},
 
     // Verificar y reparar integridad de datos
     verificarIntegridad: function() {

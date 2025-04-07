@@ -2013,21 +2013,15 @@ filterTicketDishes: function(searchText) {
     }
 },
 // Función para actualizar la tabla de órdenes en reparto
+// Funciones para la parte de "Platillos en reparto"
 updateDeliveryTable: function() {
     // Actualizar contador primero
-    var deliveryOrders = Avika.data.pendingOrders.filter(function(order) {
-        return order.serviceType === 'domicilio' && 
-               order.kitchenFinished && 
-               order.deliveryDepartureTime && 
-               !order.deliveryArrivalTime;
-    });
-    
-    document.getElementById('delivery-count').textContent = deliveryOrders.length;
+    document.getElementById('delivery-count').textContent = Avika.data.deliveryOrders.length;
     
     var deliveryBody = document.getElementById('delivery-body');
     
     // Si no hay órdenes en reparto, limpiamos la tabla
-    if (deliveryOrders.length === 0) {
+    if (Avika.data.deliveryOrders.length === 0) {
         deliveryBody.innerHTML = '';
         return;
     }
@@ -2036,8 +2030,8 @@ updateDeliveryTable: function() {
     deliveryBody.innerHTML = '';
     
     // Agregar todas las órdenes en reparto desde cero
-    for (var i = 0; i < deliveryOrders.length; i++) {
-        var order = deliveryOrders[i];
+    for (var i = 0; i < Avika.data.deliveryOrders.length; i++) {
+        var order = Avika.data.deliveryOrders[i];
         var row = this.createDeliveryRow(order);
         deliveryBody.appendChild(row);
     }
@@ -2052,46 +2046,70 @@ createDeliveryRow: function(order) {
     dishCell.textContent = order.dish + (order.quantity > 1 ? ' (' + order.quantity + ')' : '');
     row.appendChild(dishCell);
     
-    // Celda de hora de salida
+    // Celda de hora de salida (o estado "Listo para salida")
     var departureCell = document.createElement('td');
-    departureCell.textContent = order.deliveryDepartureTimeFormatted || '--:--:--';
+    if (order.deliveryDepartureTime) {
+        departureCell.textContent = order.deliveryDepartureTimeFormatted || '--:--:--';
+    } else {
+        departureCell.innerHTML = '<span style="color: #f39c12;">Listo para salida</span>';
+    }
     row.appendChild(departureCell);
     
-    // Celda de tiempo en reparto
+    // Celda de tiempo en reparto o tiempo desde que está listo
     var timerCell = document.createElement('td');
-    timerCell.className = 'delivery-timer';
-    timerCell.setAttribute('data-departure-time', order.deliveryDepartureTime);
+    if (order.deliveryDepartureTime) {
+        timerCell.className = 'delivery-timer';
+        timerCell.setAttribute('data-departure-time', order.deliveryDepartureTime);
+    } else {
+        timerCell.className = 'ready-timer';
+        timerCell.setAttribute('data-ready-time', order.finishTime);
+    }
     timerCell.setAttribute('data-id', order.id);
     timerCell.textContent = '00:00:00';
     row.appendChild(timerCell);
     
     // Celda de detalles
-    var detailsCell = document.createElement('td');
-    var detailsText = '';
-    
-    // Añadir información de categoría
-    detailsText += Avika.config.categoryNames[order.category] || order.category;
-    
-    // Añadir personalizaciones si existen
-    if (order.customizations && order.customizations.length) {
-        detailsText += ', ' + order.customizations.join(', ');
-    }
-    
-    // Añadir notas si existen
-    if (order.notes) {
-        detailsText += '<br><span class="notes">' + order.notes + '</span>';
-    }
-    
-    // Añadir información del ticket
-    if (order.ticketId) {
-        detailsText += '<br><span class="ticket-info">Ticket #' + order.ticketId.substring(order.ticketId.length - 5) + '</span>';
-    }
-    
-    detailsCell.innerHTML = detailsText;
-    row.appendChild(detailsCell);
-    
-    // Celda de acción (registrar entrega)
-    var actionCell = document.createElement('td');
+var detailsCell = document.createElement('td');
+var detailsText = '';
+
+// Añadir información de categoría
+detailsText += Avika.config.categoryNames[order.category] || order.category;
+
+// Añadir personalizaciones si existen
+if (order.customizations && order.customizations.length) {
+    detailsText += ', ' + order.customizations.map(function(code) {
+        return Avika.config.customizationOptions[code] || code;
+    }).join(', ');
+}
+
+// Añadir notas si existen
+if (order.notes) {
+    detailsText += '<br><span class="notes">' + order.notes + '</span>';
+}
+
+// Añadir información del ticket
+if (order.ticketId) {
+    detailsText += '<br><span class="ticket-info">Ticket #' + order.ticketId.substring(order.ticketId.length - 5) + '</span>';
+}
+
+detailsCell.innerHTML = detailsText;
+row.appendChild(detailsCell);
+
+// Celda de acción
+var actionCell = document.createElement('td');
+
+// Determinar qué botón mostrar según el estado
+if (!order.deliveryDepartureTime) {
+    // Si aún no se ha registrado la salida, mostrar botón "Registrar Salida"
+    var departureBtn = document.createElement('button');
+    departureBtn.className = 'action-btn departure-btn';
+    departureBtn.textContent = 'Registrar Salida';
+    departureBtn.onclick = function() {
+        Avika.orders.markDeliveryDeparture(order.id);
+    };
+    actionCell.appendChild(departureBtn);
+} else {
+    // Si ya se registró la salida, mostrar botón "Registrar Entrega"
     var arrivalBtn = document.createElement('button');
     arrivalBtn.className = 'action-btn arrival-btn';
     arrivalBtn.textContent = 'Registrar Entrega';
@@ -2099,18 +2117,20 @@ createDeliveryRow: function(order) {
         Avika.orders.markDeliveryArrival(order.id);
     };
     actionCell.appendChild(arrivalBtn);
-    row.appendChild(actionCell);
-    
-    return row;
+}
+
+row.appendChild(actionCell);
+return row;
 },
 
 // Actualizar temporizadores de reparto
 updateDeliveryTimers: function() {
-    var timerCells = document.getElementById('delivery-body').querySelectorAll('.delivery-timer');
     var now = new Date();
     
-    for (var i = 0; i < timerCells.length; i++) {
-        var timerCell = timerCells[i];
+    // Actualizar temporizadores de repartidores en camino
+    var departureTimers = document.getElementById('delivery-body').querySelectorAll('.delivery-timer');
+    for (var i = 0; i < departureTimers.length; i++) {
+        var timerCell = departureTimers[i];
         var departureTimeStr = timerCell.getAttribute('data-departure-time');
         
         if (!departureTimeStr) continue;
@@ -2131,8 +2151,34 @@ updateDeliveryTimers: function() {
             timerCell.classList.add('warning');
         }
     }
+    
+    // Actualizar temporizadores de platillos listos para salida
+    var readyTimers = document.getElementById('delivery-body').querySelectorAll('.ready-timer');
+    for (var i = 0; i < readyTimers.length; i++) {
+        var timerCell = readyTimers[i];
+        var readyTimeStr = timerCell.getAttribute('data-ready-time');
+        
+        if (!readyTimeStr) continue;
+        
+        var readyTime = new Date(readyTimeStr);
+        var elapsedMillis = now - readyTime;
+        var elapsedSeconds = Math.floor(elapsedMillis / 1000);
+        
+        var hours = Math.floor(elapsedSeconds / 3600);
+        var minutes = Math.floor((elapsedSeconds % 3600) / 60);
+        var seconds = elapsedSeconds % 60;
+        
+        timerCell.textContent = this.padZero(hours) + ':' + this.padZero(minutes) + ':' + this.padZero(seconds);
+        
+        // Añadir clase de advertencia si lleva mucho tiempo esperando salir
+        timerCell.classList.remove('warning');
+        if (minutes >= 15 || hours > 0) {
+            timerCell.classList.add('warning');
+        }
+    }
 },
-// Función para filtrar órdenes en reparto por tiempo
+
+// Función para aplicar filtros a la tabla de reparto
 filtrarReparto: function(tiempoMinutos) {
     if (tiempoMinutos === 'todos') {
         this.limpiarFiltrosReparto();
@@ -2145,7 +2191,7 @@ filtrarReparto: function(tiempoMinutos) {
     var tiempoLimite = parseInt(tiempoMinutos) * 60; // Convertir a segundos
     
     filas.forEach(function(fila) {
-        var timerCell = fila.querySelector('.delivery-timer');
+        var timerCell = fila.querySelector('.delivery-timer, .ready-timer');
         if (!timerCell) return;
         
         var tiempoTexto = timerCell.textContent;
@@ -2172,102 +2218,71 @@ limpiarFiltrosReparto: function() {
     
     this.showNotification('Filtros de reparto eliminados');
 },
-// Función para realizar búsqueda global de platillos
-performGlobalDishSearch: function(searchText) {
-    var searchLower = searchText.toLowerCase().trim();
-    var resultsContainer = document.getElementById('search-results-container');
-    
-    // Limpiar resultados anteriores
-    resultsContainer.innerHTML = '';
-    
-    // Si la búsqueda está vacía, no mostrar resultados
-    if (searchLower === '') {
-        document.getElementById('search-results-step').style.display = 'none';
-        document.getElementById('category-selection-step').style.display = 'block';
-        return;
+
+// Actualizar todos los temporizadores - Versión optimizada y actualizada
+updateAllTimers: function() {
+    // Actualizar temporizadores de platillos en preparación
+    if (Avika.data.pendingOrders.length > 0) {
+        this.updatePendingTimers();
     }
     
-    // Recopilar resultados de todas las categorías
-    var results = [];
-    
-    // Recorrer todas las categorías
-    for (var category in Avika.config.dishes) {
-        var categoryName = Avika.config.categoryNames[category];
-        var dishes = Avika.config.dishes[category];
+    // Actualizar temporizadores de platillos en reparto
+    if (Avika.data.deliveryOrders.length > 0) {
+        this.updateDeliveryTimers();
+    }
+},
+
+// Función actualizada para cargar datos guardados
+cargarDatosGuardados: function() {
+    try {
+        var savedPending = localStorage.getItem('avika_pendingOrders');
+        var savedDelivery = localStorage.getItem('avika_deliveryOrders'); // Nueva
+        var savedCompleted = localStorage.getItem('avika_completedOrders');
         
-        // Buscar en cada platillo de la categoría
-        for (var i = 0; i < dishes.length; i++) {
-            var dish = dishes[i];
-            if (dish.toLowerCase().includes(searchLower)) {
-                results.push({
-                    category: category,
-                    categoryName: categoryName,
-                    dish: dish,
-                    isSpecialCombo: (category === 'combos' && Avika.config.specialCombos.indexOf(dish) !== -1)
-                });
-            }
+        // Cargar órdenes pendientes
+        if (savedPending) {
+            Avika.data.pendingOrders = JSON.parse(savedPending);
+        } else {
+            Avika.data.pendingOrders = [];
         }
+        
+        // Cargar órdenes en reparto
+        if (savedDelivery) {
+            Avika.data.deliveryOrders = JSON.parse(savedDelivery);
+        } else {
+            Avika.data.deliveryOrders = [];
+        }
+        
+        // Cargar órdenes completadas
+        if (savedCompleted) {
+            Avika.data.completedOrders = JSON.parse(savedCompleted);
+        } else {
+            Avika.data.completedOrders = [];
+        }
+        
+        // Actualizar UI
+        Avika.ui.updatePendingTable();
+        Avika.ui.updateDeliveryTable();
+        Avika.ui.updateCompletedTable();
+        
+        var lastSaved = localStorage.getItem('avika_lastSaved');
+        if (lastSaved) {
+            Avika.ui.showNotification('Datos cargados de ' + new Date(lastSaved).toLocaleString());
+        }
+    } catch (e) {
+        console.error('Error al cargar datos guardados:', e);
     }
-    
-    // Mostrar resultados
-    if (results.length > 0) {
-        // Mostrar la sección de resultados
-        document.getElementById('search-results-step').style.display = 'block';
-        document.getElementById('category-selection-step').style.display = 'none';
-        
-        // Crear botones para cada resultado
-        results.forEach(function(result) {
-            var button = document.createElement('button');
-            button.className = 'dish-btn' + (result.isSpecialCombo ? ' special-combo' : '');
-            button.setAttribute('data-category', result.category);
-            button.setAttribute('data-dish', result.dish);
-            
-            // Mostrar categoría para facilitar identificación
-            button.innerHTML = `<span style="font-weight: bold">${result.dish}</span><br>
-                               <small style="opacity: 0.7">${result.categoryName}</small>`;
-            
-            // Estilo para mejorar visualización
-            button.style.display = 'flex';
-            button.style.flexDirection = 'column';
-            button.style.alignItems = 'center';
-            button.style.justifyContent = 'center';
-            button.style.height = 'auto';
-            button.style.minHeight = '60px';
-            button.style.padding = '8px 12px';
-            button.style.textAlign = 'center';
-            
-            // Evento al hacer clic
-            button.onclick = function() {
-                var category = this.getAttribute('data-category');
-                var dish = this.getAttribute('data-dish');
-                
-                // Actualizar estado
-                Avika.ui.state.selectedTicketItem.category = category;
-                Avika.ui.state.selectedTicketItem.dish = dish;
-                Avika.ui.state.selectedTicketItem.quantity = 1;
-                
-                // Mostrar el nombre del platillo seleccionado
-                document.getElementById('selected-dish-name').textContent = dish;
-                
-                // Ir al paso de cantidad
-                document.getElementById('search-results-step').style.display = 'none';
-                document.getElementById('quantity-selection-step').style.display = 'block';
-            };
-            
-            resultsContainer.appendChild(button);
-        });
-    } else {
-        // Si no hay resultados, mostrar mensaje
-        var noResults = document.createElement('p');
-        noResults.textContent = 'No se encontraron platillos que coincidan con "' + searchText + '"';
-        noResults.style.textAlign = 'center';
-        noResults.style.padding = '20px';
-        noResults.style.color = '#888';
-        resultsContainer.appendChild(noResults);
-        
-        // Mostrar la sección de resultados vacía
-        document.getElementById('search-results-step').style.display = 'block';
-        document.getElementById('category-selection-step').style.display = 'none';
+},
+
+// Función actualizada para guardar datos locales
+guardarDatosLocales: function() {
+    try {
+        localStorage.setItem('avika_pendingOrders', JSON.stringify(Avika.data.pendingOrders));
+        localStorage.setItem('avika_deliveryOrders', JSON.stringify(Avika.data.deliveryOrders)); // Nueva
+        localStorage.setItem('avika_completedOrders', JSON.stringify(Avika.data.completedOrders));
+        localStorage.setItem('avika_lastSaved', new Date().toString());
+    } catch (e) {
+        console.error('Error al guardar datos:', e);
     }
 }
-};
+}
