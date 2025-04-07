@@ -2027,6 +2027,17 @@ Avika.ui = {
         document.body.classList.remove('loading-active');
     },
 
+    // Función para formatear tiempo transcurrido en formato HH:MM:SS
+    formatElapsedTime: function(seconds) {
+        if (!seconds && seconds !== 0) return '--:--:--';
+        
+        var hours = Math.floor(seconds / 3600);
+        var minutes = Math.floor((seconds % 3600) / 60);
+        var secs = seconds % 60;
+        
+        return this.padZero(hours) + ':' + this.padZero(minutes) + ':' + this.padZero(secs);
+    },
+
     // Función para activar/desactivar modo ultra-compacto
     toggleCompactMode: function() {
         var body = document.body;
