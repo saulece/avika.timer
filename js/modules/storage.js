@@ -7,6 +7,17 @@ Avika.storage = {
     // Función para guardar datos automáticamente en el almacenamiento local
 guardarDatosLocales: function() {
     try {
+        // Verificar que Avika.data existe y está inicializado
+        if (!Avika.data) {
+            Avika.data = {};
+            console.warn('Avika.data no existe, inicializando objeto vacío');
+        }
+        
+        // Verificar que los arrays existen
+        if (!Avika.data.pendingOrders) Avika.data.pendingOrders = [];
+        if (!Avika.data.deliveryOrders) Avika.data.deliveryOrders = [];
+        if (!Avika.data.completedOrders) Avika.data.completedOrders = [];
+        
         // Verificar si hay cambios antes de guardar
         var currentState = JSON.stringify(Avika.data.pendingOrders) + 
                           JSON.stringify(Avika.data.deliveryOrders) + 
@@ -18,6 +29,7 @@ guardarDatosLocales: function() {
             localStorage.setItem('avika_completedOrders', JSON.stringify(Avika.data.completedOrders));
             localStorage.setItem('avika_lastSaved', new Date().toString());
             this.lastSavedState = currentState;
+            console.log('Datos guardados correctamente');
         }
     } catch (e) {
         console.error('Error al guardar datos localmente:', e);
@@ -27,38 +39,71 @@ guardarDatosLocales: function() {
 // Función para cargar datos guardados
 cargarDatosGuardados: function() {
     try {
+        // Asegurar que Avika.data existe
+        if (!Avika.data) {
+            Avika.data = {};
+            console.warn('Avika.data no existe, inicializando objeto vacío');
+        }
+        
         var savedPending = localStorage.getItem('avika_pendingOrders');
         var savedDelivery = localStorage.getItem('avika_deliveryOrders');
         var savedCompleted = localStorage.getItem('avika_completedOrders');
         
+        // Inicializar arrays si no existen
+        if (!Avika.data.pendingOrders) {
+            Avika.data.pendingOrders = [];
+        }
+        
+        if (!Avika.data.deliveryOrders) {
+            Avika.data.deliveryOrders = [];
+        }
+        
+        if (!Avika.data.completedOrders) {
+            Avika.data.completedOrders = [];
+        }
+        
+        // Cargar datos guardados si existen
         if (savedPending) {
             Avika.data.pendingOrders = JSON.parse(savedPending);
         }
         
         if (savedDelivery) {
             Avika.data.deliveryOrders = JSON.parse(savedDelivery);
-        } else {
-            Avika.data.deliveryOrders = []; // Inicializar si no existe
         }
         
         if (savedCompleted) {
             Avika.data.completedOrders = JSON.parse(savedCompleted);
         }
         
-        // Actualizar las interfaces
-        Avika.ui.updatePendingTable();
-        Avika.ui.updateDeliveryTable();
-        Avika.ui.updateCompletedTable();
-        
-        var lastSaved = localStorage.getItem('avika_lastSaved');
-        if (lastSaved) {
-            Avika.ui.showNotification('Datos cargados de ' + new Date(lastSaved).toLocaleString());
+        // Verificar que la UI esté inicializada antes de actualizar tablas
+        if (Avika.ui) {
+            // Actualizar las interfaces
+            if (typeof Avika.ui.updatePendingTable === 'function') {
+                Avika.ui.updatePendingTable();
+            }
+            
+            if (typeof Avika.ui.updateDeliveryTable === 'function') {
+                Avika.ui.updateDeliveryTable();
+            }
+            
+            if (typeof Avika.ui.updateCompletedTable === 'function') {
+                Avika.ui.updateCompletedTable();
+            }
+            
+            var lastSaved = localStorage.getItem('avika_lastSaved');
+            if (lastSaved && typeof Avika.ui.showNotification === 'function') {
+                Avika.ui.showNotification('Datos cargados de ' + new Date(lastSaved).toLocaleString());
+            }
+        } else {
+            console.warn('Avika.ui no está disponible, no se actualizaron las tablas');
         }
         
         // Actualizar el estado guardado
         this.lastSavedState = JSON.stringify(Avika.data.pendingOrders) + 
                              JSON.stringify(Avika.data.deliveryOrders) + 
                              JSON.stringify(Avika.data.completedOrders);
+                             
+        console.log('Datos cargados correctamente');
     } catch (e) {
         console.error('Error al cargar datos guardados:', e);
     }
@@ -68,6 +113,12 @@ cargarDatosGuardados: function() {
     verificarIntegridad: function() {
         console.log("Verificando integridad de datos...");
         try {
+            // Asegurar que Avika.data existe
+            if (!Avika.data) {
+                Avika.data = {};
+                console.warn('Avika.data no existe, inicializando objeto vacío');
+            }
+            
             var reparaciones = 0;
             
             // Verificar órdenes pendientes

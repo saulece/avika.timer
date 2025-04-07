@@ -6,6 +6,13 @@
 
 // Esperamos a que el DOM esté completamente cargado
 window.Avika = window.Avika || {};
+
+// Inicialización de estructuras de datos principales
+Avika.data = Avika.data || {};
+Avika.data.pendingOrders = Avika.data.pendingOrders || [];
+Avika.data.deliveryOrders = Avika.data.deliveryOrders || [];
+Avika.data.completedOrders = Avika.data.completedOrders || [];
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Inicializando Avika...");
     
@@ -21,6 +28,15 @@ document.addEventListener('DOMContentLoaded', function() {
         config: !!Avika.config,
         orders: !!Avika.orders
     });
+    
+    // Comprobar inicialización de datos
+    if (Avika.data) {
+        console.log("Estructuras de datos inicializadas correctamente:", {
+            pendingOrders: Array.isArray(Avika.data.pendingOrders),
+            deliveryOrders: Array.isArray(Avika.data.deliveryOrders),
+            completedOrders: Array.isArray(Avika.data.completedOrders)
+        });
+    }
     
     // Inicializar manualmente botones de categoría
     function initCategoryButtons() {
@@ -186,16 +202,45 @@ document.getElementById('btn-clear-delivery-filter').addEventListener('click', f
     function loadSavedData() {
         console.log("Cargando datos guardados...");
         try {
-            Avika.storage.cargarDatosGuardados();
-            console.log("Datos cargados correctamente");
+            // Verificar que el módulo de almacenamiento esté disponible
+            if (Avika.storage && typeof Avika.storage.cargarDatosGuardados === 'function') {
+                Avika.storage.cargarDatosGuardados();
+                console.log("Datos cargados correctamente");
+            } else {
+                console.warn("Módulo de almacenamiento no disponible, no se pudieron cargar datos");
+                // Inicializar arrays vacíos si no existen
+                Avika.data = Avika.data || {};
+                Avika.data.pendingOrders = Avika.data.pendingOrders || [];
+                Avika.data.deliveryOrders = Avika.data.deliveryOrders || [];
+                Avika.data.completedOrders = Avika.data.completedOrders || [];
+            }
         } catch (e) {
             console.error("Error al cargar datos:", e);
+            // Inicializar arrays vacíos en caso de error
+            Avika.data = Avika.data || {};
+            Avika.data.pendingOrders = Avika.data.pendingOrders || [];
+            Avika.data.deliveryOrders = Avika.data.deliveryOrders || [];
+            Avika.data.completedOrders = Avika.data.completedOrders || [];
         }
     }
     
     // Inicialización de la aplicación
     function initApp() {
         console.log("Inicializando aplicación...");
+        
+        // Asegurar que las estructuras de datos están inicializadas
+        if (!Avika.data) {
+            Avika.data = {};
+        }
+        if (!Avika.data.pendingOrders) {
+            Avika.data.pendingOrders = [];
+        }
+        if (!Avika.data.deliveryOrders) {
+            Avika.data.deliveryOrders = [];
+        }
+        if (!Avika.data.completedOrders) {
+            Avika.data.completedOrders = [];
+        }
         
         // Inicializar componentes de UI
         initCategoryButtons();
