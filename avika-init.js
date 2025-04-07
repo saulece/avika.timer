@@ -110,6 +110,14 @@ document.addEventListener('DOMContentLoaded', function() {
             btnNewTicket.addEventListener('click', function() {
                 Avika.ui.enableTicketMode();
             });
+            // Botones de filtrado
+document.getElementById('btn-apply-filter').addEventListener('click', function() {
+    Avika.ui.aplicarFiltros();
+});
+
+document.getElementById('btn-clear-filter').addEventListener('click', function() {
+    Avika.ui.limpiarFiltros();
+});
         }
         
         // Botones de filtrado para historial
@@ -188,10 +196,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Cargar datos guardados
         loadSavedData();
         
-        // Configurar actualizaciones periódicas
-        setInterval(function() {
-            Avika.ui.updateAllTimers();
-        }, 1000);
+
+// Configurar actualizaciones periódicas (optimizadas)
+setInterval(function() {
+    Avika.ui.updateAllTimers();
+}, 2000); // Actualizamos cada 2 segundos en lugar de cada segundo
         
         // Configurar autoguardado
         setInterval(function() {
@@ -208,4 +217,14 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error("Error fatal durante la inicialización:", e);
         alert("Error al inicializar la aplicación. Consulta la consola para más detalles.");
     }
+    // Botón para modo compacto
+document.getElementById('btn-compact-mode').addEventListener('click', function() {
+    Avika.ui.toggleCompactMode();
+});
+
+// Restaurar preferencias de modo compacto si existe
+if (localStorage.getItem('avika_compact_mode') === 'true') {
+    document.body.classList.add('ultra-compact-mode');
+    document.getElementById('compact-icon').textContent = '📱';
+}
 });

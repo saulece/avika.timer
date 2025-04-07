@@ -22,9 +22,10 @@ Avika.config = {
         // PLATILLOS COCINA FRÍA (ROLLOS)
         'frio': [
             'Kanikama Roll', 'Curry Roll', 'Philadelphia Roll', 'Spicy Roll', 'Aguacate Roll',
-            'Avi Roll', 'Mango Roll', 'Mikuso Roll', 'Acevichado Roll', 'Dragon Roll', 'Avika Roll',
-            'Red Fire Roll', 'Ebi Crunch Roll', 'Teriyaki Crunch Roll', 'Ika Ebi Roll', 'Furai Roll', 'Coco Roll',
-            'TNT Roll', 'Tuna Roll', 'Rocotto Roll', 'Parrillero Roll', 'Rib Eye Roll'
+    'Avi Roll', 'Mango Roll', 'Mikuso Roll', 'Acevichado Roll', 'Dragon Roll', 'Avika Roll',
+    'Red Fire Roll', 'Ebi Crunch Roll', 'Teriyaki Crunch Roll', 'Ika Ebi Roll', 'Furai Roll', 'Coco Roll',
+    'TNT Roll', 'Tuna Roll', 'Rocotto Roll', 'Parrillero Roll', 'Rib Eye Roll',
+    'California', 'Onigiri', 'Capricho', 'Mar y Tierra', 'Tres quesos'
         ],
         
         // ENTRADAS COCINA CALIENTE
@@ -88,14 +89,16 @@ Avika.config = {
         
         // Subcategorías para platillos fríos (rollos)
         'frio': [
-            {
-                name: 'Rollos Naturales',
-                items: ['Kanikama Roll', 'Curry Roll', 'Philadelphia Roll', 'Spicy Roll', 'Aguacate Roll',
-                        'Avi Roll', 'Mango Roll', 'Mikuso Roll', 'Acevichado Roll', 'Dragon Roll', 'Avika Roll']
-            },
-            {
-                name: 'Rollos Empanizados',
-                items: ['Red Fire Roll', 'Ebi Crunch Roll', 'Teriyaki Crunch Roll', 'Ika Ebi Roll', 'Furai Roll', 'Coco Roll']
+    {
+        name: 'Rollos Naturales',
+        items: ['Kanikama Roll', 'Curry Roll', 'Philadelphia Roll', 'Spicy Roll', 'Aguacate Roll',
+                'Avi Roll', 'Mango Roll', 'Mikuso Roll', 'Acevichado Roll', 'Dragon Roll', 'Avika Roll',
+                'California', 'Onigiri', 'Capricho']
+    },
+    {
+        name: 'Rollos Empanizados',
+        items: ['Red Fire Roll', 'Ebi Crunch Roll', 'Teriyaki Crunch Roll', 'Ika Ebi Roll', 'Furai Roll', 'Coco Roll',
+                'Mar y Tierra', 'Tres quesos']
             },
             {
                 name: 'Rollos Horneados',

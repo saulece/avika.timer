@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="avika-style.css">
 </head>
 <body>
+    <div class="loading-indicator"></div>
     <header>
         <h1>Avika - Temporizador de Sushi</h1>
     </header>
@@ -32,6 +33,30 @@
                 <div class="action-btns" style="margin-bottom: 10px;">
                     <button class="action-btn" id="btn-new-ticket">Nuevo Ticket/Comanda</button>
                     <button class="action-btn" id="btn-force-complete" style="background-color: #ff9800;" title="Solo usar en casos excepcionales cuando un ticket quedó atorado y no se puede completar normalmente">Emergencia: Desbloquear</button>
+                </div>
+                <div class="filter-panel">
+                    <select id="filter-category" class="filter-select">
+                        <option value="todos">Todas las categorías</option>
+                        <option value="frio">Platillos Fríos</option>
+                        <option value="entrada-fria">Entradas Frías</option>
+                        <option value="caliente">Platillos Calientes</option>
+                        <option value="entrada-caliente">Entradas Calientes</option>
+                        <option value="combos">Combos</option>
+                    </select>
+                    <select id="filter-service" class="filter-select">
+                        <option value="todos">Todos los servicios</option>
+                        <option value="comedor">Comedor</option>
+                        <option value="domicilio">Domicilio</option>
+                        <option value="para-llevar">Ordena y recoge</option>
+                    </select>
+                    <select id="filter-time" class="filter-select">
+                        <option value="todos">Todos los tiempos</option>
+                        <option value="5">+5 minutos</option>
+                        <option value="10">+10 minutos</option>
+                        <option value="15">+15 minutos</option>
+                    </select>
+                    <button id="btn-apply-filter" class="filter-btn">Aplicar filtros</button>
+                    <button id="btn-clear-filter" class="filter-btn">Limpiar filtros</button>
                 </div>
                 <table>
                     <thead>
@@ -136,6 +161,11 @@
             </div>
         </div>
     </div>
+
+    <!-- Botón para activar/desactivar modo ultra-compacto en móviles -->
+    <button id="btn-compact-mode" class="compact-mode-toggle" title="Cambiar a modo ultra-compacto">
+        <span id="compact-icon">🔍</span>
+    </button>
 
     <!-- Cargar módulos en orden correcto -->
     <script src="avika-core.js"></script>

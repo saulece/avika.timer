@@ -1507,3 +1507,415 @@ h2 {
     text-overflow: ellipsis;
     white-space: normal;
 }
+/* Estilos para el panel de filtros */
+.filter-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding: 12px;
+    background-color: var(--highlight-bg);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px var(--shadow-color);
+}
+
+.filter-select {
+    flex: 1;
+    min-width: 130px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--container-bg);
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.filter-btn {
+    padding: 8px 12px;
+    border: 1px solid var(--primary-btn);
+    border-radius: 6px;
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.filter-btn:hover {
+    background-color: var(--btn-hover);
+}
+
+/* Estilos para filas filtradas */
+.row-filtered {
+    display: none !important;
+}
+
+/* Versión compacta para móviles */
+@media (max-width: 768px) {
+    .filter-panel {
+        flex-direction: column;
+        padding: 10px;
+    }
+    
+    .filter-select {
+        width: 100%;
+    }
+}
+/* Estilos para el modal de exportación */
+.export-options {
+    margin: 15px 0;
+}
+
+.date-range {
+    display: flex;
+    gap: 15px;
+    margin: 10px 0;
+}
+
+.date-input {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.date-input label {
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.date-input input {
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--container-bg);
+    color: var(--text-color);
+}
+
+.export-data-options {
+    margin: 10px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.export-data-options label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.export-data-options input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+}
+
+/* Ajustes para móviles */
+@media (max-width: 600px) {
+    .date-range {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+/* Mejoras para dispositivos móviles */
+@media (max-width: 768px) {
+    /* Ajustes generales */
+    body {
+        padding: 5px;
+        font-size: 14px;
+    }
+    
+    header h1 {
+        font-size: 1.2rem;
+    }
+    
+    /* Hacer botones más fáciles de tocar */
+    .category-btn,
+    .dish-btn,
+    .action-btn,
+    .option-btn {
+        min-height: 44px; /* Altura mínima para botones táctiles */
+    }
+    
+    /* Ajustes para tablas */
+    .pending-orders-section th,
+    .pending-orders-section td {
+        padding: 4px;
+        font-size: 0.85rem;
+    }
+    
+    /* Ocultar columnas menos importantes en móviles */
+    .pending-orders-section th:nth-child(2),
+    .pending-orders-section td:nth-child(2) {
+        display: none;
+    }
+    
+    /* Mejorar visualización de botones de acción */
+    .finish-btn {
+        padding: 8px 5px;
+        font-size: 12px;
+    }
+    
+    /* Layout para sección de preparación */
+    .compact-form-container {
+        padding: 10px 5px;
+    }
+    
+    .option-group {
+        margin-bottom: 8px;
+    }
+    
+    .option-title {
+        font-size: 0.95rem;
+    }
+    
+    .option-btns {
+        justify-content: space-between;
+    }
+    
+    .option-btn {
+        flex: 0 0 48%;
+        text-align: center;
+        padding: 10px 5px;
+        margin-bottom: 4px;
+    }
+    
+    /* Mejorar visualización de modales */
+    .modal-content {
+        width: 95%;
+        padding: 15px 10px;
+    }
+    
+    /* Ajustes adicionales para modales */
+    .ticket-items-container {
+        max-height: 150px;
+    }
+}
+
+/* Ajustes para dispositivos muy pequeños */
+@media (max-width: 480px) {
+    /* Reducir padding */
+    section {
+        padding: 10px;
+    }
+    
+    /* Botones más compactos */
+    .category-btn {
+        width: 100%;
+        padding: 8px 5px;
+    }
+    
+    /* Layout para categorías */
+    .category-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 5px;
+    }
+    
+    /* Ocultar más columnas para ahorrar espacio */
+    .pending-orders-section th:nth-child(4),
+    .pending-orders-section td:nth-child(4) {
+        display: none;
+    }
+    
+    /* Simplificar cabeceras de tabla */
+    .pending-orders-section th {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    /* Simplificar tablas de completados */
+    #completed-body td {
+        padding: 5px;
+        font-size: 0.8rem;
+    }
+    
+    /* Ocultar columnas menos importantes en completados */
+    #completed-body td:nth-child(2),
+    #completed-body td:nth-child(3) {
+        display: none;
+    }
+    
+    /* Mejorar visualización de datos en tablas */
+    .timer-cell {
+        font-size: 14px;
+    }
+    
+    /* Ajustar notificaciones */
+    #notification {
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        max-width: none;
+    }
+    
+    /* Modo especial Ultra-compacto (para dispositivos muy pequeños) */
+    .ultra-compact-mode .option-btn {
+        flex: 0 0 48%;
+        font-size: 12px;
+        padding: 8px 4px;
+    }
+    
+    .ultra-compact-mode .category-btn {
+        font-size: 12px;
+        padding: 8px 4px;
+    }
+    
+    .ultra-compact-mode .finish-btn {
+        min-height: 32px;
+        font-size: 11px;
+    }
+}
+
+/* Modo Ultra-compacto activable explícitamente */
+.ultra-compact-mode {
+    /* Estilos adicionales para modo ultra-compacto */
+    --font-size-base: 12px;
+}
+
+/* Botón para activar modo ultra-compacto */
+.compact-mode-toggle {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    z-index: 1000;
+    cursor: pointer;
+    box-shadow: 0 2px 5px var(--shadow-color);
+    transition: transform 0.2s;
+}
+
+.compact-mode-toggle:hover {
+    transform: scale(1.1);
+}
+
+/* Solo mostrar en dispositivos pequeños */
+@media (min-width: 769px) {
+    .compact-mode-toggle {
+        display: none;
+    }
+}
+/* Mejoras visuales generales */
+
+/* Sombras suaves para elementos principales */
+.category-btn, 
+.dish-btn, 
+.option-btn.selected,
+.action-btn,
+table,
+.modal-content {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.category-btn:hover, 
+.dish-btn:hover,
+.action-btn:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+/* Animaciones sutiles */
+.notification {
+    animation: slideIn 0.3s forwards;
+}
+
+@keyframes slideIn {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Efecto de "splash" para botones */
+.finish-btn:active,
+.action-btn:active {
+    position: relative;
+    overflow: hidden;
+}
+
+.finish-btn:active::after,
+.action-btn:active::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255,255,255,0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%, -50%);
+    animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+    0% { transform: scale(0, 0) translate(-50%, -50%); opacity: 0.5; }
+    100% { transform: scale(40, 40) translate(-50%, -50%); opacity: 0; }
+}
+
+/* Tarjetas con efecto de elevación */
+section, 
+.pending-orders-section, 
+.option-group,
+.filter-panel {
+    border-radius: 8px;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+section:hover, 
+.pending-orders-section:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Resaltar filas de tabla al pasar el cursor */
+tr:hover td {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+/* Etiquetas más modernas */
+.timer-cell {
+    position: relative;
+    padding: 5px 8px;
+    border-radius: 4px;
+    background-color: rgba(0,0,0,0.03);
+}
+
+.timer-cell.warning {
+    background-color: rgba(243, 156, 18, 0.1);
+}
+
+.timer-cell.alert {
+    background-color: rgba(231, 76, 60, 0.1);
+}
+
+/* Indicador de carga sutil cuando hay operaciones */
+.loading-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(to right, transparent, #3498db, transparent);
+    animation: loading 1.5s infinite;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.loading-active .loading-indicator {
+    opacity: 1;
+}
+
+@keyframes loading {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
