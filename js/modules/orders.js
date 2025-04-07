@@ -374,6 +374,13 @@ Avika.orders = {
     markDeliveryArrival: function(orderId) {
         console.log("Registrando entrega de domicilio:", orderId);
         
+        // Verificar que el array de órdenes en reparto existe
+        if (!Avika.data.deliveryOrders) {
+            console.error("El array de órdenes en reparto no existe");
+            Avika.ui.showNotification('Error: No hay órdenes en reparto', 'error');
+            return;
+        }
+        
         // Buscar la orden en reparto
         var orderIndex = -1;
         var order = null;
@@ -388,6 +395,10 @@ Avika.orders = {
         
         if (!order) {
             console.error("No se encontró la orden en reparto con ID:", orderId);
+            Avika.ui.showNotification('Error: No se pudo encontrar la orden en reparto', 'error');
+            
+            // Actualizar la tabla de reparto para reflejar el estado actual
+            Avika.ui.updateDeliveryTable();
             return;
         }
         

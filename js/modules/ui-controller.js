@@ -999,22 +999,19 @@ Avika.ui = {
             var elapsedMillis = now - new Date(order.startTime);
             var elapsedSeconds = Math.floor(elapsedMillis / 1000);
             
-            var hours = Math.floor(elapsedSeconds / 3600);
-            var minutes = Math.floor((elapsedSeconds % 3600) / 60);
-            var seconds = elapsedSeconds % 60;
-            
-            timerCell.textContent = this.padZero(hours) + ':' + this.padZero(minutes) + ':' + this.padZero(seconds);
+            // Usar la función formatElapsedTime para mantener consistencia
+            timerCell.textContent = this.formatElapsedTime(elapsedSeconds);
             
             // Añadir clases de advertencia según el tiempo transcurrido
             timerCell.classList.remove('warning', 'alert');
             
             // Más de 10 minutos: advertencia
-            if (minutes >= 10 || hours > 0) {
+            if (elapsedSeconds >= 600) {
                 timerCell.classList.add('warning');
             }
             
             // Más de 15 minutos: alerta
-            if (minutes >= 15 || hours > 0) {
+            if (elapsedSeconds >= 900) {
                 timerCell.classList.add('alert');
             }
         }
@@ -1035,15 +1032,12 @@ Avika.ui = {
             var elapsedMillis = now - departureTime;
             var elapsedSeconds = Math.floor(elapsedMillis / 1000);
             
-            var hours = Math.floor(elapsedSeconds / 3600);
-            var minutes = Math.floor((elapsedSeconds % 3600) / 60);
-            var seconds = elapsedSeconds % 60;
-            
-            timerCell.textContent = this.padZero(hours) + ':' + this.padZero(minutes) + ':' + this.padZero(seconds);
+            // Usar la función formatElapsedTime para mantener consistencia
+            timerCell.textContent = this.formatElapsedTime(elapsedSeconds);
             
             // Añadir clase de advertencia para tiempos largos
             timerCell.classList.remove('warning');
-            if (minutes >= 30 || hours > 0) {
+            if (elapsedSeconds >= 1800) { // 30 minutos
                 timerCell.classList.add('warning');
             }
         }
