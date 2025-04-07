@@ -1058,7 +1058,21 @@ updateDeliveryTimers: function() {
                 <span class="close-modal">&times;</span>
                 <h2>Seleccionar platillo</h2>
                 
+                <!-- NUEVA SECCIÓN: Barra de búsqueda global -->
+                <div class="search-container" style="margin-bottom: 15px;">
+                    <input type="text" id="global-dish-search" class="search-input" placeholder="Buscar platillo en todas las categorías...">
+                </div>
+                
                 <div class="mobile-friendly-select">
+                    <!-- Sección de resultados de búsqueda global (inicialmente oculta) -->
+                    <div class="selection-step" id="search-results-step" style="display: none;">
+                        <div class="step-header">
+                            <button class="back-to-categories">« Volver a categorías</button>
+                            <h3>Resultados de búsqueda</h3>
+                        </div>
+                        <div id="search-results-container" class="dishes-container"></div>
+                    </div>
+                
                     <div class="selection-step" id="category-selection-step">
                         <h3>Categoría:</h3>
                         <div class="category-container">
@@ -1076,9 +1090,9 @@ updateDeliveryTimers: function() {
                             <h3>Platillo: <span id="selected-category-name"></span></h3>
                         </div>
                         
-                        <!-- Añadir barra de búsqueda -->
+                        <!-- Búsqueda específica de categoría -->
                         <div class="search-container" style="margin-bottom: 15px;">
-                            <input type="text" id="ticket-dish-search" class="search-input" placeholder="Buscar platillo...">
+                            <input type="text" id="ticket-dish-search" class="search-input" placeholder="Buscar en esta categoría...">
                         </div>
                         
                         <div id="dishes-selection-container" class="dishes-container"></div>
@@ -1121,6 +1135,16 @@ updateDeliveryTimers: function() {
             modal.style.display = 'none';
         };
         
+        // NUEVO: Evento para la búsqueda global
+        document.getElementById('global-dish-search').addEventListener('input', function() {
+            Avika.ui.performGlobalDishSearch(this.value);
+        });
+        
+        // Evento para barra de búsqueda específica de categoría
+        document.getElementById('ticket-dish-search').addEventListener('input', function() {
+            Avika.ui.filterTicketDishes(this.value.toLowerCase());
+        });
+        
         // Eventos para categorías
         var categoryBtns = modal.querySelectorAll('.category-btn');
         categoryBtns.forEach(function(btn) {
@@ -1131,68 +1155,89 @@ updateDeliveryTimers: function() {
                 // Mostrar paso de selección de platillos
                 document.getElementById('category-selection-step').style.display = 'none';
                 document.getElementById('dish-selection-step').style.display = 'block';
+                document.getElementById('search-results-step').style.display = 'none';
             };
         });
         
-        // Evento para buscar platillos (nuevo)
-        document.getElementById('ticket-dish-search').addEventListener('input', function() {
-            Avika.ui.filterTicketDishes(this.value.toLowerCase());
+        // Botón para volver a categorías desde resultados de búsqueda
+        var backToCategoryBtns = modal.querySelectorAll('.back-to-categories');
+        backToCategoryBtns.forEach(function(btn) {
+            btn.onclick = function() {
+                document.getElementById('search-results-step').style.display = 'none';
+                document.getElementById('category-selection-step').style.display = 'block';
+                document.getElementById('global-dish-search').value = '';
+            };
         });
         
         // Botón para volver a categorías
         modal.querySelector('.back-to-category').onclick = function() {
             document.getElementById('category-selection-step').style.display = 'block';
             document.getElementById('dish-selection-step').style.display = 'none';
+            document.getElementById('search-results-step').style.display = 'none';
         };
-                   
-           // Botón para volver a platillos
-           modal.querySelector('.back-to-dish').onclick = function() {
-               document.getElementById('dish-selection-step').style.display = 'block';
-               document.getElementById('quantity-selection-step').style.display = 'none';
-           };
-           
-           // Eventos de cantidad
-           document.getElementById('item-btn-decrease').onclick = function() {
-               Avika.ui.changeTicketItemQuantity(-1);
-           };
-           
-           document.getElementById('item-btn-increase').onclick = function() {
-               Avika.ui.changeTicketItemQuantity(1);
-           };
-           
-           // Evento para agregar al ticket
-           document.getElementById('btn-add-to-ticket').onclick = function() {
-               Avika.ui.addItemToTicket();
-           };
-           
-           // Evento para cancelar
-           document.getElementById('btn-cancel-item').onclick = function() {
-               modal.style.display = 'none';
-           };
-       }
-       
-       // Reiniciar selección
-       this.state.selectedTicketItem = {
-           category: '',
-           dish: '',
-           quantity: 1,
-           notes: ''
-       };
-       
-       // Mostrar modal en el primer paso (categorías)
-       document.getElementById('category-selection-step').style.display = 'block';
-       document.getElementById('dish-selection-step').style.display = 'none';
-       document.getElementById('quantity-selection-step').style.display = 'none';
-       
-       // Resetear contenido
-       document.getElementById('item-quantity-display').textContent = '1';
-       document.getElementById('item-notes-input').value = '';
-       document.getElementById('selected-category-name').textContent = '';
-       document.getElementById('selected-dish-name').textContent = '';
-       document.getElementById('dishes-selection-container').innerHTML = '';
-       
-       modal.style.display = 'block';
-   },
+        
+        // Botón para volver a platillos
+        modal.querySelector('.back-to-dish').onclick = function() {
+            document.getElementById('dish-selection-step').style.display = 'block';
+            document.getElementById('quantity-selection-step').style.display = 'none';
+        };
+        
+        // Eventos de cantidad
+        document.getElementById('item-btn-decrease').onclick = function() {
+            Avika.ui.changeTicketItemQuantity(-1);
+        };
+        
+        document.getElementById('item-btn-increase').onclick = function() {
+            Avika.ui.changeTicketItemQuantity(1);
+        };
+        
+        // Evento para agregar al ticket
+        document.getElementById('btn-add-to-ticket').onclick = function() {
+            Avika.ui.addItemToTicket();
+        };
+        
+        // Evento para cancelar
+        document.getElementById('btn-cancel-item').onclick = function() {
+            modal.style.display = 'none';
+        };
+    }
+    
+    // Reiniciar selección
+    this.state.selectedTicketItem = {
+        category: '',
+        dish: '',
+        quantity: 1,
+        notes: ''
+    };
+    
+    // Limpiar campos de búsqueda
+    if (document.getElementById('global-dish-search')) {
+        document.getElementById('global-dish-search').value = '';
+    }
+    if (document.getElementById('ticket-dish-search')) {
+        document.getElementById('ticket-dish-search').value = '';
+    }
+    
+    // Mostrar la vista de categorías por defecto
+    document.getElementById('category-selection-step').style.display = 'block';
+    document.getElementById('dish-selection-step').style.display = 'none';
+    document.getElementById('quantity-selection-step').style.display = 'none';
+    if (document.getElementById('search-results-step')) {
+        document.getElementById('search-results-step').style.display = 'none';
+    }
+    
+    // Resetear otros contenidos
+    document.getElementById('item-quantity-display').textContent = '1';
+    document.getElementById('item-notes-input').value = '';
+    document.getElementById('selected-category-name').textContent = '';
+    document.getElementById('selected-dish-name').textContent = '';
+    document.getElementById('dishes-selection-container').innerHTML = '';
+    if (document.getElementById('search-results-container')) {
+        document.getElementById('search-results-container').innerHTML = '';
+    }
+    
+    modal.style.display = 'block';
+},
    
    selectTicketCategory: function(category) {
        this.state.selectedTicketItem.category = category;
@@ -2126,5 +2171,103 @@ limpiarFiltrosReparto: function() {
     });
     
     this.showNotification('Filtros de reparto eliminados');
+},
+// Función para realizar búsqueda global de platillos
+performGlobalDishSearch: function(searchText) {
+    var searchLower = searchText.toLowerCase().trim();
+    var resultsContainer = document.getElementById('search-results-container');
+    
+    // Limpiar resultados anteriores
+    resultsContainer.innerHTML = '';
+    
+    // Si la búsqueda está vacía, no mostrar resultados
+    if (searchLower === '') {
+        document.getElementById('search-results-step').style.display = 'none';
+        document.getElementById('category-selection-step').style.display = 'block';
+        return;
+    }
+    
+    // Recopilar resultados de todas las categorías
+    var results = [];
+    
+    // Recorrer todas las categorías
+    for (var category in Avika.config.dishes) {
+        var categoryName = Avika.config.categoryNames[category];
+        var dishes = Avika.config.dishes[category];
+        
+        // Buscar en cada platillo de la categoría
+        for (var i = 0; i < dishes.length; i++) {
+            var dish = dishes[i];
+            if (dish.toLowerCase().includes(searchLower)) {
+                results.push({
+                    category: category,
+                    categoryName: categoryName,
+                    dish: dish,
+                    isSpecialCombo: (category === 'combos' && Avika.config.specialCombos.indexOf(dish) !== -1)
+                });
+            }
+        }
+    }
+    
+    // Mostrar resultados
+    if (results.length > 0) {
+        // Mostrar la sección de resultados
+        document.getElementById('search-results-step').style.display = 'block';
+        document.getElementById('category-selection-step').style.display = 'none';
+        
+        // Crear botones para cada resultado
+        results.forEach(function(result) {
+            var button = document.createElement('button');
+            button.className = 'dish-btn' + (result.isSpecialCombo ? ' special-combo' : '');
+            button.setAttribute('data-category', result.category);
+            button.setAttribute('data-dish', result.dish);
+            
+            // Mostrar categoría para facilitar identificación
+            button.innerHTML = `<span style="font-weight: bold">${result.dish}</span><br>
+                               <small style="opacity: 0.7">${result.categoryName}</small>`;
+            
+            // Estilo para mejorar visualización
+            button.style.display = 'flex';
+            button.style.flexDirection = 'column';
+            button.style.alignItems = 'center';
+            button.style.justifyContent = 'center';
+            button.style.height = 'auto';
+            button.style.minHeight = '60px';
+            button.style.padding = '8px 12px';
+            button.style.textAlign = 'center';
+            
+            // Evento al hacer clic
+            button.onclick = function() {
+                var category = this.getAttribute('data-category');
+                var dish = this.getAttribute('data-dish');
+                
+                // Actualizar estado
+                Avika.ui.state.selectedTicketItem.category = category;
+                Avika.ui.state.selectedTicketItem.dish = dish;
+                Avika.ui.state.selectedTicketItem.quantity = 1;
+                
+                // Mostrar el nombre del platillo seleccionado
+                document.getElementById('selected-dish-name').textContent = dish;
+                
+                // Ir al paso de cantidad
+                document.getElementById('search-results-step').style.display = 'none';
+                document.getElementById('quantity-selection-step').style.display = 'block';
+            };
+            
+            resultsContainer.appendChild(button);
+        });
+    } else {
+        // Si no hay resultados, mostrar mensaje
+        var noResults = document.createElement('p');
+        noResults.textContent = 'No se encontraron platillos que coincidan con "' + searchText + '"';
+        noResults.style.textAlign = 'center';
+        noResults.style.padding = '20px';
+        noResults.style.color = '#888';
+        resultsContainer.appendChild(noResults);
+        
+        // Mostrar la sección de resultados vacía
+        document.getElementById('search-results-step').style.display = 'block';
+        document.getElementById('category-selection-step').style.display = 'none';
+    }
 }
 };
