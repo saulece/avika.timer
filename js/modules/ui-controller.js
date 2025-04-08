@@ -725,11 +725,17 @@ Avika.ui = {
         // Celda de tiempo en reparto o tiempo desde que está listo
         var timerCell = document.createElement('td');
         if (order.deliveryDepartureTime) {
+            // Si ya salió para entrega, mostrar tiempo desde la salida
             timerCell.className = 'delivery-timer';
             timerCell.setAttribute('data-departure-time', order.deliveryDepartureTime);
-        } else {
+        } else if (order.finishTime) {
+            // Si está listo pero aún no ha salido, mostrar tiempo desde que está listo
             timerCell.className = 'ready-timer';
             timerCell.setAttribute('data-ready-time', order.finishTime);
+        } else {
+            // Caso de respaldo (no debería ocurrir)
+            timerCell.className = 'ready-timer';
+            timerCell.setAttribute('data-ready-time', new Date().toISOString());
         }
         timerCell.setAttribute('data-id', order.id);
         timerCell.textContent = '00:00:00';
@@ -766,16 +772,7 @@ Avika.ui = {
         var actionCell = document.createElement('td');
 
         // Determinar qué botón mostrar según el estado
-        if (!order.deliveryDepartureTime) {
-            // Si aún no se ha registrado la salida, mostrar botón "Registrar Salida"
-            var departureBtn = document.createElement('button');
-            departureBtn.className = 'action-btn departure-btn';
-            departureBtn.textContent = 'Registrar Salida';
-            departureBtn.onclick = function() {
-                Avika.orders.markDeliveryDeparture(order.id);
-            };
-            actionCell.appendChild(departureBtn);
-        } else {
+        if (order.deliveryDepartureTime) {
             // Si ya se registró la salida, mostrar botón "Registrar Entrega"
             var arrivalBtn = document.createElement('button');
             arrivalBtn.className = 'action-btn arrival-btn';
@@ -784,6 +781,15 @@ Avika.ui = {
                 Avika.orders.markDeliveryArrival(order.id);
             };
             actionCell.appendChild(arrivalBtn);
+        } else {
+            // Si aún no se ha registrado la salida, mostrar botón "Registrar Salida"
+            var departureBtn = document.createElement('button');
+            departureBtn.className = 'action-btn departure-btn';
+            departureBtn.textContent = 'Registrar Salida';
+            departureBtn.onclick = function() {
+                Avika.orders.markDeliveryDeparture(order.id);
+            };
+            actionCell.appendChild(departureBtn);
         }
 
         row.appendChild(actionCell);

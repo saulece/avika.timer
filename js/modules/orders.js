@@ -1,6 +1,22 @@
 // orders.js - Implementación de funciones para manejo de órdenes
 window.Avika = window.Avika || {};
 
+// Función de respaldo para formatear tiempo transcurrido
+function formatElapsedTimeFallback(seconds) {
+    if (!seconds && seconds !== 0) return '--:--:--';
+    
+    var hours = Math.floor(seconds / 3600);
+    var minutes = Math.floor((seconds % 3600) / 60);
+    var secs = seconds % 60;
+    
+    // Función auxiliar para agregar ceros
+    function padZero(num) {
+        return (num < 10 ? '0' : '') + num;
+    }
+    
+    return padZero(hours) + ':' + padZero(minutes) + ':' + padZero(secs);
+}
+
 Avika.orders = {
     // Función para iniciar la preparación de un platillo
     startPreparation: function() {
@@ -97,9 +113,50 @@ Avika.orders = {
                 // Todos los platillos del ticket están terminados
                 console.log("Todos los platillos del ticket", order.ticketId, "están terminados");
                 
-                // Si es a domicilio, mostrar botón de "Registrar Salida"
-                if (order.serviceType === 'domicilio') {
-                    console.log("Ticket a domicilio listo para salida");
+                // Si es a domicilio o para llevar, mover todos los platillos del ticket a reparto
+                if (order.serviceType === 'domicilio' || order.serviceType === 'para-llevar') {
+                    console.log("Ticket a domicilio o para llevar listo para reparto");
+                    
+                    // Asegurarse de que el array de órdenes en reparto existe
+                    if (!Avika.data.deliveryOrders) {
+                        Avika.data.deliveryOrders = [];
+                    }
+                    
+                    // Recopilar índices a eliminar (en orden descendente)
+                    var indicesToRemove = [];
+                    var itemsToMove = [];
+                    
+                    // Buscar todos los platillos del ticket
+                    for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                        var item = Avika.data.pendingOrders[i];
+                        if (item.ticketId === order.ticketId) {
+                            // Marcar como listo para reparto
+                            var finishTime = new Date();
+                            item.finishTime = finishTime;
+                            item.finishTimeFormatted = Avika.ui.formatTime(finishTime);
+                            
+                            // Agregar a la lista para mover
+                            itemsToMove.push(item);
+                            indicesToRemove.push(i);
+                        }
+                    }
+                    
+                    // Eliminar de pendientes en orden descendente
+                    for (var i = indicesToRemove.length - 1; i >= 0; i--) {
+                        Avika.data.pendingOrders.splice(indicesToRemove[i], 1);
+                    }
+                    
+                    // Agregar a reparto
+                    for (var i = 0; i < itemsToMove.length; i++) {
+                        Avika.data.deliveryOrders.unshift(itemsToMove[i]);
+                    }
+                    
+                    // Actualizar tablas
+                    Avika.ui.updatePendingTable();
+                    Avika.ui.updateDeliveryTable();
+                    
+                    // Mostrar notificación
+                    Avika.ui.showNotification('¡Ticket #' + order.ticketId.substring(order.ticketId.length - 5) + ' listo para reparto!');
                 }
             }
         }
@@ -138,22 +195,59 @@ Avika.orders = {
         var endTime = new Date();
         order.endTime = endTime;
         order.preparationTime = Math.floor((endTime - new Date(order.startTime)) / 1000);
-        order.preparationTimeFormatted = Avika.ui.formatElapsedTime(order.preparationTime);
         
-        // Mover a completadas
-        Avika.data.completedOrders.unshift(order);
-        Avika.data.pendingOrders.splice(orderIndex, 1);
+        // Usar formatElapsedTime con manejo de errores
+        try {
+            if (Avika.ui && typeof Avika.ui.formatElapsedTime === 'function') {
+                order.preparationTimeFormatted = Avika.ui.formatElapsedTime(order.preparationTime);
+            } else if (Avika.orderService && typeof Avika.orderService.formatElapsedTime === 'function') {
+                order.preparationTimeFormatted = Avika.orderService.formatElapsedTime(order.preparationTime);
+            } else {
+                order.preparationTimeFormatted = formatElapsedTimeFallback(order.preparationTime);
+            }
+        } catch (e) {
+            console.warn("Error al formatear tiempo de preparación:", e);
+            order.preparationTimeFormatted = formatElapsedTimeFallback(order.preparationTime);
+        }
         
-        // Actualizar las tablas
-        Avika.ui.updatePendingTable();
-        Avika.ui.updateCompletedTable();
+        // Verificar si es un pedido a domicilio o para llevar
+        if (order.serviceType === 'domicilio' || order.serviceType === 'para-llevar') {
+            // Marcar como listo para reparto
+            order.finishTime = endTime;
+            order.finishTimeFormatted = Avika.ui.formatTime(endTime);
+            
+            // Asegurarse de que el array de órdenes en reparto existe
+            if (!Avika.data.deliveryOrders) {
+                Avika.data.deliveryOrders = [];
+            }
+            
+            // Mover a reparto en lugar de a completadas
+            Avika.data.deliveryOrders.unshift(order);
+            Avika.data.pendingOrders.splice(orderIndex, 1);
+            
+            // Actualizar las tablas
+            Avika.ui.updatePendingTable();
+            Avika.ui.updateDeliveryTable();
+            
+            // Mostrar notificación
+            Avika.ui.showNotification('¡' + order.dish + ' listo para reparto! Tiempo de preparación: ' + 
+                                  order.preparationTimeFormatted);
+        } else {
+            // Para pedidos en comedor, mover directamente a completadas
+            Avika.data.completedOrders.unshift(order);
+            Avika.data.pendingOrders.splice(orderIndex, 1);
+            
+            // Actualizar las tablas
+            Avika.ui.updatePendingTable();
+            Avika.ui.updateCompletedTable();
+            
+            // Mostrar notificación
+            Avika.ui.showNotification('¡' + order.dish + ' terminado! Tiempo: ' + 
+                                  order.preparationTimeFormatted);
+        }
         
         // Guardar cambios
         Avika.storage.guardarDatosLocales();
-        
-        // Mostrar notificación
-        Avika.ui.showNotification('¡' + order.dish + ' terminado! Tiempo: ' + 
-                              order.preparationTimeFormatted);
     },
     
     // Función para finalizar una cocina caliente (para combos especiales)
@@ -410,7 +504,24 @@ Avika.orders = {
         // Calcular tiempo de entrega
         var deliveryTimeInSeconds = Math.floor((arrivalTime - new Date(order.deliveryDepartureTime)) / 1000);
         order.deliveryTime = deliveryTimeInSeconds;
-        order.deliveryTimeFormatted = Avika.ui.formatElapsedTime(deliveryTimeInSeconds);
+        
+        // Usar formatElapsedTime con manejo de errores
+        try {
+            // Intentar usar la función de Avika.ui primero
+            if (Avika.ui && typeof Avika.ui.formatElapsedTime === 'function') {
+                order.deliveryTimeFormatted = Avika.ui.formatElapsedTime(deliveryTimeInSeconds);
+            } else if (Avika.orderService && typeof Avika.orderService.formatElapsedTime === 'function') {
+                // Intentar usar la función de orderService como respaldo
+                order.deliveryTimeFormatted = Avika.orderService.formatElapsedTime(deliveryTimeInSeconds);
+            } else {
+                // Implementación de respaldo si ninguna está disponible
+                order.deliveryTimeFormatted = formatElapsedTimeFallback(deliveryTimeInSeconds);
+            }
+        } catch (e) {
+            console.warn("Error al formatear tiempo de entrega:", e);
+            // Implementar formato de respaldo
+            order.deliveryTimeFormatted = formatElapsedTimeFallback(deliveryTimeInSeconds);
+        }
         
         // Mover a órdenes completadas
         Avika.data.completedOrders.unshift(order);
@@ -430,7 +541,24 @@ Avika.orders = {
                     // Calcular tiempo de entrega
                     var itemDeliveryTime = Math.floor((arrivalTime - new Date(item.deliveryDepartureTime)) / 1000);
                     item.deliveryTime = itemDeliveryTime;
-                    item.deliveryTimeFormatted = Avika.ui.formatElapsedTime(itemDeliveryTime);
+                    
+                    // Usar formatElapsedTime con manejo de errores
+                    try {
+                        // Intentar usar la función de Avika.ui primero
+                        if (Avika.ui && typeof Avika.ui.formatElapsedTime === 'function') {
+                            item.deliveryTimeFormatted = Avika.ui.formatElapsedTime(itemDeliveryTime);
+                        } else if (Avika.orderService && typeof Avika.orderService.formatElapsedTime === 'function') {
+                            // Intentar usar la función de orderService como respaldo
+                            item.deliveryTimeFormatted = Avika.orderService.formatElapsedTime(itemDeliveryTime);
+                        } else {
+                            // Implementación de respaldo si ninguna está disponible
+                            item.deliveryTimeFormatted = formatElapsedTimeFallback(itemDeliveryTime);
+                        }
+                    } catch (e) {
+                        console.warn("Error al formatear tiempo de entrega para item:", e);
+                        // Implementar formato de respaldo
+                        item.deliveryTimeFormatted = formatElapsedTimeFallback(itemDeliveryTime);
+                    }
                     
                     // Agregar a completadas
                     Avika.data.completedOrders.unshift(item);
