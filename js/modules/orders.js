@@ -823,62 +823,93 @@ Avika.orders = {
             order.deliveryDepartureTimeFormatted = hours + ':' + minutes + ':' + seconds;
         }
         
-        // Si está en pendientes, mover a reparto
-        if (inPending) {
-            // Mover a órdenes en reparto
-            if (!Avika.data.deliveryOrders) {
-                Avika.data.deliveryOrders = [];
-            }
-            Avika.data.deliveryOrders.unshift(order);
+        // Si es parte de un ticket, actualizar todos los platillos del ticket
+        if (order.ticketId) {
+            // Actualizar platillos en pendientes
+            var pendingIndicesToRemove = [];
             
-            // Si es parte de un ticket, mover todos los platillos del ticket
-            if (order.ticketId) {
-                // Recopilar índices a eliminar (en orden descendente para no afectar índices anteriores)
-                var indicesToRemove = [];
-                
-                for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-                    var item = Avika.data.pendingOrders[i];
-                    if (item.ticketId === order.ticketId && item.id !== orderId) {
-                        // Registrar salida para este platillo también
-                        item.deliveryDepartureTime = departureTime;
-                        
-                        // Formatear hora
-                        try {
-                            if (Avika.utils && typeof Avika.utils.formatTime === 'function') {
-                                item.deliveryDepartureTimeFormatted = Avika.utils.formatTime(departureTime);
-                            } else if (Avika.ui && typeof Avika.ui.formatTime === 'function') {
-                                item.deliveryDepartureTimeFormatted = Avika.ui.formatTime(departureTime);
-                            } else {
-                                // Implementación de respaldo
-                                var hours = (departureTime.getHours() < 10 ? '0' : '') + departureTime.getHours();
-                                var minutes = (departureTime.getMinutes() < 10 ? '0' : '') + departureTime.getMinutes();
-                                var seconds = (departureTime.getSeconds() < 10 ? '0' : '') + departureTime.getSeconds();
-                                item.deliveryDepartureTimeFormatted = hours + ':' + minutes + ':' + seconds;
-                            }
-                        } catch (e) {
-                            console.warn("Error al formatear hora de salida para item:", e);
+            for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                var item = Avika.data.pendingOrders[i];
+                if (item.ticketId === order.ticketId) {
+                    // Registrar salida para este platillo
+                    item.deliveryDepartureTime = departureTime;
+                    
+                    // Formatear hora
+                    try {
+                        if (Avika.utils && typeof Avika.utils.formatTime === 'function') {
+                            item.deliveryDepartureTimeFormatted = Avika.utils.formatTime(departureTime);
+                        } else if (Avika.ui && typeof Avika.ui.formatTime === 'function') {
+                            item.deliveryDepartureTimeFormatted = Avika.ui.formatTime(departureTime);
+                        } else {
+                            // Implementación de respaldo
                             var hours = (departureTime.getHours() < 10 ? '0' : '') + departureTime.getHours();
                             var minutes = (departureTime.getMinutes() < 10 ? '0' : '') + departureTime.getMinutes();
                             var seconds = (departureTime.getSeconds() < 10 ? '0' : '') + departureTime.getSeconds();
                             item.deliveryDepartureTimeFormatted = hours + ':' + minutes + ':' + seconds;
                         }
-                        
-                        // Agregar a reparto
-                        Avika.data.deliveryOrders.unshift(item);
-                        
-                        // Marcar para eliminar
-                        indicesToRemove.push(i);
+                    } catch (e) {
+                        console.warn("Error al formatear hora de salida para item:", e);
+                        var hours = (departureTime.getHours() < 10 ? '0' : '') + departureTime.getHours();
+                        var minutes = (departureTime.getMinutes() < 10 ? '0' : '') + departureTime.getMinutes();
+                        var seconds = (departureTime.getSeconds() < 10 ? '0' : '') + departureTime.getSeconds();
+                        item.deliveryDepartureTimeFormatted = hours + ':' + minutes + ':' + seconds;
                     }
-                }
-                
-                // Eliminar de pendientes en orden descendente
-                for (var i = indicesToRemove.length - 1; i >= 0; i--) {
-                    Avika.data.pendingOrders.splice(indicesToRemove[i], 1);
+                    
+                    // Mover a reparto
+                    if (!Avika.data.deliveryOrders) {
+                        Avika.data.deliveryOrders = [];
+                    }
+                    Avika.data.deliveryOrders.unshift(item);
+                    
+                    // Marcar para eliminar de pendientes
+                    pendingIndicesToRemove.push(i);
                 }
             }
             
-            // Eliminar la orden original de pendientes
-            Avika.data.pendingOrders.splice(orderIndex, 1);
+            // Eliminar de pendientes en orden descendente
+            for (var i = pendingIndicesToRemove.length - 1; i >= 0; i--) {
+                Avika.data.pendingOrders.splice(pendingIndicesToRemove[i], 1);
+            }
+            
+            // Actualizar platillos que ya están en reparto
+            for (var i = 0; i < Avika.data.deliveryOrders.length; i++) {
+                var item = Avika.data.deliveryOrders[i];
+                if (item.ticketId === order.ticketId && item.id !== orderId) {
+                    // Registrar salida para este platillo
+                    item.deliveryDepartureTime = departureTime;
+                    
+                    // Formatear hora
+                    try {
+                        if (Avika.utils && typeof Avika.utils.formatTime === 'function') {
+                            item.deliveryDepartureTimeFormatted = Avika.utils.formatTime(departureTime);
+                        } else if (Avika.ui && typeof Avika.ui.formatTime === 'function') {
+                            item.deliveryDepartureTimeFormatted = Avika.ui.formatTime(departureTime);
+                        } else {
+                            // Implementación de respaldo
+                            var hours = (departureTime.getHours() < 10 ? '0' : '') + departureTime.getHours();
+                            var minutes = (departureTime.getMinutes() < 10 ? '0' : '') + departureTime.getMinutes();
+                            var seconds = (departureTime.getSeconds() < 10 ? '0' : '') + departureTime.getSeconds();
+                            item.deliveryDepartureTimeFormatted = hours + ':' + minutes + ':' + seconds;
+                        }
+                    } catch (e) {
+                        console.warn("Error al formatear hora de salida para item:", e);
+                        var hours = (departureTime.getHours() < 10 ? '0' : '') + departureTime.getHours();
+                        var minutes = (departureTime.getMinutes() < 10 ? '0' : '') + departureTime.getMinutes();
+                        var seconds = (departureTime.getSeconds() < 10 ? '0' : '') + departureTime.getSeconds();
+                        item.deliveryDepartureTimeFormatted = hours + ':' + minutes + ':' + seconds;
+                    }
+                }
+            }
+        } else {
+            // Si no es parte de un ticket y está en pendientes, mover a reparto
+            if (inPending) {
+                // Mover a órdenes en reparto
+                if (!Avika.data.deliveryOrders) {
+                    Avika.data.deliveryOrders = [];
+                }
+                Avika.data.deliveryOrders.unshift(order);
+                Avika.data.pendingOrders.splice(orderIndex, 1);
+            }
         }
         
         // Actualizar tablas
@@ -1000,15 +1031,16 @@ Avika.orders = {
         // Mover a órdenes completadas
         Avika.data.completedOrders.unshift(order);
         
-        // Si es parte de un ticket, mover todos los platillos del ticket
+        // Si es parte de un ticket, actualizar y mover todos los platillos del ticket
         if (order.ticketId) {
             // Recopilar índices a eliminar (en orden descendente)
             var indicesToRemove = [];
             
+            // Actualizar todos los platillos del mismo ticket que estén en reparto
             for (var i = 0; i < Avika.data.deliveryOrders.length; i++) {
                 var item = Avika.data.deliveryOrders[i];
                 if (item.ticketId === order.ticketId && item.id !== orderId) {
-                    // Registrar entrega para este platillo también
+                    // Registrar entrega para este platillo
                     item.deliveryArrivalTime = arrivalTime;
                     
                     // Formatear hora de llegada
@@ -1032,23 +1064,14 @@ Avika.orders = {
                         item.deliveryArrivalTimeFormatted = hours + ':' + minutes + ':' + seconds;
                     }
                     
-                    // Calcular tiempo de entrega
+                    // Asegurarse de que tiene tiempo de salida
                     if (!item.deliveryDepartureTime) {
-                        console.warn("Un item del ticket no tiene tiempo de salida registrado, usando tiempo actual");
-                        item.deliveryDepartureTime = new Date(item.endTime || item.startTime);
-                        
-                        // Formatear hora de salida si no existe
-                        try {
-                            if (Avika.utils && typeof Avika.utils.formatTime === 'function') {
-                                item.deliveryDepartureTimeFormatted = Avika.utils.formatTime(item.deliveryDepartureTime);
-                            } else if (Avika.ui && typeof Avika.ui.formatTime === 'function') {
-                                item.deliveryDepartureTimeFormatted = Avika.ui.formatTime(item.deliveryDepartureTime);
-                            }
-                        } catch (e) {
-                            console.warn("Error al formatear hora de salida faltante para item:", e);
-                        }
+                        console.warn("Un item del ticket no tiene tiempo de salida registrado, usando el mismo que el platillo principal");
+                        item.deliveryDepartureTime = order.deliveryDepartureTime;
+                        item.deliveryDepartureTimeFormatted = order.deliveryDepartureTimeFormatted;
                     }
                     
+                    // Calcular tiempo de entrega
                     var itemDeliveryTime = Math.floor((arrivalTime - new Date(item.deliveryDepartureTime)) / 1000);
                     item.deliveryTime = itemDeliveryTime;
                     
@@ -1068,6 +1091,39 @@ Avika.orders = {
             for (var i = indicesToRemove.length - 1; i >= 0; i--) {
                 Avika.data.deliveryOrders.splice(indicesToRemove[i], 1);
             }
+            
+            // Buscar si hay algún platillo del mismo ticket en pendientes (caso raro pero posible)
+            var pendingIndicesToRemove = [];
+            
+            for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                var item = Avika.data.pendingOrders[i];
+                if (item.ticketId === order.ticketId) {
+                    console.warn("Se encontró un platillo del ticket en pendientes, moviendo directamente a completados");
+                    
+                    // Registrar salida y entrega para este platillo
+                    item.deliveryDepartureTime = order.deliveryDepartureTime;
+                    item.deliveryDepartureTimeFormatted = order.deliveryDepartureTimeFormatted;
+                    item.deliveryArrivalTime = arrivalTime;
+                    item.deliveryArrivalTimeFormatted = order.deliveryArrivalTimeFormatted;
+                    item.deliveryTime = order.deliveryTime;
+                    item.deliveryTimeFormatted = order.deliveryTimeFormatted;
+                    
+                    // Marcar como terminado
+                    item.finished = true;
+                    item.kitchenFinished = true;
+                    
+                    // Agregar a completadas
+                    Avika.data.completedOrders.unshift(item);
+                    
+                    // Marcar para eliminar de pendientes
+                    pendingIndicesToRemove.push(i);
+                }
+            }
+            
+            // Eliminar de pendientes en orden descendente
+            for (var i = pendingIndicesToRemove.length - 1; i >= 0; i--) {
+                Avika.data.pendingOrders.splice(pendingIndicesToRemove[i], 1);
+            }
         }
         
         // Eliminar la orden original de reparto
@@ -1075,6 +1131,10 @@ Avika.orders = {
         
         // Actualizar tablas
         if (Avika.ui) {
+            if (typeof Avika.ui.updatePendingTable === 'function') {
+                Avika.ui.updatePendingTable();
+            }
+            
             if (typeof Avika.ui.updateDeliveryTable === 'function') {
                 Avika.ui.updateDeliveryTable();
             }
