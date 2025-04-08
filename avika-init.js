@@ -50,28 +50,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function initCategoryButtons() {
         console.log("Inicializando botones de categoría...");
         
-        // Conectar los botones de categoría con sus funciones
-        document.getElementById('btn-frio').addEventListener('click', function() {
-            Avika.ui.selectCategory('frio');
-        });
-        
-        document.getElementById('btn-entrada-fria').addEventListener('click', function() {
-            Avika.ui.selectCategory('entrada-fria');
-        });
-        
-        document.getElementById('btn-caliente').addEventListener('click', function() {
-            Avika.ui.selectCategory('caliente');
-        });
-        
-        document.getElementById('btn-entrada-caliente').addEventListener('click', function() {
-            Avika.ui.selectCategory('entrada-caliente');
-        });
-        
-        document.getElementById('btn-combos').addEventListener('click', function() {
-            Avika.ui.selectCategory('combos');
-        });
-        
-        console.log("Botones de categoría inicializados correctamente");
+        // Esta función ahora es un stub ya que los botones de categoría fueron eliminados
+        // Mantenemos la función para compatibilidad con el resto del código
+        console.log("Los botones de categoría ya no existen, saltando inicialización");
     }
     
     // Inicializar botones de servicio
@@ -287,7 +268,7 @@ function loadSavedData() {
         }
         
         // Inicializar componentes de UI
-        initCategoryButtons();
+        initCategoryButtons(); // Ahora es seguro llamarlo porque maneja el caso de botones faltantes
         initServiceButtons();
         initQuantityButtons();
         initActionButtons();
