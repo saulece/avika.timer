@@ -163,42 +163,43 @@ Avika.stats = {
     },
 
     // Función para exportar a CSV - Simplificada para exportar todos los datos
-    exportarCSV: function(fechaDesde, fechaHasta, incluirEstadisticas) {
-        Avika.ui.showLoading();
-        
-        // Incluir estadísticas por defecto
-        incluirEstadisticas = (incluirEstadisticas !== false);
-        
-        // Usar todas las órdenes completadas
-        var ordenesAExportar = Avika.data.completedOrders;
-        
-        // Crear cabecera del CSV
-        var csv = 'Platillo,Categoría,Servicio,Inicio,Fin,Tiempo (seg),Tiempo (min:seg),Ticket,Notas\n';
-        
-        // Agregar datos de cada orden
-        ordenesAExportar.forEach(function(order) {
-            var tiempoEnSegundos = order.endTime ? (new Date(order.endTime) - new Date(order.startTime)) / 1000 : 0;
-            var minutos = Math.floor(tiempoEnSegundos / 60);
-            var segundos = Math.floor(tiempoEnSegundos % 60);
-            var tiempoFormateado = Avika.ui.padZero(minutos) + ':' + Avika.ui.padZero(segundos);
+    exportarCSV: function() {
+        try {
+            Avika.ui.showLoading();
             
-            var row = [
-                '"' + order.dish + '"',
-                '"' + Avika.config.categoryNames[order.category] + '"',
-                '"' + Avika.config.serviceNames[order.serviceType] + '"',
-                '"' + new Date(order.startTime).toLocaleString() + '"',
-                order.endTime ? '"' + new Date(order.endTime).toLocaleString() + '"' : '""',
-                tiempoEnSegundos,
-                '"' + tiempoFormateado + '"',
-                order.ticketId ? '"' + order.ticketId + '"' : '""',
-                order.notes ? '"' + order.notes.replace(/"/g, '""') + '"' : '""'
-            ];
+            var ordenesAExportar = Avika.data.completedOrders;
             
-            csv += row.join(',') + '\n';
-        });
-        
-        // Incluir estadísticas si se solicitó
-        if (incluirEstadisticas) {
+            if (ordenesAExportar.length === 0) {
+                Avika.ui.hideLoading();
+                Avika.ui.showNotification('No hay datos para exportar');
+                return;
+            }
+            
+            // Crear cabecera del CSV
+            var csv = 'Platillo,Categoría,Servicio,Inicio,Fin,Tiempo (seg),Tiempo (min:seg),Ticket,Notas\n';
+            
+            // Agregar filas de datos
+            ordenesAExportar.forEach(function(order) {
+                var tiempoEnSegundos = (new Date(order.endTime) - new Date(order.startTime)) / 1000;
+                var minutos = Math.floor(tiempoEnSegundos / 60);
+                var segundos = Math.floor(tiempoEnSegundos % 60);
+                
+                var row = [
+                    '"' + order.dish + '"',
+                    '"' + order.categoryDisplay + '"',
+                    '"' + Avika.config.serviceNames[order.serviceType] + '"',
+                    '"' + (order.startTimeFormatted || '') + '"',
+                    '"' + (order.endTimeFormatted || '') + '"',
+                    Math.round(tiempoEnSegundos),
+                    '"' + Avika.ui.padZero(minutos) + ':' + Avika.ui.padZero(segundos) + '"',
+                    '"' + (order.ticketId || '') + '"',
+                    '"' + (order.notes || '').replace(/"/g, '""') + '"'
+                ];
+                
+                csv += row.join(',') + '\n';
+            });
+            
+            // Incluir estadísticas
             // Estadísticas por categoría
             csv += '\nCategoría,Tiempo Promedio (min:seg),Cantidad\n';
             
@@ -304,28 +305,43 @@ Avika.stats = {
                 csv += '"' + Avika.ui.padZero(minutosEntrega) + ':' + Avika.ui.padZero(segundosEntrega) + '",';
                 csv += totalEntregas + '\n';
             }
+            
+            // Crear link de descarga
+            try {
+                var csvBlob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                var csvUrl = URL.createObjectURL(csvBlob);
+                
+                var link = document.createElement('a');
+                link.href = csvUrl;
+                var hoy = new Date();
+                var fecha = hoy.getFullYear() + '-' + Avika.ui.padZero(hoy.getMonth() + 1) + '-' + Avika.ui.padZero(hoy.getDate());
+                
+                // Nombre simplificado del archivo
+                var nombreArchivo = 'avika_tiempos_' + fecha;
+                
+                link.download = nombreArchivo + '.csv';
+                link.style.display = 'none';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Liberar el objeto URL para evitar fugas de memoria
+                setTimeout(function() {
+                    window.URL.revokeObjectURL(csvUrl);
+                }, 100);
+                
+                Avika.ui.hideLoading();
+                Avika.ui.showNotification('Datos exportados correctamente: ' + ordenesAExportar.length + ' registros');
+            } catch (downloadError) {
+                Avika.ui.hideLoading();
+                console.error('Error al descargar el archivo CSV:', downloadError);
+                Avika.ui.showNotification('Error al descargar el archivo: ' + downloadError.message, 'error');
+            }
+        } catch (error) {
+            Avika.ui.hideLoading();
+            console.error('Error al exportar datos:', error);
+            Avika.ui.showNotification('Error al exportar datos: ' + error.message, 'error');
         }
-        
-        // Crear link de descarga
-        var csvBlob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        var csvUrl = URL.createObjectURL(csvBlob);
-        
-        var link = document.createElement('a');
-        link.href = csvUrl;
-        var hoy = new Date();
-        var fecha = hoy.getFullYear() + '-' + Avika.ui.padZero(hoy.getMonth() + 1) + '-' + Avika.ui.padZero(hoy.getDate());
-        
-        // Nombre simplificado del archivo
-        var nombreArchivo = 'avika_tiempos_' + fecha;
-        
-        link.download = nombreArchivo + '.csv';
-        link.style.display = 'none';
-        
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        Avika.ui.hideLoading();
-        Avika.ui.showNotification('Datos exportados correctamente: ' + ordenesAExportar.length + ' registros');
     }
 };

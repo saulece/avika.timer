@@ -296,29 +296,33 @@ function loadSavedData() {
         // Cargar datos guardados
         loadSavedData();
         
-        // Configurar actualizaciones periódicas (optimizadas)
-setInterval(function() {
-    // Usar la función throttled para mejor rendimiento
-    if (Avika.optimization && Avika.optimization.throttledUpdateTimers) {
-        Avika.optimization.throttledUpdateTimers();
-    } else if (Avika.orderService && typeof Avika.orderService.updateAllTimers === 'function') {
-        // Fallback a la función normal si no está disponible la optimizada
-        Avika.orderService.updateAllTimers();
-    } else if (Avika.ui && typeof Avika.ui.updateAllTimers === 'function') {
-        // Fallback a la función anterior si existe
-        Avika.ui.updateAllTimers();
-    }
-}, Avika.utils && Avika.utils.TIME_CONSTANTS ? 
-   Avika.utils.TIME_CONSTANTS.TIMER_UPDATE_INTERVAL_MS : 2000);
-
-// Configurar autoguardado
-setInterval(function() {
-    if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
-        Avika.storage.guardarDatosLocales();
-    }
-}, Avika.utils && Avika.utils.TIME_CONSTANTS ? 
-   Avika.utils.TIME_CONSTANTS.AUTO_SAVE_INTERVAL_MS : 
-   (Avika.config && Avika.config.autoSaveInterval || 30000));
+        // Inicializar temporizadores
+        function initializeTimers() {
+            // Temporizador para actualizar todos los timers cada 2 segundos
+            setInterval(function() {
+                if (Avika.ui && typeof Avika.ui.updateAllTimers === 'function') {
+                    Avika.ui.updateAllTimers();
+                } else if (Avika.orderService && typeof Avika.orderService.updateAllTimers === 'function') {
+                    Avika.orderService.updateAllTimers();
+                }
+            }, Avika.utils.TIME_CONSTANTS.TIMER_UPDATE_INTERVAL_MS);
+            
+            // Temporizador para guardar datos automáticamente
+            setInterval(function() {
+                if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+                    Avika.storage.guardarDatosLocales();
+                }
+            }, Avika.utils.TIME_CONSTANTS.AUTO_SAVE_INTERVAL_MS);
+            
+            // Temporizador para archivar órdenes antiguas (cada 5 minutos)
+            setInterval(function() {
+                if (Avika.utils && typeof Avika.utils.archiveOldOrders === 'function') {
+                    Avika.utils.archiveOldOrders();
+                }
+            }, 5 * 60 * 1000); // 5 minutos
+        }
+        
+        initializeTimers();
         
         console.log("Inicialización completa");
     }
