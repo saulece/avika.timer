@@ -688,45 +688,19 @@ Avika.orders = {
             }
         } else {
             // Este combo está terminado pero otros platillos del ticket aún no
-            // Mover solo este combo a la sección correspondiente
+            // NO mover el combo hasta que todos los platillos del ticket estén listos
+            console.log("Combo especial terminado, pero esperando a que todos los platillos del ticket estén listos");
+            
+            // Actualizar el estado del combo en la lista de pendientes
             var orderIndex = -1;
             for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
                 if (Avika.data.pendingOrders[i].id === order.id) {
-                    orderIndex = i;
+                    // Solo actualizamos el estado, pero no lo movemos todavía
+                    Avika.data.pendingOrders[i].finished = true;
+                    Avika.data.pendingOrders[i].endTime = order.endTime;
+                    Avika.data.pendingOrders[i].preparationTime = order.preparationTime;
+                    Avika.data.pendingOrders[i].preparationTimeFormatted = order.preparationTimeFormatted;
                     break;
-                }
-            }
-            
-            if (orderIndex !== -1) {
-                if (order.serviceType === 'comedor' || order.serviceType === 'ordenar-esperar') {
-                    // Para comedor, mover a completados
-                    if (!Avika.data.completedOrders) {
-                        Avika.data.completedOrders = [];
-                    }
-                    Avika.data.completedOrders.unshift(order);
-                    Avika.data.pendingOrders.splice(orderIndex, 1);
-                    
-                    // Actualizar la tabla de completados
-                    if (Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
-                        Avika.ui.updateCompletedTable();
-                    }
-                } else if (order.serviceType === 'domicilio' || order.serviceType === 'para-llevar') {
-                    // Para domicilio o para llevar, mover a reparto
-                    order.readyForDelivery = true;
-                    order.kitchenFinished = true;
-                    order.finishTime = new Date();
-                    order.finishTimeFormatted = this.formatTime(order.finishTime);
-                    
-                    if (!Avika.data.deliveryOrders) {
-                        Avika.data.deliveryOrders = [];
-                    }
-                    Avika.data.deliveryOrders.unshift(order);
-                    Avika.data.pendingOrders.splice(orderIndex, 1);
-                    
-                    // Actualizar la tabla de reparto
-                    if (Avika.ui && typeof Avika.ui.updateDeliveryTable === 'function') {
-                        Avika.ui.updateDeliveryTable();
-                    }
                 }
             }
         }
