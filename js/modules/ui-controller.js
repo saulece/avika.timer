@@ -1357,7 +1357,11 @@ showNotification: function(message, type) {
     generateHourOptions: function() {
         var options = '';
         for (var i = 0; i < 24; i++) {
-            options += `<option value="${i}">${this.padZero(i)}</option>`;
+            // Usar padZero de utils en lugar de this.padZero
+            var paddedHour = Avika.utils && Avika.utils.padZero ? 
+                              Avika.utils.padZero(i) : 
+                              (i < 10 ? '0' + i : i);
+            options += `<option value="${i}">${paddedHour}</option>`;
         }
         return options;
     },
