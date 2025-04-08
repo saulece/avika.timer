@@ -940,7 +940,89 @@ Avika.ui = {
             }
         } 
         // Si es a domicilio, mostrar botón de "Listo" y luego "Registrar Salida"
-        else if (order.serviceType === 'domicilio') {
+        else if (order.serviceType === 'domicilio' || order.serviceType === 'para-llevar') {
+            // Si es parte de un ticket
+            if (order.ticketId) {
+                // Verificar si todos los platillos del ticket están terminados
+                var allTicketItemsFinished = true;
+                for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                    var item = Avika.data.pendingOrders[i];
+                    if (item.ticketId === order.ticketId) {
+                        if (item.isSpecialCombo && (!item.hotKitchenFinished || !item.coldKitchenFinished)) {
+                            allTicketItemsFinished = false;
+                            break;
+                        } else if (!item.isSpecialCombo && !item.finished) {
+                            allTicketItemsFinished = false;
+                            break;
+                        }
+                    }
+                }
+                // Si este platillo no está terminado, mostrar botón "Listo"
+                if (!order.finished) {
+                    var doneBtn = document.createElement('button');
+                    doneBtn.className = 'action-btn';
+                    doneBtn.textContent = 'Listo';
+                    doneBtn.onclick = function() {
+                        Avika.orders.finishIndividualItem(order.id);
+                    };
+                    actionsCell.appendChild(doneBtn);
+                }
+                // Si todos los platillos del ticket están terminados, mostrar "Registrar Salida"
+                else if (allTicketItemsFinished && !order.deliveryDepartureTime) {
+                    var departureBtn = document.createElement('button');
+                    departureBtn.className = 'action-btn departure-btn';
+                    departureBtn.textContent = 'Registrar Salida';
+                    departureBtn.onclick = function() {
+                        Avika.orders.markDeliveryDeparture(order.id);
+                    };
+                    actionsCell.appendChild(departureBtn);
+                }
+                // Si ya se registró la salida pero no la entrega
+                else if (order.deliveryDepartureTime && !order.deliveryArrivalTime) {
+                    var arrivalBtn = document.createElement('button');
+                    arrivalBtn.className = 'action-btn arrival-btn';
+                    arrivalBtn.textContent = 'Registrar Entrega';
+                    arrivalBtn.onclick = function() {
+                        Avika.orders.markDeliveryArrival(order.id);
+                    };
+                    actionsCell.appendChild(arrivalBtn);
+                }
+                // Platillo terminado pero esperando que otros platillos del ticket estén listos
+                else if (order.finished && !allTicketItemsFinished) {
+                    var statusText = document.createElement('span');
+                    statusText.className = 'status-text';
+                    statusText.textContent = 'Esperando otros platillos';
+                    actionsCell.appendChild(statusText);
+                }
+            }
+            // Platillo individual (sin ticket)
+            else {
+                var doneBtn = document.createElement('button');
+                doneBtn.className = 'action-btn';
+                
+                // Mostrar el botón adecuado según el estado
+                if (!order.kitchenFinished) {
+                    doneBtn.textContent = 'Listo';
+                    doneBtn.onclick = function() {
+                        Avika.orders.finishKitchenForDelivery(order.id);
+                    };
+                } else if (!order.deliveryDepartureTime) {
+                    doneBtn.textContent = 'Registrar Salida';
+                    doneBtn.onclick = function() {
+                        Avika.orders.markDeliveryDeparture(order.id);
+                    };
+                } else if (!order.deliveryArrivalTime) {
+                    doneBtn.textContent = 'Registrar Entrega';
+                    doneBtn.onclick = function() {
+                        Avika.orders.markDeliveryArrival(order.id);
+                    };
+                }
+                
+                actionsCell.appendChild(doneBtn);
+            }
+        }
+        // Para platillos normales no a domicilio, mostrar botón de listo
+        else {
             // Si es parte de un ticket y ya está terminado, mostrar "Esperando otros platillos"
             if (order.ticketId && order.finished) {
                 var statusText = document.createElement('span');
@@ -1271,7 +1353,16 @@ Avika.ui = {
         // Mostrar modal
         modal.style.display = 'block';
     },
-    
+
+    selectTicketService: function(button, service) {
+        document.getElementById('ticket-btn-comedor').classList.remove('selected');
+        document.getElementById('ticket-btn-domicilio').classList.remove('selected');
+        document.getElementById('ticket-btn-para-llevar').classList.remove('selected');
+        
+        button.classList.add('selected');
+        this.state.ticketService = service;
+    },
+
     // Funciones de utilidad para el selector de hora
     generateHourOptions: function() {
         var options = '';
@@ -1295,14 +1386,6 @@ Avika.ui = {
             options += `<option value="${i}">${paddedMinute}</option>`;
         }
         return options;
-    },
-    selectTicketService: function(button, service) {
-        document.getElementById('ticket-btn-comedor').classList.remove('selected');
-        document.getElementById('ticket-btn-domicilio').classList.remove('selected');
-        document.getElementById('ticket-btn-para-llevar').classList.remove('selected');
-        
-        button.classList.add('selected');
-        this.state.ticketService = service;
     },
     // MODIFICADO: Método para mostrar el modal de selección de platillos con búsqueda global
     showTicketItemSelection: function() {
@@ -1760,87 +1843,6 @@ Avika.ui = {
         this.showNotification('Ticket desbloqueado: ' + ticketItems.length + ' platillos marcados como terminados. Este procedimiento debe usarse solo en casos excepcionales.');
         this.updatePendingTable();
         Avika.storage.guardarDatosLocales();
-    },
-    // Función para mostrar el modal de selección de ticket a desbloquear
-    showForceCompleteModal: function() {
-        // Crear el modal si no existe
-        var modal = document.getElementById('force-complete-modal');
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = 'force-complete-modal';
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <span class="close-modal">&times;</span>
-                    <h2>Desbloquear Ticket (Emergencia)</h2>
-                    <p>Esta función es para situaciones excepcionales donde un ticket quedó "atorado" por algún error.</p>
-                    <p><strong>Nota importante:</strong> Normalmente, el botón "Salida del Repartidor" aparece automáticamente una vez que todos los platillos del ticket están marcados como terminados.</p>
-                    <p>Esta función solo debe usarse cuando por alguna razón el flujo normal falló y necesita desbloquear un ticket.</p>
-                    <div id="ticket-list" class="ticket-list-container"></div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-            // Evento para cerrar modal
-            var closeBtn = modal.querySelector('.close-modal');
-            closeBtn.onclick = function() {
-                modal.style.display = 'none';
-            };
-        }
-        
-        // Llenar la lista de tickets pendientes
-        var ticketListContainer = document.getElementById('ticket-list');
-        ticketListContainer.innerHTML = '';
-        
-        var uniqueTickets = {};
-        
-        // Recopilar tickets únicos
-        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            var order = Avika.data.pendingOrders[i];
-            if (order.ticketId && !uniqueTickets[order.ticketId]) {
-                uniqueTickets[order.ticketId] = {
-                    ticketId: order.ticketId,
-                    serviceType: order.serviceType,
-                    startTime: order.startTimeFormatted
-                };
-            }
-        }
-        
-        // Crear botones para cada ticket
-        var ticketCount = 0;
-        for (var tid in uniqueTickets) {
-            var ticket = uniqueTickets[tid];
-            ticketCount++;
-            
-            var ticketItem = document.createElement('div');
-            ticketItem.className = 'force-ticket-item';
-            ticketItem.innerHTML = `
-                <div class="ticket-info">
-                    <span class="ticket-id">Ticket #${ticketCount}</span>
-                    <span class="ticket-details">${Avika.config.serviceNames[ticket.serviceType]} - ${ticket.startTime}</span>
-                </div>
-                <button class="force-complete-btn" data-ticket-id="${ticket.ticketId}">Desbloquear</button>
-            `;
-            ticketListContainer.appendChild(ticketItem);
-        }
-        
-        // Si no hay tickets, mostrar mensaje
-        if (ticketCount === 0) {
-            ticketListContainer.innerHTML = '<p>No hay tickets pendientes para desbloquear</p>';
-        } else {
-            // Agregar eventos a los botones
-            var buttons = ticketListContainer.querySelectorAll('.force-complete-btn');
-            buttons.forEach(function(btn) {
-                btn.onclick = function() {
-                    var ticketId = this.getAttribute('data-ticket-id');
-                    Avika.ui.forceCompleteTicket(ticketId);
-                    modal.style.display = 'none';
-                };
-            });
-        }
-        
-        // Mostrar el modal
-        modal.style.display = 'block';
     },
     // Función para mostrar el modal de selección de ticket a desbloquear
     showForceCompleteModal: function() {
