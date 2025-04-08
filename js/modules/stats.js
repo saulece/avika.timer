@@ -607,5 +607,80 @@ Avika.stats = {
             Avika.ui.hideLoading();
             Avika.ui.showNotification('Error al exportar a Excel. Verifica que la librería SheetJS esté cargada.');
         }
+    },
+
+    // Función para filtrar órdenes por tiempo
+    filterOrdersByTime: function(orders, startTime, endTime) {
+        return orders.filter(order => {
+            const orderTime = new Date(order.startTime);
+            return orderTime >= startTime && orderTime <= endTime;
+        });
+    },
+
+    // Función para calcular hora pico
+    calculatePeakHours: function(orders) {
+        const hoursCount = Array(24).fill(0);
+        orders.forEach(order => {
+            const orderHour = new Date(order.startTime).getHours();
+            hoursCount[orderHour]++;
+        });
+        const peakHour = hoursCount.indexOf(Math.max(...hoursCount));
+        return peakHour;
+    },
+
+    // Función para renderizar gráfico de estadísticas
+    renderStatisticsChart: function(data, labels, chartId) {
+        const ctx = document.getElementById(chartId).getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Order Count',
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    },
+
+    // Función para calcular tiempo promedio de servicio por día de la semana
+    calculateAverageServiceTimeByDay: function(orders) {
+        const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const serviceTimes = Array(7).fill(0);
+        const orderCounts = Array(7).fill(0);
+        orders.forEach(order => {
+            const day = new Date(order.startTime).getDay();
+            const serviceTime = (new Date(order.endTime) - new Date(order.startTime)) / 1000;
+            serviceTimes[day] += serviceTime;
+            orderCounts[day]++;
+        });
+        return serviceTimes.map((totalTime, index) => totalTime / (orderCounts[index] || 1));
+    },
+
+    // Función para mejorar estadísticas
+    enhanceStatistics: function() {
+        const completedOrders = Avika.data.completedOrders;
+        const filteredOrders = Avika.stats.filterOrdersByTime(completedOrders, new Date('2025-04-01'), new Date('2025-04-07'));
+        const peakHour = Avika.stats.calculatePeakHours(filteredOrders);
+        const averageServiceTimes = Avika.stats.calculateAverageServiceTimeByDay(filteredOrders);
+
+        console.log('Peak Hour:', peakHour);
+        console.log('Average Service Times by Day:', averageServiceTimes);
+
+        // Render a chart for visualization
+        Avika.stats.renderStatisticsChart(averageServiceTimes, ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], 'serviceTimeChart');
     }
 };
+
+// Llamar a la función para mejorar estadísticas
+Avika.stats.enhanceStatistics();
