@@ -170,18 +170,63 @@ Avika.orders = {
         
         // Manejar el platillo según su tipo de servicio
         if (order.serviceType === 'comedor' || order.serviceType === 'ordenar-esperar') {
-            // Para comedor, mover el platillo inmediatamente a completados
-            if (!Avika.data.completedOrders) {
-                Avika.data.completedOrders = [];
-            }
-            
-            // Mover a completados
-            Avika.data.completedOrders.unshift(order);
-            Avika.data.pendingOrders.splice(orderIndex, 1);
-            
-            // Actualizar la tabla de completados
-            if (Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
-                Avika.ui.updateCompletedTable();
+            // Verificar si este platillo es parte de un ticket
+            if (order.ticketId) {
+                // Verificar el estado completo del ticket
+                var ticketStatus = this.checkTicketCompletionStatus(order.ticketId);
+                
+                // Si todos los platillos están terminados, mover todos juntos a completados
+                if (ticketStatus.isComplete) {
+                    console.log("Todos los platillos del ticket", order.ticketId, "están terminados");
+                    
+                    // Marcar todas las órdenes con el estado completado
+                    var itemsToMove = [];
+                    
+                    // Recopilar todos los items del ticket
+                    for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                        var item = Avika.data.pendingOrders[i];
+                        if (item.ticketId === order.ticketId) {
+                            item.allTicketItemsFinished = true;
+                            itemsToMove.push(i);
+                        }
+                    }
+                    
+                    console.log("Ticket de comedor listo, moviendo todos los platillos a completados");
+                    
+                    // Mover todos los items a la sección de completados
+                    if (!Avika.data.completedOrders) {
+                        Avika.data.completedOrders = [];
+                    }
+                    
+                    // Procesar los items en orden inverso para evitar problemas con los índices
+                    for (var i = itemsToMove.length - 1; i >= 0; i--) {
+                        var itemIndex = itemsToMove[i];
+                        var item = Avika.data.pendingOrders[itemIndex];
+                        
+                        // Mover a completados
+                        Avika.data.completedOrders.unshift(item);
+                        Avika.data.pendingOrders.splice(itemIndex, 1);
+                    }
+                    
+                    // Actualizar la tabla de completados
+                    if (Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
+                        Avika.ui.updateCompletedTable();
+                    }
+                }
+            } else {
+                // Si no es parte de un ticket, mover el platillo inmediatamente a completados
+                if (!Avika.data.completedOrders) {
+                    Avika.data.completedOrders = [];
+                }
+                
+                // Mover a completados
+                Avika.data.completedOrders.unshift(order);
+                Avika.data.pendingOrders.splice(orderIndex, 1);
+                
+                // Actualizar la tabla de completados
+                if (Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
+                    Avika.ui.updateCompletedTable();
+                }
             }
         } else if (order.serviceType === 'domicilio' || order.serviceType === 'para-llevar') {
             // Si todos los platillos del ticket están terminados, actualizar estado del ticket
