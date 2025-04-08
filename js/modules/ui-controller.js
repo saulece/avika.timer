@@ -2410,5 +2410,103 @@ Avika.ui = {
     // Función para añadir ceros a la izquierda (utilizada en stats.js)
     padZero: function(num) {
         return num < 10 ? '0' + num : num;
+    },
+    
+    // Función para realizar búsqueda global de platillos en todas las categorías
+    performGlobalDishSearch: function(searchText) {
+        // Si el texto de búsqueda está vacío, ocultar resultados y volver a categorías
+        if (!searchText || searchText.trim() === '') {
+            document.getElementById('search-results-step').style.display = 'none';
+            document.getElementById('category-selection-step').style.display = 'block';
+            return;
+        }
+        
+        searchText = searchText.toLowerCase().trim();
+        var resultsContainer = document.getElementById('search-results-container');
+        resultsContainer.innerHTML = '';
+        
+        var resultsFound = 0;
+        var searchResults = [];
+        
+        // Buscar en todas las categorías
+        for (var category in Avika.config.dishes) {
+            var dishes = Avika.config.dishes[category];
+            
+            dishes.forEach(function(dish) {
+                // Buscar en nombre y descripción del platillo
+                if (dish.name.toLowerCase().includes(searchText) || 
+                    (dish.description && dish.description.toLowerCase().includes(searchText))) {
+                    searchResults.push({
+                        category: category,
+                        dish: dish
+                    });
+                }
+            });
+        }
+        
+        // Mostrar resultados
+        if (searchResults.length > 0) {
+            // Ordenar resultados: primero los que coinciden en el nombre
+            searchResults.sort(function(a, b) {
+                var aNameMatch = a.dish.name.toLowerCase().includes(searchText);
+                var bNameMatch = b.dish.name.toLowerCase().includes(searchText);
+                
+                if (aNameMatch && !bNameMatch) return -1;
+                if (!aNameMatch && bNameMatch) return 1;
+                return 0;
+            });
+            
+            // Crear botones para cada resultado
+            searchResults.forEach(function(result) {
+                var dishBtn = document.createElement('button');
+                dishBtn.className = 'dish-btn';
+                dishBtn.setAttribute('data-category', result.category);
+                dishBtn.setAttribute('data-dish-id', result.dish.id);
+                
+                var categoryLabel = document.createElement('span');
+                categoryLabel.className = 'category-label';
+                categoryLabel.textContent = Avika.config.categoryNames[result.category];
+                
+                var dishName = document.createElement('span');
+                dishName.className = 'dish-name';
+                dishName.textContent = result.dish.name;
+                
+                dishBtn.appendChild(categoryLabel);
+                dishBtn.appendChild(dishName);
+                
+                // Evento para seleccionar el platillo
+                dishBtn.onclick = function() {
+                    var category = this.getAttribute('data-category');
+                    var dishId = this.getAttribute('data-dish-id');
+                    var dish = Avika.config.dishes[category].find(d => d.id === dishId);
+                    
+                    if (dish) {
+                        Avika.ui.state.selectedTicketItem.category = category;
+                        Avika.ui.state.selectedTicketItem.dish = dish;
+                        
+                        document.getElementById('selected-dish-name').textContent = dish.name;
+                        document.getElementById('search-results-step').style.display = 'none';
+                        document.getElementById('quantity-selection-step').style.display = 'block';
+                    }
+                };
+                
+                resultsContainer.appendChild(dishBtn);
+                resultsFound++;
+            });
+        }
+        
+        // Si no hay resultados, mostrar mensaje
+        if (resultsFound === 0) {
+            var noResults = document.createElement('p');
+            noResults.textContent = 'No se encontraron platillos que coincidan con "' + searchText + '"';
+            noResults.style.padding = '15px';
+            noResults.style.textAlign = 'center';
+            resultsContainer.appendChild(noResults);
+        }
+        
+        // Mostrar sección de resultados y ocultar otras
+        document.getElementById('search-results-step').style.display = 'block';
+        document.getElementById('category-selection-step').style.display = 'none';
+        document.getElementById('dish-selection-step').style.display = 'none';
     }
 };
