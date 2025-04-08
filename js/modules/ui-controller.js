@@ -468,10 +468,9 @@ Avika.ui = {
             completedHeader.innerHTML = `
                 <tr>
                     <th>Platillo</th>
-                    <th>Inicio</th>
                     <th>Fin</th>
-                    <th>Tiempo</th>
                     <th>Detalles</th>
+                    <th>Tiempo</th>
                 </tr>
             `;
         }
@@ -560,20 +559,10 @@ Avika.ui = {
             dishCell.textContent = order.dish + (order.quantity > 1 ? ' (' + order.quantity + ')' : '');
             row.appendChild(dishCell);
             
-            // Celda de inicio
-            var startCell = document.createElement('td');
-            startCell.textContent = order.startTimeFormatted || '--:--:--';
-            row.appendChild(startCell);
-            
             // Celda de fin
             var endCell = document.createElement('td');
             endCell.textContent = order.endTimeFormatted || order.finishTimeFormatted || '--:--:--';
             row.appendChild(endCell);
-            
-            // Celda de tiempo total
-            var timeCell = document.createElement('td');
-            timeCell.textContent = order.preparationTimeFormatted || '--:--:--';
-            row.appendChild(timeCell);
             
             // Celda de detalles
             var detailsCell = document.createElement('td');
@@ -620,6 +609,11 @@ Avika.ui = {
             
             detailsCell.textContent = details || 'Sin detalles';
             row.appendChild(detailsCell);
+            
+            // Celda de tiempo total
+            var timeCell = document.createElement('td');
+            timeCell.textContent = order.preparationTimeFormatted || '--:--:--';
+            row.appendChild(timeCell);
             
             return row;
         }
