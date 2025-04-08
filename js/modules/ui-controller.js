@@ -457,22 +457,36 @@ Avika.ui = {
         Avika.data.currentQuantity = Math.max(1, Avika.data.currentQuantity + change);
         document.getElementById('quantity-display').textContent = Avika.data.currentQuantity;
     },
-    // MODIFICADO: Actualizar tabla de órdenes completadas para mostrar detalles correctamente
+    // MODIFICADO: Actualizar tabla de órdenes completadas para mostrar detalles correctamente en móviles
     updateCompletedTable: function(showAll) {
         var completedBody = document.getElementById('completed-body');
         completedBody.innerHTML = '';
         
-        // Actualizar también el encabezado de la tabla para mostrar todas las columnas
+        // Detectar si estamos en un dispositivo móvil
+        var isMobile = window.innerWidth <= 768;
+        
+        // Actualizar también el encabezado de la tabla para mostrar columnas adecuadas según dispositivo
         var completedHeader = document.getElementById('completed-header');
         if (completedHeader) {
-            completedHeader.innerHTML = `
-                <tr>
-                    <th style="width: 20%">Platillo</th>
-                    <th style="width: 15%">Inicio</th>
-                    <th style="width: 15%">Fin</th>
-                    <th style="width: 50%">Detalles</th>
-                </tr>
-            `;
+            if (isMobile) {
+                // Versión simplificada para móviles
+                completedHeader.innerHTML = `
+                    <tr>
+                        <th style="width: 50%">Platillo</th>
+                        <th style="width: 50%">Fin</th>
+                    </tr>
+                `;
+            } else {
+                // Versión completa para escritorio
+                completedHeader.innerHTML = `
+                    <tr>
+                        <th style="width: 20%">Platillo</th>
+                        <th style="width: 15%">Inicio</th>
+                        <th style="width: 15%">Fin</th>
+                        <th style="width: 50%">Detalles</th>
+                    </tr>
+                `;
+            }
         }
         
         var displayOrders = showAll ? Avika.data.completedOrders : Avika.data.completedOrders.slice(0, 5);
@@ -553,69 +567,155 @@ Avika.ui = {
         // Función para crear una fila para un platillo completado
         function createCompletedRow(order) {
             var row = document.createElement('tr');
+            var isMobile = window.innerWidth <= 768;
             
-            // Celda del platillo
+            // Celda del platillo con información adicional en móviles
             var dishCell = document.createElement('td');
-            dishCell.textContent = order.dish + (order.quantity > 1 ? ' (' + order.quantity + ')' : '');
+            if (isMobile) {
+                // En móviles, incluimos más información en la celda del platillo
+                var dishInfo = document.createElement('div');
+                dishInfo.style.fontWeight = 'bold';
+                dishInfo.textContent = order.dish + (order.quantity > 1 ? ' (' + order.quantity + ')' : '');
+                dishCell.appendChild(dishInfo);
+                
+                // Añadir información adicional en líneas separadas
+                var extraInfo = document.createElement('div');
+                extraInfo.style.fontSize = '0.8em';
+                extraInfo.style.color = '#555';
+                
+                var infoText = '';
+                
+                // Añadir información de servicio y ticket
+                if (order.serviceType) {
+                    infoText += Avika.config.serviceNames[order.serviceType] || order.serviceType;
+                }
+                
+                if (order.ticketId) {
+                    infoText += ' | #' + order.ticketId.substring(order.ticketId.length - 5);
+                }
+                
+                if (order.category) {
+                    infoText += ' | ' + (Avika.config.categoryNames[order.category] || order.category);
+                }
+                
+                extraInfo.textContent = infoText;
+                dishCell.appendChild(extraInfo);
+                
+                // Si hay personalizaciones, añadirlas en otra línea
+                if (order.customizations && order.customizations.length > 0) {
+                    var customInfo = document.createElement('div');
+                    customInfo.style.fontSize = '0.8em';
+                    customInfo.style.color = '#555';
+                    customInfo.textContent = order.customizations.map(function(code) {
+                        return Avika.config.customizationOptions[code] || code;
+                    }).join(', ');
+                    dishCell.appendChild(customInfo);
+                }
+                
+                // Si hay notas, añadirlas en otra línea
+                if (order.notes) {
+                    var notesInfo = document.createElement('div');
+                    notesInfo.style.fontSize = '0.8em';
+                    notesInfo.style.fontStyle = 'italic';
+                    notesInfo.style.color = '#555';
+                    notesInfo.textContent = 'Notas: ' + order.notes;
+                    dishCell.appendChild(notesInfo);
+                }
+            } else {
+                // En escritorio, solo el nombre del platillo
+                dishCell.textContent = order.dish + (order.quantity > 1 ? ' (' + order.quantity + ')' : '');
+            }
             row.appendChild(dishCell);
             
-            // Celda de inicio
-            var startCell = document.createElement('td');
-            startCell.textContent = order.startTimeFormatted || '--:--:--';
-            row.appendChild(startCell);
+            // En móviles, solo mostramos la celda de fin
+            // En escritorio, mostramos todas las celdas
+            if (!isMobile) {
+                // Celda de inicio (solo en escritorio)
+                var startCell = document.createElement('td');
+                startCell.textContent = order.startTimeFormatted || '--:--:--';
+                row.appendChild(startCell);
+            }
             
-            // Celda de fin
+            // Celda de fin (siempre visible)
             var endCell = document.createElement('td');
-            endCell.textContent = order.endTimeFormatted || order.finishTimeFormatted || '--:--:--';
+            if (isMobile) {
+                // En móviles, añadir información de entrega si existe
+                var endTimeDiv = document.createElement('div');
+                endTimeDiv.style.fontWeight = 'bold';
+                endTimeDiv.textContent = order.endTimeFormatted || order.finishTimeFormatted || '--:--:--';
+                endCell.appendChild(endTimeDiv);
+                
+                if (order.deliveryDepartureTimeFormatted || order.deliveryArrivalTimeFormatted) {
+                    var deliveryInfo = document.createElement('div');
+                    deliveryInfo.style.fontSize = '0.8em';
+                    deliveryInfo.style.color = '#555';
+                    
+                    var deliveryText = '';
+                    if (order.deliveryDepartureTimeFormatted) {
+                        deliveryText += 'Salida: ' + order.deliveryDepartureTimeFormatted;
+                    }
+                    
+                    if (order.deliveryArrivalTimeFormatted) {
+                        if (deliveryText) deliveryText += ' | ';
+                        deliveryText += 'Entrega: ' + order.deliveryArrivalTimeFormatted;
+                    }
+                    
+                    deliveryInfo.textContent = deliveryText;
+                    endCell.appendChild(deliveryInfo);
+                }
+            } else {
+                // En escritorio, solo la hora de fin
+                endCell.textContent = order.endTimeFormatted || order.finishTimeFormatted || '--:--:--';
+            }
             row.appendChild(endCell);
             
-            // Celda de detalles
-            var detailsCell = document.createElement('td');
-            var details = '';
-            
-            // Construir los detalles correctamente
-            if (order.serviceType) {
-                details += Avika.config.serviceNames[order.serviceType] || order.serviceType;
-            }
-            
-            if (order.ticketId) {
-                details += ' | Ticket #' + order.ticketId.substring(order.ticketId.length - 5);
-            }
-            
-            if (order.category) {
-                details += ' | ' + (Avika.config.categoryNames[order.category] || order.category);
-            }
-            
-            if (order.isSpecialCombo) {
-                details += ' (Combo Especial)';
-            }
-            
-            if (order.customizations && order.customizations.length > 0) {
-                details += ' | ' + order.customizations.map(function(code) {
-                    return Avika.config.customizationOptions[code] || code;
-                }).join(', ');
-            }
-            
-            if (order.notes) {
-                details += ' | Notas: ' + order.notes;
-            }
-            
-            if (order.deliveryDepartureTimeFormatted) {
-                details += ' | Salida: ' + order.deliveryDepartureTimeFormatted;
-            }
-            
-            if (order.deliveryArrivalTimeFormatted) {
-                details += ' | Entrega: ' + order.deliveryArrivalTimeFormatted;
+            if (!isMobile) {
+                // Celda de detalles (solo en escritorio)
+                var detailsCell = document.createElement('td');
+                var details = '';
                 
-                if (order.deliveryTimeFormatted) {
-                    details += ' | Tiempo de entrega: ' + order.deliveryTimeFormatted;
+                // Construir los detalles correctamente
+                if (order.serviceType) {
+                    details += Avika.config.serviceNames[order.serviceType] || order.serviceType;
                 }
+                
+                if (order.ticketId) {
+                    details += ' | Ticket #' + order.ticketId.substring(order.ticketId.length - 5);
+                }
+                
+                if (order.category) {
+                    details += ' | ' + (Avika.config.categoryNames[order.category] || order.category);
+                }
+                
+                if (order.isSpecialCombo) {
+                    details += ' (Combo Especial)';
+                }
+                
+                if (order.customizations && order.customizations.length > 0) {
+                    details += ' | ' + order.customizations.map(function(code) {
+                        return Avika.config.customizationOptions[code] || code;
+                    }).join(', ');
+                }
+                
+                if (order.notes) {
+                    details += ' | Notas: ' + order.notes;
+                }
+                
+                if (order.deliveryDepartureTimeFormatted) {
+                    details += ' | Salida: ' + order.deliveryDepartureTimeFormatted;
+                }
+                
+                if (order.deliveryArrivalTimeFormatted) {
+                    details += ' | Entrega: ' + order.deliveryArrivalTimeFormatted;
+                    
+                    if (order.deliveryTimeFormatted) {
+                        details += ' | Tiempo de entrega: ' + order.deliveryTimeFormatted;
+                    }
+                }
+                
+                detailsCell.textContent = details || 'Sin detalles';
+                row.appendChild(detailsCell);
             }
-            
-            detailsCell.textContent = details || 'Sin detalles';
-            row.appendChild(detailsCell);
-            
-            // Ya no necesitamos la celda de tiempo total
             
             return row;
         }
