@@ -325,6 +325,12 @@ setInterval(function() {
     // Iniciar la aplicación
     try {
         initApp();
+        // Activar automáticamente el modo de tickets al iniciar la aplicación
+        setTimeout(function() {
+            if (Avika.ui && Avika.ui.enableTicketMode) {
+                Avika.ui.enableTicketMode();
+            }
+        }, 500); // Pequeño retraso para asegurar que todo está inicializado
     } catch (e) {
         console.error("Error fatal durante la inicialización:", e);
         alert("Error al inicializar la aplicación. Consulta la consola para más detalles.");
