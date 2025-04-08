@@ -105,54 +105,54 @@ Avika.ui = {
         }
     },
     // Función mejorada para mostrar notificaciones con tipos
-showNotification: function(message, type) {
-    var notification = Avika.utils.getElement('notification');
-    if (!notification) {
-        Avika.utils.log.warn('Elemento de notificación no encontrado');
-        return;
-    }
-    
-    // Eliminar clases anteriores
-    notification.className = '';
-    notification.classList.add('notification');
-    
-    // Añadir clase según el tipo
-    type = type || 'info'; // Tipos: 'info', 'success', 'warning', 'error'
-    notification.classList.add('notification-' + type);
-    
-    // Establecer el mensaje
-    notification.textContent = message;
-    
-    // Mostrar con animación
-    notification.style.display = 'block';
-    notification.style.opacity = '0';
-    
-    // Animación de entrada
-    setTimeout(function() {
-        notification.style.opacity = '1';
-        notification.style.transform = 'translateY(0)';
-    }, 10);
-    
-    // Usar constante definida centralmente
-    var timeout = Avika.utils.TIME_CONSTANTS.NOTIFICATION_TIMEOUT_MS;
-    
-    // Limpiar cualquier temporizador existente para evitar solapamientos
-    if (this._notificationTimer) {
-        clearTimeout(this._notificationTimer);
-    }
-    
-    // Guardar referencia al temporizador
-    this._notificationTimer = setTimeout(function() {
-        // Animación de salida
-        notification.style.opacity = '0';
-        notification.style.transform = 'translateY(20px)';
+    showNotification: function(message, type) {
+        var notification = Avika.utils.getElement('notification');
+        if (!notification) {
+            Avika.utils.log.warn('Elemento de notificación no encontrado');
+            return;
+        }
         
-        // Ocultar después de la animación
+        // Eliminar clases anteriores
+        notification.className = '';
+        notification.classList.add('notification');
+        
+        // Añadir clase según el tipo
+        type = type || 'info'; // Tipos: 'info', 'success', 'warning', 'error'
+        notification.classList.add('notification-' + type);
+        
+        // Establecer el mensaje
+        notification.textContent = message;
+        
+        // Mostrar con animación
+        notification.style.display = 'block';
+        notification.style.opacity = '0';
+        
+        // Animación de entrada
         setTimeout(function() {
-            notification.style.display = 'none';
-        }, 300);
-    }, timeout);
-},
+            notification.style.opacity = '1';
+            notification.style.transform = 'translateY(0)';
+        }, 10);
+        
+        // Usar constante definida centralmente
+        var timeout = Avika.utils.TIME_CONSTANTS.NOTIFICATION_TIMEOUT_MS;
+        
+        // Limpiar cualquier temporizador existente para evitar solapamientos
+        if (this._notificationTimer) {
+            clearTimeout(this._notificationTimer);
+        }
+        
+        // Guardar referencia al temporizador
+        this._notificationTimer = setTimeout(function() {
+            // Animación de salida
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateY(20px)';
+            
+            // Ocultar después de la animación
+            setTimeout(function() {
+                notification.style.display = 'none';
+            }, 300);
+        }, timeout);
+    },
     
     // Función para manejar subcategorías
     selectCategory: function(category) {
@@ -941,88 +941,6 @@ showNotification: function(message, type) {
         } 
         // Si es a domicilio, mostrar botón de "Listo" y luego "Registrar Salida"
         else if (order.serviceType === 'domicilio') {
-            // Si es parte de un ticket
-            if (order.ticketId) {
-                // Verificar si todos los platillos del ticket están terminados
-                var allTicketItemsFinished = true;
-                for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-                    var item = Avika.data.pendingOrders[i];
-                    if (item.ticketId === order.ticketId) {
-                        if (item.isSpecialCombo && (!item.hotKitchenFinished || !item.coldKitchenFinished)) {
-                            allTicketItemsFinished = false;
-                            break;
-                        } else if (!item.isSpecialCombo && !item.finished) {
-                            allTicketItemsFinished = false;
-                            break;
-                        }
-                    }
-                }
-                // Si este platillo no está terminado, mostrar botón "Listo"
-                if (!order.finished) {
-                    var doneBtn = document.createElement('button');
-                    doneBtn.className = 'action-btn';
-                    doneBtn.textContent = 'Listo';
-                    doneBtn.onclick = function() {
-                        Avika.orders.finishIndividualItem(order.id);
-                    };
-                    actionsCell.appendChild(doneBtn);
-                }
-                // Si todos los platillos del ticket están terminados, mostrar "Registrar Salida"
-                else if (allTicketItemsFinished && !order.deliveryDepartureTime) {
-                    var departureBtn = document.createElement('button');
-                    departureBtn.className = 'action-btn departure-btn';
-                    departureBtn.textContent = 'Registrar Salida';
-                    departureBtn.onclick = function() {
-                        Avika.orders.markDeliveryDeparture(order.id);
-                    };
-                    actionsCell.appendChild(departureBtn);
-                }
-                // Si ya se registró la salida pero no la entrega
-                else if (order.deliveryDepartureTime && !order.deliveryArrivalTime) {
-                    var arrivalBtn = document.createElement('button');
-                    arrivalBtn.className = 'action-btn arrival-btn';
-                    arrivalBtn.textContent = 'Registrar Entrega';
-                    arrivalBtn.onclick = function() {
-                        Avika.orders.markDeliveryArrival(order.id);
-                    };
-                    actionsCell.appendChild(arrivalBtn);
-                }
-                // Platillo terminado pero esperando que otros platillos del ticket estén listos
-                else if (order.finished && !allTicketItemsFinished) {
-                    var statusText = document.createElement('span');
-                    statusText.className = 'status-text';
-                    statusText.textContent = 'Esperando otros platillos';
-                    actionsCell.appendChild(statusText);
-                }
-            }
-            // Platillo individual (sin ticket)
-            else {
-                var doneBtn = document.createElement('button');
-                doneBtn.className = 'action-btn';
-                
-                // Mostrar el botón adecuado según el estado
-                if (!order.kitchenFinished) {
-                    doneBtn.textContent = 'Listo';
-                    doneBtn.onclick = function() {
-                        Avika.orders.finishKitchenForDelivery(order.id);
-                    };
-                } else if (!order.deliveryDepartureTime) {
-                    doneBtn.textContent = 'Registrar Salida';
-                    doneBtn.onclick = function() {
-                        Avika.orders.markDeliveryDeparture(order.id);
-                    };
-                } else if (!order.deliveryArrivalTime) {
-                    doneBtn.textContent = 'Registrar Entrega';
-                    doneBtn.onclick = function() {
-                        Avika.orders.markDeliveryArrival(order.id);
-                    };
-                }
-                
-                actionsCell.appendChild(doneBtn);
-            }
-        }
-        // Para platillos normales no a domicilio, mostrar botón de listo
-        else if (!order.deliveryDepartureTime) {
             // Si es parte de un ticket y ya está terminado, mostrar "Esperando otros platillos"
             if (order.ticketId && order.finished) {
                 var statusText = document.createElement('span');
@@ -1332,11 +1250,10 @@ showNotification: function(message, type) {
             };
         }
         
-       // Inicializar hora actual
-var now = new Date();
-document.getElementById('ticket-hour').value = now.getHours();
-// Reemplazar this.getMinutes con una operación directa
-document.getElementById('ticket-minute').value = now.getMinutes(); // Usar el valor directamente'
+        // Inicializar hora actual
+        var now = new Date();
+        document.getElementById('ticket-hour').value = now.getHours();
+        document.getElementById('ticket-minute').value = now.getMinutes(); // Usar el valor directamente
         
         // Resetear lista de items
         this.state.ticketItems = [];
@@ -1477,14 +1394,20 @@ document.getElementById('ticket-minute').value = now.getMinutes(); // Usar el va
             };
             
             // NUEVO: Evento para la búsqueda global
-            document.getElementById('global-dish-search').addEventListener('input', function() {
-                Avika.ui.performGlobalDishSearch(this.value);
-            });
+            var globalSearchInput = document.getElementById('global-dish-search');
+            if (globalSearchInput) {
+                globalSearchInput.addEventListener('input', function() {
+                    Avika.ui.performGlobalDishSearch(this.value.trim());
+                });
+            }
             
             // Evento para barra de búsqueda específica de categoría
-            document.getElementById('ticket-dish-search').addEventListener('input', function() {
-                Avika.ui.filterTicketDishes(this.value.toLowerCase());
-            });
+            var categorySearchInput = document.getElementById('ticket-dish-search');
+            if (categorySearchInput) {
+                categorySearchInput.addEventListener('input', function() {
+                    Avika.ui.filterTicketDishes(this.value.trim().toLowerCase());
+                });
+            }
             
             // Eventos para categorías
             var categoryBtns = modal.querySelectorAll('.category-btn');
