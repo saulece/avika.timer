@@ -8,9 +8,9 @@ Avika.orders = {
         
         try {
             // Obtener datos del formulario
-            var selectedDish = document.getElementById('selected-dish').textContent;
-            var quantity = parseInt(document.getElementById('quantity-value').textContent, 10);
-            var serviceType = document.querySelector('.service-button.selected').getAttribute('data-service');
+            var selectedDish = document.getElementById('selected-dish-title').textContent;
+            var quantity = parseInt(document.getElementById('quantity-display').textContent, 10);
+            var serviceType = document.querySelector('.option-btn.selected').getAttribute('id').replace('btn-', '');
             
             // Validar datos
             if (!selectedDish || selectedDish === '') {
