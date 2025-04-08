@@ -21,11 +21,17 @@ function formatElapsedTimeFallback(seconds) {
 // Esta función intenta usar las implementaciones disponibles en orden de preferencia
 function getFormatElapsedTimeFunction() {
     if (Avika.utils && typeof Avika.utils.formatElapsedTime === 'function') {
-        return Avika.utils.formatElapsedTime;
+        return function(seconds) {
+            return Avika.utils.formatElapsedTime.call(Avika.utils, seconds);
+        };
     } else if (Avika.ui && typeof Avika.ui.formatElapsedTime === 'function') {
-        return Avika.ui.formatElapsedTime;
+        return function(seconds) {
+            return Avika.ui.formatElapsedTime.call(Avika.ui, seconds);
+        };
     } else if (Avika.orderService && typeof Avika.orderService.formatElapsedTime === 'function') {
-        return Avika.orderService.formatElapsedTime;
+        return function(seconds) {
+            return Avika.orderService.formatElapsedTime.call(Avika.orderService, seconds);
+        };
     } else {
         return formatElapsedTimeFallback;
     }
