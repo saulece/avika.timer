@@ -460,156 +460,228 @@ Avika.ui = {
     // MODIFICADO: Actualizar tabla de órdenes completadas para mostrar detalles correctamente
     updateCompletedTable: function(showAll) {
         var completedBody = document.getElementById('completed-body');
-        if (!completedBody) return;
-        
         completedBody.innerHTML = '';
         
-        if (!Avika.data.completedOrders || Avika.data.completedOrders.length === 0) {
-            var emptyRow = document.createElement('tr');
-            var emptyCell = document.createElement('td');
-            emptyCell.colSpan = 3;
-            emptyCell.textContent = 'No hay platillos completados';
-            emptyCell.style.textAlign = 'center';
-            emptyRow.appendChild(emptyCell);
-            completedBody.appendChild(emptyRow);
-            return;
+        // Actualizar también el encabezado de la tabla para mostrar todas las columnas
+        var completedHeader = document.getElementById('completed-header');
+        if (completedHeader) {
+            completedHeader.innerHTML = `
+                <tr>
+                    <th>Platillo</th>
+                    <th>Inicio</th>
+                    <th>Fin</th>
+                    <th>Tiempo</th>
+                    <th>Detalles</th>
+                </tr>
+            `;
         }
         
-        // Determinar cuántos mostrar
-        var ordersToShow = showAll ? 
-                          Avika.data.completedOrders : 
-                          Avika.data.completedOrders.slice(0, 10);
+        var displayOrders = showAll ? Avika.data.completedOrders : Avika.data.completedOrders.slice(0, 5);
         
-        // Agrupar por ticket
+        // Agrupar órdenes por ticketId
         var ticketGroups = {};
+        var individualOrders = [];
         
-        ordersToShow.forEach(function(order) {
+        // Primero, separar órdenes por ticket
+        for (var i = 0; i < displayOrders.length; i++) {
+            var order = displayOrders[i];
             if (order.ticketId) {
                 if (!ticketGroups[order.ticketId]) {
-                    ticketGroups[order.ticketId] = [];
+                    ticketGroups[order.ticketId] = {
+                        orders: [],
+                        serviceType: order.serviceType
+                    };
                 }
-                ticketGroups[order.ticketId].push(order);
+                ticketGroups[order.ticketId].orders.push(order);
+            } else {
+                individualOrders.push(order);
             }
-        });
+        }
         
-        // Primero mostrar órdenes individuales (sin ticketId)
-        ordersToShow.forEach(function(order) {
-            if (!order.ticketId) {
-                var row = this.createCompletedRow(order);
-                completedBody.appendChild(row);
+        // Función para aplicar estilos a las filas de un ticket
+        function applyTicketStyles(rows, ticketId, serviceType) {
+            var ticketColor = '';
+            
+            // Asignar color según tipo de servicio
+            if (serviceType === 'comedor') {
+                ticketColor = '#f0f8ff'; // Azul claro para comedor
+            } else if (serviceType === 'domicilio') {
+                ticketColor = '#fff0f0'; // Rojo claro para domicilio
+            } else if (serviceType === 'para-llevar') {
+                ticketColor = '#f0fff0'; // Verde claro para llevar
+            } else {
+                ticketColor = '#f5f5f5'; // Gris claro para otros
             }
-        }, this);
+            
+            // Aplicar estilos a cada fila
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                row.style.backgroundColor = ticketColor;
+                
+                // Primera fila del ticket
+                if (i === 0) {
+                    row.classList.add('ticket-first-row');
+                    
+                    // Añadir información del ticket en la primera fila
+                    var firstCell = row.cells[0];
+                    var ticketLabel = document.createElement('div');
+                    ticketLabel.className = 'ticket-label';
+                    ticketLabel.textContent = 'Ticket #' + ticketId.substring(ticketId.length - 5);
+                    ticketLabel.style.fontSize = '0.8em';
+                    ticketLabel.style.fontWeight = 'bold';
+                    ticketLabel.style.marginBottom = '3px';
+                    ticketLabel.style.color = '#555';
+                    
+                    // Insertar el label al principio de la celda
+                    if (firstCell.firstChild) {
+                        firstCell.insertBefore(ticketLabel, firstCell.firstChild);
+                    } else {
+                        firstCell.appendChild(ticketLabel);
+                    }
+                }
+                
+                // Última fila del ticket
+                if (i === rows.length - 1) {
+                    row.classList.add('ticket-last-row');
+                    row.style.borderBottom = '2px solid #999';
+                }
+                
+                // Añadir borde izquierdo a todas las filas del ticket
+                row.style.borderLeft = '3px solid #999';
+            }
+        }
         
-        // Luego mostrar órdenes agrupadas por ticket
+        // Función para crear una fila para un platillo completado
+        function createCompletedRow(order) {
+            var row = document.createElement('tr');
+            
+            // Celda del platillo
+            var dishCell = document.createElement('td');
+            dishCell.textContent = order.dish + (order.quantity > 1 ? ' (' + order.quantity + ')' : '');
+            row.appendChild(dishCell);
+            
+            // Celda de inicio
+            var startCell = document.createElement('td');
+            startCell.textContent = order.startTimeFormatted || '--:--:--';
+            row.appendChild(startCell);
+            
+            // Celda de fin
+            var endCell = document.createElement('td');
+            endCell.textContent = order.endTimeFormatted || order.finishTimeFormatted || '--:--:--';
+            row.appendChild(endCell);
+            
+            // Celda de tiempo total
+            var timeCell = document.createElement('td');
+            timeCell.textContent = order.preparationTimeFormatted || '--:--:--';
+            row.appendChild(timeCell);
+            
+            // Celda de detalles
+            var detailsCell = document.createElement('td');
+            var details = '';
+            
+            // Construir los detalles correctamente
+            if (order.serviceType) {
+                details += Avika.config.serviceNames[order.serviceType] || order.serviceType;
+            }
+            
+            if (order.ticketId) {
+                details += ' | Ticket #' + order.ticketId.substring(order.ticketId.length - 5);
+            }
+            
+            if (order.category) {
+                details += ' | ' + (Avika.config.categoryNames[order.category] || order.category);
+            }
+            
+            if (order.isSpecialCombo) {
+                details += ' (Combo Especial)';
+            }
+            
+            if (order.customizations && order.customizations.length > 0) {
+                details += ' | ' + order.customizations.map(function(code) {
+                    return Avika.config.customizationOptions[code] || code;
+                }).join(', ');
+            }
+            
+            if (order.notes) {
+                details += ' | Notas: ' + order.notes;
+            }
+            
+            if (order.deliveryDepartureTimeFormatted) {
+                details += ' | Salida: ' + order.deliveryDepartureTimeFormatted;
+            }
+            
+            if (order.deliveryArrivalTimeFormatted) {
+                details += ' | Entrega: ' + order.deliveryArrivalTimeFormatted;
+                
+                if (order.deliveryTimeFormatted) {
+                    details += ' | Tiempo de entrega: ' + order.deliveryTimeFormatted;
+                }
+            }
+            
+            detailsCell.textContent = details || 'Sin detalles';
+            row.appendChild(detailsCell);
+            
+            return row;
+        }
+        
+        // Añadir órdenes agrupadas por ticket
         for (var ticketId in ticketGroups) {
-            var ticketOrders = ticketGroups[ticketId];
+            var ticketRows = [];
+            var group = ticketGroups[ticketId];
             
-            // Determinar el tipo de servicio del ticket (usar el del primer platillo)
-            var serviceType = ticketOrders[0].serviceType;
-            
-            // Crear filas para cada platillo del ticket
-            var rows = [];
-            ticketOrders.forEach(function(order) {
-                var row = this.createCompletedRow(order);
-                rows.push(row);
+            // Crear filas para cada orden del ticket
+            for (var i = 0; i < group.orders.length; i++) {
+                var order = group.orders[i];
+                var row = createCompletedRow(order);
                 completedBody.appendChild(row);
-            }, this);
-            
-            // Aplicar estilos de agrupación
-            this.applyTicketStyles(rows, ticketId, serviceType);
-        }
-    },
-
-    // Función para aplicar estilos a las filas de un ticket
-    applyTicketStyles: function(rows, ticketId, serviceType) {
-        if (!rows || rows.length === 0) return;
-        
-        // Determinar color según tipo de servicio
-        var borderColor;
-        switch (serviceType) {
-            case 'domicilio':
-                borderColor = '#e74c3c'; // Rojo para domicilio
-                break;
-            case 'para-llevar':
-                borderColor = '#f39c12'; // Naranja para llevar
-                break;
-            default:
-                borderColor = '#3498db'; // Azul para comedor
-        }
-        
-        // Aplicar estilos a todas las filas
-        rows.forEach(function(row) {
-            row.style.borderLeft = '4px solid ' + borderColor;
-            row.classList.add('ticket-group-row');
-            
-            // Añadir atributo de datos para identificar el ticket
-            row.setAttribute('data-ticket-id', ticketId);
-        });
-        
-        // Añadir indicador de ticket a la primera fila
-        if (rows.length > 0) {
-            var firstRow = rows[0];
-            var ticketBadge = document.createElement('span');
-            ticketBadge.className = 'ticket-badge';
-            ticketBadge.textContent = 'T';
-            ticketBadge.title = 'Parte de un ticket/comanda';
-            ticketBadge.style.backgroundColor = borderColor;
-            
-            var firstCell = firstRow.querySelector('td');
-            if (firstCell) {
-                firstCell.insertBefore(ticketBadge, firstCell.firstChild);
+                ticketRows.push(row);
             }
+            
+            // Aplicar estilos a las filas del ticket
+            applyTicketStyles(ticketRows, ticketId, group.serviceType);
+        }
+        
+        // Añadir órdenes individuales
+        for (var i = 0; i < individualOrders.length; i++) {
+            var row = createCompletedRow(individualOrders[i]);
+            completedBody.appendChild(row);
+            
+            // Estilo para órdenes individuales
+            row.style.backgroundColor = '#ffffff'; // Blanco para órdenes individuales
+        }
+        
+        // Añadir botón para limpiar historial si hay pedidos completados
+        if (Avika.data.completedOrders.length > 0) {
+            var clearHistoryContainer = document.getElementById('clear-history-container');
+            if (!clearHistoryContainer) {
+                clearHistoryContainer = document.createElement('div');
+                clearHistoryContainer.id = 'clear-history-container';
+                clearHistoryContainer.style.textAlign = 'center';
+                clearHistoryContainer.style.margin = '10px 0';
+                
+                var completedTable = document.getElementById('completed-table');
+                if (completedTable) {
+                    completedTable.parentNode.insertBefore(clearHistoryContainer, completedTable.nextSibling);
+                }
+            }
+            
+            clearHistoryContainer.innerHTML = '';
+            var clearBtn = document.createElement('button');
+            clearBtn.className = 'action-btn cancel-btn';
+            clearBtn.textContent = 'Limpiar Historial';
+            clearBtn.onclick = function() {
+                if (confirm('¿Está seguro que desea limpiar el historial de platillos terminados?')) {
+                    Avika.orders.clearCompletedOrders();
+                    
+                    // Ocultar el botón después de limpiar
+                    document.getElementById('clear-history-container').style.display = 'none';
+                }
+            };
+            
+            clearHistoryContainer.appendChild(clearBtn);
         }
     },
-
-    // Función para crear una fila para un platillo completado
-    createCompletedRow: function(order) {
-        var row = document.createElement('tr');
-        
-        // Celda del platillo
-        var dishCell = document.createElement('td');
-        dishCell.textContent = order.dish;
-        if (order.quantity > 1) {
-            dishCell.textContent += ' (' + order.quantity + ')';
-        }
-        row.appendChild(dishCell);
-        
-        // Celda de fin
-        var endCell = document.createElement('td');
-        endCell.textContent = order.endTimeFormatted || '';
-        row.appendChild(endCell);
-        
-        // Celda de detalles
-        var detailsCell = document.createElement('td');
-        var detailsText = '';
-        
-        // Añadir información de categoría
-        if (order.category) {
-            detailsText += Avika.config.categoryNames[order.category] || order.category;
-        }
-        
-        // Añadir tipo de servicio
-        if (order.serviceType) {
-            if (detailsText) detailsText += ' - ';
-            detailsText += Avika.config.serviceNames[order.serviceType] || order.serviceType;
-        }
-        
-        // Añadir notas si existen
-        if (order.notes) {
-            detailsText += ' - ' + order.notes;
-        }
-        
-        // Añadir información del ticket
-        if (order.ticketId) {
-            if (detailsText) detailsText += ' - ';
-            detailsText += 'Ticket: ' + order.ticketId.replace('ticket-', '');
-        }
-        
-        detailsCell.textContent = detailsText;
-        row.appendChild(detailsCell);
-        
-        return row;
-    },
+    
     // Función para filtrar platillos en el modal de tickets
     filterTicketDishes: function(searchText) {
         var buttons = document.querySelectorAll('#dishes-selection-container .dish-btn');

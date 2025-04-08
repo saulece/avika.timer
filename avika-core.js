@@ -11,8 +11,7 @@ window.Avika = Object.assign({
     data: {
         pendingOrders: [],
         deliveryOrders: [],
-        completedOrders: [],
-        archivedOrders: [] // Nuevo array para archivar órdenes antiguas
+        completedOrders: []
     },
     
     // Objeto para utilidades compartidas
@@ -24,8 +23,7 @@ window.Avika = Object.assign({
             THIRTY_MINUTES_IN_SECONDS: 1800,  // 30 minutos
             NOTIFICATION_TIMEOUT_MS: 3000,    // 3 segundos
             AUTO_SAVE_INTERVAL_MS: 30000,     // 30 segundos
-            TIMER_UPDATE_INTERVAL_MS: 2000,   // 2 segundos
-            MAX_COMPLETED_ORDERS: 1000        // Límite de órdenes completadas en memoria
+            TIMER_UPDATE_INTERVAL_MS: 2000    // 2 segundos
         },
         
         // Función para validar fechas
@@ -87,80 +85,9 @@ window.Avika = Object.assign({
             var el = document.getElementById(id);
             if (!el && this.log) this.log.warn('Elemento no encontrado:', id);
             return el;
-        },
-        
-        // Función para manejar errores de manera consistente
-        handleError: function(context, error) {
-            if (this.log) {
-                this.log.error('Error en ' + context + ':', error);
-            } else {
-                console.error('Error en ' + context + ':', error);
-            }
-            
-            // Notificar al usuario si la UI está disponible
-            if (window.Avika && Avika.ui && typeof Avika.ui.showNotification === 'function') {
-                Avika.ui.showNotification('Error: ' + error.message, 'error');
-            }
-            
-            return false;
-        },
-        
-        // Función para verificar compatibilidad del navegador
-        checkBrowserCompatibility: function() {
-            var issues = [];
-            
-            // Verificar soporte para características modernas
-            if (!window.Blob) issues.push('Blob API no soportada');
-            if (!window.localStorage) issues.push('LocalStorage no soportado');
-            if (!Array.prototype.forEach) issues.push('Array.forEach no soportado');
-            
-            if (issues.length > 0) {
-                var message = 'Tu navegador puede tener problemas de compatibilidad: ' + issues.join(', ');
-                if (this.log) this.log.warn(message);
-                return false;
-            }
-            
-            return true;
-        },
-        
-        // Función para archivar órdenes antiguas
-        archiveOldOrders: function() {
-            try {
-                if (!window.Avika || !Avika.data) return;
-                
-                var maxOrders = this.TIME_CONSTANTS.MAX_COMPLETED_ORDERS;
-                var completedOrders = Avika.data.completedOrders;
-                
-                if (completedOrders.length > maxOrders) {
-                    // Mover órdenes excedentes al archivo
-                    var ordersToArchive = completedOrders.splice(0, completedOrders.length - maxOrders);
-                    
-                    if (!Array.isArray(Avika.data.archivedOrders)) {
-                        Avika.data.archivedOrders = [];
-                    }
-                    
-                    // Añadir al archivo
-                    Avika.data.archivedOrders = Avika.data.archivedOrders.concat(ordersToArchive);
-                    
-                    if (this.log) {
-                        this.log.info('Órdenes archivadas:', ordersToArchive.length, 
-                                     'Total en archivo:', Avika.data.archivedOrders.length);
-                    }
-                    
-                    // Guardar datos si el módulo de almacenamiento está disponible
-                    if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
-                        Avika.storage.guardarDatosLocales();
-                    }
-                }
-            } catch (error) {
-                this.handleError('archiveOldOrders', error);
-            }
         }
     }
 }, window.Avika || {});
 
 // Log de inicialización
 console.log('Avika Core inicializado - Versión:', Avika.VERSION);
-
-// Verificar compatibilidad del navegador
-Avika.utils.checkBrowserCompatibility();
