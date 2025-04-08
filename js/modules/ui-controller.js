@@ -2405,5 +2405,10 @@ Avika.ui = {
             localStorage.setItem('avika_compact_mode', 'true');
             this.showNotification('Modo ultra-compacto activado');
         }
+    },
+    
+    // Función para añadir ceros a la izquierda (utilizada en stats.js)
+    padZero: function(num) {
+        return num < 10 ? '0' + num : num;
     }
 };
