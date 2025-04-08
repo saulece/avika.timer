@@ -452,6 +452,9 @@ Avika.stats = {
                 var fechaFin = new Date(order.endTime);
                 var fechaFormateada = fechaFin.getDate() + '/' + (fechaFin.getMonth() + 1) + '/' + fechaFin.getFullYear();
                 
+                // Determinar si es un combo especial (tiene registros de cocina caliente y fru00eda)
+                var esComboEspecial = order.hotKitchenFinished && order.coldKitchenFinished ? 'Su00ed' : 'No';
+                
                 datosOrdenes.push([
                     order.dish,
                     Avika.config.categoryNames[order.category],
@@ -459,11 +462,14 @@ Avika.stats = {
                     Avika.config.serviceNames[order.serviceType],
                     order.startTimeFormatted,
                     order.endTimeFormatted,
+                    order.hotKitchenEndTimeFormatted || '-',
+                    order.coldKitchenEndTimeFormatted || '-',
                     order.prepTime,
                     order.deliveryDepartureTimeFormatted || '',
                     order.deliveryArrivalTimeFormatted || '',
                     order.deliveryTime || '',
-                    fechaFormateada
+                    fechaFormateada,
+                    esComboEspecial
                 ]);
             });
             

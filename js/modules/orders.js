@@ -478,6 +478,9 @@ Avika.orders = {
         
         // Marcar cocina caliente como terminada
         order.hotKitchenFinished = true;
+        // Registrar la hora de finalizaciu00f3n de la cocina caliente
+        order.hotKitchenEndTime = new Date();
+        order.hotKitchenEndTimeFormatted = this.formatTime(order.hotKitchenEndTime);
         
         // Si ambas cocinas están terminadas, marcar como completado
         if (order.hotKitchenFinished && order.coldKitchenFinished) {
@@ -525,6 +528,9 @@ Avika.orders = {
         
         // Marcar cocina fría como terminada
         order.coldKitchenFinished = true;
+        // Registrar la hora de finalización de la cocina fría
+        order.coldKitchenEndTime = new Date();
+        order.coldKitchenEndTimeFormatted = this.formatTime(order.coldKitchenEndTime);
         
         // Si ambas cocinas están terminadas, marcar como completado
         if (order.hotKitchenFinished && order.coldKitchenFinished) {
