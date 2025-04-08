@@ -171,23 +171,62 @@ Avika.orders = {
                 console.log("Todos los platillos del ticket", order.ticketId, "están terminados");
                 
                 // Marcar todas las órdenes con el estado completado
+                var itemsToMove = [];
+                var serviceType = null;
+                
+                // Recopilar todos los items del ticket y su tipo de servicio
                 for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
                     var item = Avika.data.pendingOrders[i];
                     if (item.ticketId === order.ticketId) {
                         item.allTicketItemsFinished = true;
+                        itemsToMove.push(i);
+                        if (!serviceType) serviceType = item.serviceType;
                     }
                 }
                 
-                // Si es a domicilio o para llevar, mostrar botón de salida
-                if (order.serviceType === 'domicilio' || order.serviceType === 'para-llevar') {
+                // Procesar los items según el tipo de servicio
+                if (serviceType === 'domicilio' || serviceType === 'para-llevar') {
                     console.log("Ticket a domicilio o para llevar listo para reparto");
                     
-                    // Marcar el ticket como listo para reparto
-                    for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-                        var item = Avika.data.pendingOrders[i];
-                        if (item.ticketId === order.ticketId) {
-                            item.readyForDelivery = true;
-                        }
+                    // Mover todos los items a la sección de reparto
+                    if (!Avika.data.deliveryOrders) {
+                        Avika.data.deliveryOrders = [];
+                    }
+                    
+                    // Procesar los items en orden inverso para evitar problemas con los índices
+                    for (var i = itemsToMove.length - 1; i >= 0; i--) {
+                        var itemIndex = itemsToMove[i];
+                        var item = Avika.data.pendingOrders[itemIndex];
+                        
+                        // Marcar como listo para reparto
+                        item.readyForDelivery = true;
+                        item.kitchenFinished = true;
+                        item.finishTime = new Date();
+                        item.finishTimeFormatted = this.formatTime(item.finishTime);
+                        
+                        // Mover a reparto
+                        Avika.data.deliveryOrders.unshift(item);
+                        Avika.data.pendingOrders.splice(itemIndex, 1);
+                    }
+                    
+                    // Actualizar la tabla de reparto
+                    if (Avika.ui && typeof Avika.ui.updateDeliveryTable === 'function') {
+                        Avika.ui.updateDeliveryTable();
+                    }
+                } else if (serviceType === 'comedor' || serviceType === 'ordenar-esperar') {
+                    // Para comedor, mover todos los items a completados
+                    for (var i = itemsToMove.length - 1; i >= 0; i--) {
+                        var itemIndex = itemsToMove[i];
+                        var item = Avika.data.pendingOrders[itemIndex];
+                        
+                        // Mover a completados
+                        Avika.data.completedOrders.unshift(item);
+                        Avika.data.pendingOrders.splice(itemIndex, 1);
+                    }
+                    
+                    // Actualizar la tabla de completados
+                    if (Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
+                        Avika.ui.updateCompletedTable();
                     }
                 }
             }

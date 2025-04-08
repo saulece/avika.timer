@@ -1336,7 +1336,7 @@ showNotification: function(message, type) {
 var now = new Date();
 document.getElementById('ticket-hour').value = now.getHours();
 // Reemplazar this.getMinutes con una operación directa
-document.getElementById('ticket-minute').value = now.getMinutes(); // Usar el valor directamente
+document.getElementById('ticket-minute').value = now.getMinutes(); // Usar el valor directamente'
         
         // Resetear lista de items
         this.state.ticketItems = [];
