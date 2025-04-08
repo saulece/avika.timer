@@ -134,15 +134,16 @@ document.addEventListener('DOMContentLoaded', function() {
             btnNewTicket.addEventListener('click', function() {
                 Avika.ui.enableTicketMode();
             });
-            // Botones de filtrado
-document.getElementById('btn-apply-filter').addEventListener('click', function() {
-    Avika.ui.aplicarFiltros();
-});
-
-document.getElementById('btn-clear-filter').addEventListener('click', function() {
-    Avika.ui.limpiarFiltros();
-});
         }
+        
+        // Botones de filtrado
+        document.getElementById('btn-apply-filter').addEventListener('click', function() {
+            Avika.ui.aplicarFiltros();
+        });
+
+        document.getElementById('btn-clear-filter').addEventListener('click', function() {
+            Avika.ui.limpiarFiltros();
+        });
         
         // Botones de filtrado para historial
         var btnShowAllHistory = document.getElementById('btn-show-all-history');
