@@ -1154,6 +1154,36 @@ Avika.ui = {
         }
     },
     
+    // Verificar si un elemento está visible en el viewport
+    isElementInViewport: function(el) {
+        // Validar que el elemento exista
+        if (!el) return false;
+        
+        try {
+            var rect = el.getBoundingClientRect();
+            var windowHeight = window.innerHeight || document.documentElement.clientHeight;
+            var windowWidth = window.innerWidth || document.documentElement.clientWidth;
+            
+            // Añadir un buffer para pre-cargar elementos cercanos al viewport
+            var buffer = 200; // píxeles de margen para pre-carga
+            
+            return (
+                (rect.top >= -buffer && rect.top <= windowHeight + buffer) ||
+                (rect.bottom >= -buffer && rect.bottom <= windowHeight + buffer)
+            ) && (
+                rect.left >= 0 &&
+                rect.right <= windowWidth
+            );
+        } catch (e) {
+            if (Avika.utils && Avika.utils.log) {
+                Avika.utils.log.warn("Error al verificar visibilidad del elemento:", e);
+            } else {
+                console.warn("Error al verificar visibilidad del elemento:", e);
+            }
+            return false;
+        }
+    },
+    
     // Búsqueda optimizada de órdenes
     findOrderById: function(id) {
         if (!id || !Avika.data || !Array.isArray(Avika.data.pendingOrders)) {

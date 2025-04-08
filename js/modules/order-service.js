@@ -1091,6 +1091,7 @@ isElementInViewport: function(el) {
         return Avika.ui.isElementInViewport(el);
     }
     
+    // Fallback en caso de que la función no esté disponible en UI controller
     // Validar que el elemento exista
     if (!el) return false;
     
