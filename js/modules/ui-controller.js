@@ -1331,10 +1331,12 @@ showNotification: function(message, type) {
                 Avika.ui.selectTicketService(this, 'para-llevar');
             };
         }
-        // Inicializar hora actual
-        var now = new Date();
-        document.getElementById('ticket-hour').value = now.getHours();
-        document.getElementById('ticket-minute').value = this.getMinutes(now.getMinutes());
+        
+       // Inicializar hora actual
+var now = new Date();
+document.getElementById('ticket-hour').value = now.getHours();
+// Reemplazar this.getMinutes con una operación directa
+document.getElementById('ticket-minute').value = now.getMinutes(); // Usar el valor directamente
         
         // Resetear lista de items
         this.state.ticketItems = [];
