@@ -1,6 +1,52 @@
 // ui-controller.js - Funciones de interfaz de usuario con soporte para subcategorías
 window.Avika = window.Avika || {};
 
+// Módulo de utilidades centralizado para funciones compartidas
+Avika.utils = Avika.utils || {
+    // Constantes de tiempo para toda la aplicación
+    TIME_CONSTANTS: {
+        TEN_MINUTES_IN_SECONDS: 600,      // 10 minutos
+        FIFTEEN_MINUTES_IN_SECONDS: 900,  // 15 minutos
+        THIRTY_MINUTES_IN_SECONDS: 1800,  // 30 minutos
+        NOTIFICATION_TIMEOUT_MS: 3000,    // 3 segundos
+        AUTO_SAVE_INTERVAL_MS: 30000,     // 30 segundos
+        TIMER_UPDATE_INTERVAL_MS: 2000    // 2 segundos
+    },
+    
+    // Funciones de validación de fechas
+    isValidDate: function(date) {
+        return date instanceof Date && !isNaN(date.getTime());
+    },
+    
+    // Funciones de acceso al DOM seguras
+    getElement: function(id) {
+        var el = document.getElementById(id);
+        if (!el) this.log.warn('Elemento no encontrado:', id);
+        return el;
+    },
+    
+    // Sistema de logging configurable
+    log: {
+        level: 'info', // 'debug', 'info', 'warn', 'error', 'none'
+        
+        debug: function(msg, ...args) {
+            if (['debug'].includes(this.level)) console.debug(msg, ...args);
+        },
+        
+        info: function(msg, ...args) {
+            if (['debug', 'info'].includes(this.level)) console.info(msg, ...args);
+        },
+        
+        warn: function(msg, ...args) {
+            if (['debug', 'info', 'warn'].includes(this.level)) console.warn(msg, ...args);
+        },
+        
+        error: function(msg, ...args) {
+            if (['debug', 'info', 'warn', 'error'].includes(this.level)) console.error(msg, ...args);
+        }
+    }
+};
+
 Avika.ui = {
     // Estado de la UI
     state: {
@@ -59,13 +105,27 @@ Avika.ui = {
         }
     },
     showNotification: function(message) {
-        var notification = document.getElementById('notification');
+        var notification = Avika.utils.getElement('notification');
+        if (!notification) {
+            Avika.utils.log.warn('Elemento de notificación no encontrado');
+            return;
+        }
+        
         notification.textContent = message;
         notification.style.display = 'block';
         
-        setTimeout(function() {
+        // Usar constante definida centralmente
+        var timeout = Avika.utils.TIME_CONSTANTS.NOTIFICATION_TIMEOUT_MS;
+        
+        // Limpiar cualquier temporizador existente para evitar solapamientos
+        if (this._notificationTimer) {
+            clearTimeout(this._notificationTimer);
+        }
+        
+        // Guardar referencia al temporizador
+        this._notificationTimer = setTimeout(function() {
             notification.style.display = 'none';
-        }, 3000);
+        }, timeout);
     },
     
     padZero: function(num) {
@@ -976,42 +1036,74 @@ Avika.ui = {
     },
     // Actualizar temporizadores de platillos en preparación
     updatePendingTimers: function() {
-        var timerCells = document.getElementById('pending-body').querySelectorAll('.timer-cell');
+        var self = this; // Guardar referencia a this para evitar problemas de contexto
+        var pendingBody = Avika.utils.getElement('pending-body');
+        if (!pendingBody) return;
+        
+        var timerCells = pendingBody.querySelectorAll('.timer-cell');
+        if (timerCells.length === 0) return;
+        
         var now = new Date(); // Calcular la hora actual una sola vez
         var visibleTimers = 0;
+        var MAX_INVISIBLE_TIMERS = 10; // Límite de temporizadores invisibles a actualizar
+        
+        // Usar constantes definidas centralmente
+        var TEN_MINUTES = Avika.utils.TIME_CONSTANTS.TEN_MINUTES_IN_SECONDS;
+        var FIFTEEN_MINUTES = Avika.utils.TIME_CONSTANTS.FIFTEEN_MINUTES_IN_SECONDS;
+        
+        // Crear un mapa de órdenes para búsqueda más eficiente
+        var orderMap = {};
+        if (Array.isArray(Avika.data.pendingOrders)) {
+            Avika.data.pendingOrders.forEach(function(order) {
+                if (order && order.id) {
+                    orderMap[order.id] = order;
+                }
+            });
+        }
         
         for (var i = 0; i < timerCells.length; i++) {
             var timerCell = timerCells[i];
             
             // Solo actualizar temporizadores visibles (mejora de rendimiento)
-            var isVisible = this.isElementInViewport(timerCell);
-            if (!isVisible && visibleTimers > 10) continue; // Limitar a 10 temporizadores invisibles
+            var isVisible = self.isElementInViewport(timerCell);
+            if (!isVisible && visibleTimers > MAX_INVISIBLE_TIMERS) continue;
             
             var orderId = timerCell.getAttribute('data-id');
             if (!orderId) continue;
             
-            // Buscar la orden por ID usando una referencia indexada (más eficiente)
-            var order = this.findOrderById(orderId);
+            // Buscar la orden usando el mapa (mucho más eficiente)
+            var order = orderMap[orderId];
             if (!order) continue;
             
             visibleTimers++;
             
-            var elapsedMillis = now - new Date(order.startTime);
+            // Validar que startTime sea una fecha válida
+            var startTime;
+            try {
+                startTime = new Date(order.startTime);
+                if (!Avika.utils.isValidDate(startTime)) throw new Error("Fecha inválida");
+            } catch (e) {
+                Avika.utils.log.warn("Formato de fecha inválido para la orden:", orderId);
+                timerCell.textContent = "--:--:--";
+                continue;
+            }
+            
+            var elapsedMillis = now - startTime;
             var elapsedSeconds = Math.floor(elapsedMillis / 1000);
             
             // Usar la función formatElapsedTime para mantener consistencia
-            timerCell.textContent = this.formatElapsedTime(elapsedSeconds);
+            timerCell.textContent = self.formatElapsedTime(elapsedSeconds);
             
             // Añadir clases de advertencia según el tiempo transcurrido
             timerCell.classList.remove('warning', 'alert');
             
             // Más de 10 minutos: advertencia
-            if (elapsedSeconds >= 600) {
+            if (elapsedSeconds >= TEN_MINUTES) {
                 timerCell.classList.add('warning');
             }
             
             // Más de 15 minutos: alerta
-            if (elapsedSeconds >= 900) {
+            if (elapsedSeconds >= FIFTEEN_MINUTES) {
                 timerCell.classList.add('alert');
             }
         }
@@ -1019,8 +1111,15 @@ Avika.ui = {
 
     // Actualizar temporizadores de reparto
     updateDeliveryTimers: function() {
-        var timerCells = document.getElementById('delivery-body').querySelectorAll('.delivery-timer');
+        var self = this; // Guardar referencia a this para evitar problemas de contexto
+        var deliveryBody = Avika.utils.getElement('delivery-body');
+        if (!deliveryBody) return;
+        
+        var timerCells = deliveryBody.querySelectorAll('.delivery-timer');
+        if (timerCells.length === 0) return;
+        
         var now = new Date();
+        var THIRTY_MINUTES = Avika.utils.TIME_CONSTANTS.THIRTY_MINUTES_IN_SECONDS;
         
         for (var i = 0; i < timerCells.length; i++) {
             var timerCell = timerCells[i];
@@ -1028,49 +1127,52 @@ Avika.ui = {
             
             if (!departureTimeStr) continue;
             
-            var departureTime = new Date(departureTimeStr);
+            // Validar formato de fecha
+            var departureTime;
+            try {
+                departureTime = new Date(departureTimeStr);
+                if (isNaN(departureTime.getTime())) {
+                    console.warn('Formato de fecha inválido:', departureTimeStr);
+                    continue;
+                }
+            } catch (e) {
+                console.warn('Error al parsear fecha:', e);
+                continue;
+            }
+            
             var elapsedMillis = now - departureTime;
             var elapsedSeconds = Math.floor(elapsedMillis / 1000);
             
             // Usar la función formatElapsedTime para mantener consistencia
-            timerCell.textContent = this.formatElapsedTime(elapsedSeconds);
+            timerCell.textContent = self.formatElapsedTime(elapsedSeconds);
             
             // Añadir clase de advertencia para tiempos largos
             timerCell.classList.remove('warning');
-            if (elapsedSeconds >= 1800) { // 30 minutos
+            if (elapsedSeconds >= THIRTY_MINUTES) {
                 timerCell.classList.add('warning');
             }
         }
     },
-    // Actualizar todos los temporizadores - Versión optimizada
-    updateAllTimers: function() {
-        // Actualizar temporizadores de platillos en preparación
-        if (Avika.data.pendingOrders.length > 0) {
-            this.updatePendingTimers();
-        }
-        
-        // Actualizar temporizadores de platillos en reparto
-        if (Avika.data.deliveryOrders.length > 0) {
-            this.updateDeliveryTimers();
-        }
-    },
-
-    // Verificar si un elemento está visible en el viewport
-    isElementInViewport: function(el) {
-        var rect = el.getBoundingClientRect();
-        return (
-            rect.top >= 0 &&
-            rect.left >= 0 &&
-            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-        );
-    },
-
+    
     // Búsqueda optimizada de órdenes
     findOrderById: function(id) {
+        if (!id || !Avika.data || !Array.isArray(Avika.data.pendingOrders)) {
+            return null;
+        }
+        
+        // Primero intentar búsqueda directa si existe un mapa de órdenes
+        if (this._orderCache && this._orderCache[id]) {
+            return this._orderCache[id];
+        }
+        
+        // Búsqueda tradicional si no hay caché
         for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            if (Avika.data.pendingOrders[i].id === id) {
-                return Avika.data.pendingOrders[i];
+            var order = Avika.data.pendingOrders[i];
+            if (order && order.id === id) {
+                // Actualizar caché para futuras búsquedas
+                if (!this._orderCache) this._orderCache = {};
+                this._orderCache[id] = order;
+                return order;
             }
         }
         return null;
@@ -2030,6 +2132,43 @@ Avika.ui = {
         var secs = seconds % 60;
         
         return this.padZero(hours) + ':' + this.padZero(minutes) + ':' + this.padZero(secs);
+    },
+    
+    // Actualizar todos los temporizadores - Versión optimizada
+    updateAllTimers: function() {
+        // Delegar a la función optimizada en orderService si está disponible
+        if (Avika.orderService && typeof Avika.orderService.updateAllTimers === 'function') {
+            return Avika.orderService.updateAllTimers();
+        }
+        
+        // Implementación de respaldo si orderService no está disponible
+        try {
+            // Verificar que los datos existen antes de actualizar
+            if (!Avika.data) {
+                if (Avika.utils && Avika.utils.log) {
+                    Avika.utils.log.warn('Avika.data no está disponible para actualizar temporizadores');
+                } else {
+                    console.warn('Avika.data no está disponible para actualizar temporizadores');
+                }
+                return;
+            }
+            
+            // Actualizar temporizadores de platillos en preparación
+            if (Array.isArray(Avika.data.pendingOrders) && Avika.data.pendingOrders.length > 0) {
+                this.updatePendingTimers();
+            }
+            
+            // Actualizar temporizadores de platillos en reparto
+            if (Array.isArray(Avika.data.deliveryOrders) && Avika.data.deliveryOrders.length > 0) {
+                this.updateDeliveryTimers();
+            }
+        } catch (error) {
+            if (Avika.utils && Avika.utils.log) {
+                Avika.utils.log.error('Error al actualizar temporizadores desde UI:', error);
+            } else {
+                console.error('Error al actualizar temporizadores desde UI:', error);
+            }
+        }
     },
 
     // Función para activar/desactivar modo ultra-compacto

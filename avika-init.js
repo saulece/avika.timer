@@ -297,13 +297,24 @@ function loadSavedData() {
         
         // Configurar actualizaciones periódicas (optimizadas)
         setInterval(function() {
-            Avika.ui.updateAllTimers();
-        }, 2000); // Actualizamos cada 2 segundos en lugar de cada segundo
+            // Usar la función optimizada de orderService para actualizar todos los temporizadores
+            if (Avika.orderService && typeof Avika.orderService.updateAllTimers === 'function') {
+                Avika.orderService.updateAllTimers();
+            } else if (Avika.ui && typeof Avika.ui.updateAllTimers === 'function') {
+                // Fallback a la función anterior si existe
+                Avika.ui.updateAllTimers();
+            }
+        }, Avika.utils && Avika.utils.TIME_CONSTANTS ? 
+           Avika.utils.TIME_CONSTANTS.TIMER_UPDATE_INTERVAL_MS : 2000); // Usar constante centralizada
         
         // Configurar autoguardado
         setInterval(function() {
-            Avika.storage.guardarDatosLocales();
-        }, Avika.config.autoSaveInterval || 30000);
+            if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+                Avika.storage.guardarDatosLocales();
+            }
+        }, Avika.utils && Avika.utils.TIME_CONSTANTS ? 
+           Avika.utils.TIME_CONSTANTS.AUTO_SAVE_INTERVAL_MS : 
+           (Avika.config.autoSaveInterval || 30000));
         
         console.log("Inicialización completa");
     }
