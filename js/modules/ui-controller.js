@@ -1369,15 +1369,14 @@ showNotification: function(message, type) {
     generateMinuteOptions: function() {
         var options = '';
         for (var i = 0; i < 60; i += 1) {
-            options += `<option value="${i}">${this.padZero(i)}</option>`;
+            // Usar padZero de utils en lugar de this.padZero
+            var paddedMinute = Avika.utils && Avika.utils.padZero ? 
+                               Avika.utils.padZero(i) : 
+                               (i < 10 ? '0' + i : i);
+            options += `<option value="${i}">${paddedMinute}</option>`;
         }
         return options;
     },
-    
-    getMinutes: function(num) {
-        return num % 60;
-    },
-    
     selectTicketService: function(button, service) {
         document.getElementById('ticket-btn-comedor').classList.remove('selected');
         document.getElementById('ticket-btn-domicilio').classList.remove('selected');
