@@ -2432,13 +2432,12 @@ Avika.ui = {
         for (var category in Avika.config.dishes) {
             var dishes = Avika.config.dishes[category];
             
-            dishes.forEach(function(dish) {
-                // Buscar en nombre y descripción del platillo
-                if ((dish.name && dish.name.toLowerCase().includes(searchText)) || 
-                    (dish.description && dish.description.toLowerCase().includes(searchText))) {
+            dishes.forEach(function(dishName) {
+                // En este caso, dishName es una cadena, no un objeto
+                if (dishName.toLowerCase().includes(searchText)) {
                     searchResults.push({
                         category: category,
-                        dish: dish
+                        dishName: dishName
                     });
                 }
             });
@@ -2446,14 +2445,9 @@ Avika.ui = {
         
         // Mostrar resultados
         if (searchResults.length > 0) {
-            // Ordenar resultados: primero los que coinciden en el nombre
+            // Ordenar resultados alfabéticamente por nombre del platillo
             searchResults.sort(function(a, b) {
-                var aNameMatch = a.dish.name && a.dish.name.toLowerCase().includes(searchText);
-                var bNameMatch = b.dish.name && b.dish.name.toLowerCase().includes(searchText);
-                
-                if (aNameMatch && !bNameMatch) return -1;
-                if (!aNameMatch && bNameMatch) return 1;
-                return 0;
+                return a.dishName.localeCompare(b.dishName);
             });
             
             // Crear botones para cada resultado
@@ -2461,7 +2455,7 @@ Avika.ui = {
                 var dishBtn = document.createElement('button');
                 dishBtn.className = 'dish-btn';
                 dishBtn.setAttribute('data-category', result.category);
-                dishBtn.setAttribute('data-dish-id', result.dish.id);
+                dishBtn.setAttribute('data-dish-name', result.dishName);
                 
                 var categoryLabel = document.createElement('span');
                 categoryLabel.className = 'category-label';
@@ -2469,7 +2463,7 @@ Avika.ui = {
                 
                 var dishName = document.createElement('span');
                 dishName.className = 'dish-name';
-                dishName.textContent = result.dish.name;
+                dishName.textContent = result.dishName;
                 
                 dishBtn.appendChild(categoryLabel);
                 dishBtn.appendChild(dishName);
@@ -2477,17 +2471,14 @@ Avika.ui = {
                 // Evento para seleccionar el platillo
                 dishBtn.onclick = function() {
                     var category = this.getAttribute('data-category');
-                    var dishId = this.getAttribute('data-dish-id');
-                    var dish = Avika.config.dishes[category].find(d => d.id === dishId);
+                    var dishNameValue = this.getAttribute('data-dish-name');
                     
-                    if (dish) {
-                        Avika.ui.state.selectedTicketItem.category = category;
-                        Avika.ui.state.selectedTicketItem.dish = dish;
-                        
-                        document.getElementById('selected-dish-name').textContent = dish.name;
-                        document.getElementById('search-results-step').style.display = 'none';
-                        document.getElementById('quantity-selection-step').style.display = 'block';
-                    }
+                    Avika.ui.state.selectedTicketItem.category = category;
+                    Avika.ui.state.selectedTicketItem.dish = dishNameValue;
+                    
+                    document.getElementById('selected-dish-name').textContent = dishNameValue;
+                    document.getElementById('search-results-step').style.display = 'none';
+                    document.getElementById('quantity-selection-step').style.display = 'block';
                 };
                 
                 resultsContainer.appendChild(dishBtn);
