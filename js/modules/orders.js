@@ -1033,13 +1033,20 @@ Avika.orders = {
         
         // Si es parte de un ticket, actualizar y mover todos los platillos del ticket
         if (order.ticketId) {
-            // Recopilar índices a eliminar (en orden descendente)
-            var indicesToRemove = [];
+            console.log("Procesando ticket completo:", order.ticketId);
             
-            // Actualizar todos los platillos del mismo ticket que estén en reparto
-            for (var i = 0; i < Avika.data.deliveryOrders.length; i++) {
-                var item = Avika.data.deliveryOrders[i];
-                if (item.ticketId === order.ticketId && item.id !== orderId) {
+            // Crear una copia del array de órdenes en reparto para evitar problemas al modificarlo
+            var deliveryOrdersCopy = Avika.data.deliveryOrders.slice();
+            var itemsToRemove = [];
+            
+            // Primero, identificar todos los platillos del mismo ticket
+            for (var i = 0; i < deliveryOrdersCopy.length; i++) {
+                var item = deliveryOrdersCopy[i];
+                
+                // Verificar si el item pertenece al mismo ticket
+                if (item.ticketId === order.ticketId) {
+                    console.log("Encontrado platillo del mismo ticket en reparto:", item.id, item.dish);
+                    
                     // Registrar entrega para este platillo
                     item.deliveryArrivalTime = arrivalTime;
                     
@@ -1083,20 +1090,21 @@ Avika.orders = {
                     Avika.data.completedOrders.unshift(item);
                     
                     // Marcar para eliminar
-                    indicesToRemove.push(i);
+                    itemsToRemove.push(item.id);
                 }
             }
             
-            // Eliminar de reparto en orden descendente
-            for (var i = indicesToRemove.length - 1; i >= 0; i--) {
-                Avika.data.deliveryOrders.splice(indicesToRemove[i], 1);
-            }
+            // Eliminar todos los platillos del mismo ticket de la sección de reparto
+            Avika.data.deliveryOrders = Avika.data.deliveryOrders.filter(function(item) {
+                return !itemsToRemove.includes(item.id);
+            });
             
             // Buscar si hay algún platillo del mismo ticket en pendientes (caso raro pero posible)
-            var pendingIndicesToRemove = [];
+            var pendingOrdersCopy = Avika.data.pendingOrders ? Avika.data.pendingOrders.slice() : [];
+            var pendingItemsToRemove = [];
             
-            for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-                var item = Avika.data.pendingOrders[i];
+            for (var i = 0; i < pendingOrdersCopy.length; i++) {
+                var item = pendingOrdersCopy[i];
                 if (item.ticketId === order.ticketId) {
                     console.warn("Se encontró un platillo del ticket en pendientes, moviendo directamente a completados");
                     
@@ -1116,18 +1124,20 @@ Avika.orders = {
                     Avika.data.completedOrders.unshift(item);
                     
                     // Marcar para eliminar de pendientes
-                    pendingIndicesToRemove.push(i);
+                    pendingItemsToRemove.push(item.id);
                 }
             }
             
-            // Eliminar de pendientes en orden descendente
-            for (var i = pendingIndicesToRemove.length - 1; i >= 0; i--) {
-                Avika.data.pendingOrders.splice(pendingIndicesToRemove[i], 1);
+            // Eliminar los platillos del mismo ticket de pendientes
+            if (Avika.data.pendingOrders && pendingItemsToRemove.length > 0) {
+                Avika.data.pendingOrders = Avika.data.pendingOrders.filter(function(item) {
+                    return !pendingItemsToRemove.includes(item.id);
+                });
             }
+        } else {
+            // Si no es parte de un ticket, simplemente eliminar la orden original de reparto
+            Avika.data.deliveryOrders.splice(orderIndex, 1);
         }
-        
-        // Eliminar la orden original de reparto
-        Avika.data.deliveryOrders.splice(orderIndex, 1);
         
         // Actualizar tablas
         if (Avika.ui) {
