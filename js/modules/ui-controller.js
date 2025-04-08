@@ -2434,7 +2434,7 @@ Avika.ui = {
             
             dishes.forEach(function(dish) {
                 // Buscar en nombre y descripción del platillo
-                if (dish.name.toLowerCase().includes(searchText) || 
+                if ((dish.name && dish.name.toLowerCase().includes(searchText)) || 
                     (dish.description && dish.description.toLowerCase().includes(searchText))) {
                     searchResults.push({
                         category: category,
@@ -2448,8 +2448,8 @@ Avika.ui = {
         if (searchResults.length > 0) {
             // Ordenar resultados: primero los que coinciden en el nombre
             searchResults.sort(function(a, b) {
-                var aNameMatch = a.dish.name.toLowerCase().includes(searchText);
-                var bNameMatch = b.dish.name.toLowerCase().includes(searchText);
+                var aNameMatch = a.dish.name && a.dish.name.toLowerCase().includes(searchText);
+                var bNameMatch = b.dish.name && b.dish.name.toLowerCase().includes(searchText);
                 
                 if (aNameMatch && !bNameMatch) return -1;
                 if (!aNameMatch && bNameMatch) return 1;
