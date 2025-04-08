@@ -443,31 +443,63 @@ Avika.stats = {
             // Agregar encabezados
             datosOrdenes.push([
                 'Platillo', 'Categoría', 'Cantidad', 'Tipo de Servicio', 
-                'Inicio', 'Fin', 'Tiempo Total', 'Salida Repartidor', 
-                'Llegada Repartidor', 'Tiempo de Entrega', 'Fecha'
+                'Inicio', 'Fin', 'Fin Cocina Caliente', 'Fin Cocina Fría', 'Tiempo Total', 'Salida Repartidor', 
+                'Llegada Repartidor', 'Tiempo de Entrega', 'Fecha', 'Combo Especial'
             ]);
             
             // Agregar cada orden completada
             ordenesAExportar.forEach(function(order) {
-                var fechaFin = new Date(order.endTime);
-                var fechaFormateada = fechaFin.getDate() + '/' + (fechaFin.getMonth() + 1) + '/' + fechaFin.getFullYear();
+                // Formatear fechas de manera segura
+                var fechaInicio = order.startTime ? new Date(order.startTime) : null;
+                var fechaFin = order.endTime ? new Date(order.endTime) : null;
+                var fechaFormateada = fechaFin ? fechaFin.getDate() + '/' + (fechaFin.getMonth() + 1) + '/' + fechaFin.getFullYear() : '-';
                 
-                // Determinar si es un combo especial (tiene registros de cocina caliente y fru00eda)
-                var esComboEspecial = order.hotKitchenFinished && order.coldKitchenFinished ? 'Su00ed' : 'No';
+                // Formatear tiempos de inicio y fin
+                var startTimeFormatted = fechaInicio ? Avika.orders.formatTime(fechaInicio) : '-';
+                var endTimeFormatted = fechaFin ? Avika.orders.formatTime(fechaFin) : '-';
+                
+                // Formatear tiempos de cocina caliente y fría
+                var hotKitchenEndTimeFormatted = order.hotKitchenEndTime ? Avika.orders.formatTime(new Date(order.hotKitchenEndTime)) : '-';
+                var coldKitchenEndTimeFormatted = order.coldKitchenEndTime ? Avika.orders.formatTime(new Date(order.coldKitchenEndTime)) : '-';
+                
+                // Calcular tiempo de preparación
+                var prepTime = '-';
+                if (order.startTime && order.endTime) {
+                    var tiempoEnSegundos = (new Date(order.endTime) - new Date(order.startTime)) / 1000;
+                    var minutos = Math.floor(tiempoEnSegundos / 60);
+                    var segundos = Math.floor(tiempoEnSegundos % 60);
+                    prepTime = Avika.ui.padZero(minutos) + ':' + Avika.ui.padZero(segundos);
+                }
+                
+                // Formatear tiempos de entrega
+                var deliveryDepartureTimeFormatted = order.deliveryDepartureTime ? Avika.orders.formatTime(new Date(order.deliveryDepartureTime)) : '-';
+                var deliveryArrivalTimeFormatted = order.deliveryArrivalTime ? Avika.orders.formatTime(new Date(order.deliveryArrivalTime)) : '-';
+                
+                // Calcular tiempo de entrega
+                var deliveryTime = '-';
+                if (order.deliveryDepartureTime && order.deliveryArrivalTime) {
+                    var tiempoEntregaSegundos = (new Date(order.deliveryArrivalTime) - new Date(order.deliveryDepartureTime)) / 1000;
+                    var minutosEntrega = Math.floor(tiempoEntregaSegundos / 60);
+                    var segundosEntrega = Math.floor(tiempoEntregaSegundos % 60);
+                    deliveryTime = Avika.ui.padZero(minutosEntrega) + ':' + Avika.ui.padZero(segundosEntrega);
+                }
+                
+                // Determinar si es un combo especial (tiene registros de cocina caliente y fría)
+                var esComboEspecial = order.hotKitchenFinished && order.coldKitchenFinished ? 'Sí' : 'No';
                 
                 datosOrdenes.push([
                     order.dish,
                     Avika.config.categoryNames[order.category],
                     order.quantity,
                     Avika.config.serviceNames[order.serviceType],
-                    order.startTimeFormatted,
-                    order.endTimeFormatted,
-                    order.hotKitchenEndTimeFormatted || '-',
-                    order.coldKitchenEndTimeFormatted || '-',
-                    order.prepTime,
-                    order.deliveryDepartureTimeFormatted || '',
-                    order.deliveryArrivalTimeFormatted || '',
-                    order.deliveryTime || '',
+                    startTimeFormatted,
+                    endTimeFormatted,
+                    hotKitchenEndTimeFormatted,
+                    coldKitchenEndTimeFormatted,
+                    prepTime,
+                    deliveryDepartureTimeFormatted,
+                    deliveryArrivalTimeFormatted,
+                    deliveryTime,
                     fechaFormateada,
                     esComboEspecial
                 ]);
