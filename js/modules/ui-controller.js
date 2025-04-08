@@ -478,8 +478,81 @@ Avika.ui = {
         
         var displayOrders = showAll ? Avika.data.completedOrders : Avika.data.completedOrders.slice(0, 5);
         
+        // Agrupar órdenes por ticketId
+        var ticketGroups = {};
+        var individualOrders = [];
+        
+        // Primero, separar órdenes por ticket
         for (var i = 0; i < displayOrders.length; i++) {
             var order = displayOrders[i];
+            if (order.ticketId) {
+                if (!ticketGroups[order.ticketId]) {
+                    ticketGroups[order.ticketId] = {
+                        orders: [],
+                        serviceType: order.serviceType
+                    };
+                }
+                ticketGroups[order.ticketId].orders.push(order);
+            } else {
+                individualOrders.push(order);
+            }
+        }
+        
+        // Función para aplicar estilos a las filas de un ticket
+        function applyTicketStyles(rows, ticketId, serviceType) {
+            var ticketColor = '';
+            
+            // Asignar color según tipo de servicio
+            if (serviceType === 'comedor') {
+                ticketColor = '#f0f8ff'; // Azul claro para comedor
+            } else if (serviceType === 'domicilio') {
+                ticketColor = '#fff0f0'; // Rojo claro para domicilio
+            } else if (serviceType === 'para-llevar') {
+                ticketColor = '#f0fff0'; // Verde claro para llevar
+            } else {
+                ticketColor = '#f5f5f5'; // Gris claro para otros
+            }
+            
+            // Aplicar estilos a cada fila
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                row.style.backgroundColor = ticketColor;
+                
+                // Primera fila del ticket
+                if (i === 0) {
+                    row.classList.add('ticket-first-row');
+                    
+                    // Añadir información del ticket en la primera fila
+                    var firstCell = row.cells[0];
+                    var ticketLabel = document.createElement('div');
+                    ticketLabel.className = 'ticket-label';
+                    ticketLabel.textContent = 'Ticket #' + ticketId.substring(ticketId.length - 5);
+                    ticketLabel.style.fontSize = '0.8em';
+                    ticketLabel.style.fontWeight = 'bold';
+                    ticketLabel.style.marginBottom = '3px';
+                    ticketLabel.style.color = '#555';
+                    
+                    // Insertar el label al principio de la celda
+                    if (firstCell.firstChild) {
+                        firstCell.insertBefore(ticketLabel, firstCell.firstChild);
+                    } else {
+                        firstCell.appendChild(ticketLabel);
+                    }
+                }
+                
+                // Última fila del ticket
+                if (i === rows.length - 1) {
+                    row.classList.add('ticket-last-row');
+                    row.style.borderBottom = '2px solid #999';
+                }
+                
+                // Añadir borde izquierdo a todas las filas del ticket
+                row.style.borderLeft = '3px solid #999';
+            }
+        }
+        
+        // Función para crear una fila para un platillo completado
+        function createCompletedRow(order) {
             var row = document.createElement('tr');
             
             // Celda del platillo
@@ -548,7 +621,33 @@ Avika.ui = {
             detailsCell.textContent = details || 'Sin detalles';
             row.appendChild(detailsCell);
             
+            return row;
+        }
+        
+        // Añadir órdenes agrupadas por ticket
+        for (var ticketId in ticketGroups) {
+            var ticketRows = [];
+            var group = ticketGroups[ticketId];
+            
+            // Crear filas para cada orden del ticket
+            for (var i = 0; i < group.orders.length; i++) {
+                var order = group.orders[i];
+                var row = createCompletedRow(order);
+                completedBody.appendChild(row);
+                ticketRows.push(row);
+            }
+            
+            // Aplicar estilos a las filas del ticket
+            applyTicketStyles(ticketRows, ticketId, group.serviceType);
+        }
+        
+        // Añadir órdenes individuales
+        for (var i = 0; i < individualOrders.length; i++) {
+            var row = createCompletedRow(individualOrders[i]);
             completedBody.appendChild(row);
+            
+            // Estilo para órdenes individuales
+            row.style.backgroundColor = '#ffffff'; // Blanco para órdenes individuales
         }
         
         // Añadir botón para limpiar historial si hay pedidos completados
@@ -620,29 +719,114 @@ Avika.ui = {
     },
     // Actualizar tabla de órdenes pendientes
     updatePendingTable: function() {
-        // Actualizar contador primero
-        document.getElementById('pending-count').textContent = Avika.data.pendingOrders.length;
-        
         var pendingBody = document.getElementById('pending-body');
-        
-        // Si no hay órdenes pendientes, limpiamos la tabla
-        if (Avika.data.pendingOrders.length === 0) {
-            pendingBody.innerHTML = '';
-            return;
-        }
-        
-        // Reconstruir la tabla completamente para evitar problemas
         pendingBody.innerHTML = '';
         
-        // Agregar todas las órdenes pendientes desde cero
+        // Agrupar órdenes por ticketId
+        var ticketGroups = {};
+        var individualOrders = [];
+        
+        // Primero, separar órdenes por ticket
         for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
             var order = Avika.data.pendingOrders[i];
-            // Crear una nueva fila para cada orden
-            var newRow = this.createOrderRow(order);
-            pendingBody.appendChild(newRow);
+            if (order.ticketId) {
+                if (!ticketGroups[order.ticketId]) {
+                    ticketGroups[order.ticketId] = {
+                        orders: [],
+                        serviceType: order.serviceType
+                    };
+                }
+                ticketGroups[order.ticketId].orders.push(order);
+            } else {
+                individualOrders.push(order);
+            }
+        }
+        
+        // Función para aplicar estilos a las filas de un ticket
+        function applyTicketStyles(rows, ticketId, serviceType) {
+            var ticketColor = '';
+            
+            // Asignar color según tipo de servicio
+            if (serviceType === 'comedor') {
+                ticketColor = '#f0f8ff'; // Azul claro para comedor
+            } else if (serviceType === 'domicilio') {
+                ticketColor = '#fff0f0'; // Rojo claro para domicilio
+            } else if (serviceType === 'para-llevar') {
+                ticketColor = '#f0fff0'; // Verde claro para llevar
+            } else {
+                ticketColor = '#f5f5f5'; // Gris claro para otros
+            }
+            
+            // Aplicar estilos a cada fila
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                row.style.backgroundColor = ticketColor;
+                
+                // Primera fila del ticket
+                if (i === 0) {
+                    row.classList.add('ticket-first-row');
+                    
+                    // Añadir información del ticket en la primera fila
+                    var firstCell = row.cells[0];
+                    var ticketLabel = document.createElement('div');
+                    ticketLabel.className = 'ticket-label';
+                    ticketLabel.textContent = 'Ticket #' + ticketId.substring(ticketId.length - 5);
+                    ticketLabel.style.fontSize = '0.8em';
+                    ticketLabel.style.fontWeight = 'bold';
+                    ticketLabel.style.marginBottom = '3px';
+                    ticketLabel.style.color = '#555';
+                    
+                    // Insertar el label al principio de la celda
+                    if (firstCell.firstChild) {
+                        firstCell.insertBefore(ticketLabel, firstCell.firstChild);
+                    } else {
+                        firstCell.appendChild(ticketLabel);
+                    }
+                }
+                
+                // Última fila del ticket
+                if (i === rows.length - 1) {
+                    row.classList.add('ticket-last-row');
+                    row.style.borderBottom = '2px solid #999';
+                }
+                
+                // Añadir borde izquierdo a todas las filas del ticket
+                row.style.borderLeft = '3px solid #999';
+            }
+        }
+        
+        // Añadir órdenes agrupadas por ticket
+        for (var ticketId in ticketGroups) {
+            var ticketRows = [];
+            var group = ticketGroups[ticketId];
+            
+            // Crear filas para cada orden del ticket
+            for (var i = 0; i < group.orders.length; i++) {
+                var order = group.orders[i];
+                var row = this.createOrderRow(order);
+                pendingBody.appendChild(row);
+                ticketRows.push(row);
+            }
+            
+            // Aplicar estilos a las filas del ticket
+            applyTicketStyles(ticketRows, ticketId, group.serviceType);
+        }
+        
+        // Añadir órdenes individuales
+        for (var i = 0; i < individualOrders.length; i++) {
+            var row = this.createOrderRow(individualOrders[i]);
+            pendingBody.appendChild(row);
+            
+            // Estilo para órdenes individuales
+            row.style.backgroundColor = '#ffffff'; // Blanco para órdenes individuales
+        }
+        
+        // Actualizar contador de órdenes pendientes
+        var pendingCount = document.getElementById('pending-count');
+        if (pendingCount) {
+            pendingCount.textContent = Avika.data.pendingOrders.length;
         }
     },
-
     // Actualizar tabla de órdenes en reparto
     updateDeliveryTable: function() {
         // Actualizar contador primero
@@ -659,13 +843,106 @@ Avika.ui = {
         // Reconstruir la tabla completamente
         deliveryBody.innerHTML = '';
         
-        // Agregar todas las órdenes en reparto desde cero
+        // Agrupar órdenes por ticketId
+        var ticketGroups = {};
+        var individualOrders = [];
+        
+        // Primero, separar órdenes por ticket
         for (var i = 0; i < Avika.data.deliveryOrders.length; i++) {
             var order = Avika.data.deliveryOrders[i];
-            var row = this.createDeliveryRow(order);
+            if (order.ticketId) {
+                if (!ticketGroups[order.ticketId]) {
+                    ticketGroups[order.ticketId] = {
+                        orders: [],
+                        serviceType: order.serviceType
+                    };
+                }
+                ticketGroups[order.ticketId].orders.push(order);
+            } else {
+                individualOrders.push(order);
+            }
+        }
+        
+        // Función para aplicar estilos a las filas de un ticket
+        function applyTicketStyles(rows, ticketId, serviceType) {
+            var ticketColor = '';
+            
+            // Asignar color según tipo de servicio
+            if (serviceType === 'comedor') {
+                ticketColor = '#f0f8ff'; // Azul claro para comedor
+            } else if (serviceType === 'domicilio') {
+                ticketColor = '#fff0f0'; // Rojo claro para domicilio
+            } else if (serviceType === 'para-llevar') {
+                ticketColor = '#f0fff0'; // Verde claro para llevar
+            } else {
+                ticketColor = '#f5f5f5'; // Gris claro para otros
+            }
+            
+            // Aplicar estilos a cada fila
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                row.style.backgroundColor = ticketColor;
+                
+                // Primera fila del ticket
+                if (i === 0) {
+                    row.classList.add('ticket-first-row');
+                    
+                    // Añadir información del ticket en la primera fila
+                    var firstCell = row.cells[0];
+                    var ticketLabel = document.createElement('div');
+                    ticketLabel.className = 'ticket-label';
+                    ticketLabel.textContent = 'Ticket #' + ticketId.substring(ticketId.length - 5);
+                    ticketLabel.style.fontSize = '0.8em';
+                    ticketLabel.style.fontWeight = 'bold';
+                    ticketLabel.style.marginBottom = '3px';
+                    ticketLabel.style.color = '#555';
+                    
+                    // Insertar el label al principio de la celda
+                    if (firstCell.firstChild) {
+                        firstCell.insertBefore(ticketLabel, firstCell.firstChild);
+                    } else {
+                        firstCell.appendChild(ticketLabel);
+                    }
+                }
+                
+                // Última fila del ticket
+                if (i === rows.length - 1) {
+                    row.classList.add('ticket-last-row');
+                    row.style.borderBottom = '2px solid #999';
+                }
+                
+                // Añadir borde izquierdo a todas las filas del ticket
+                row.style.borderLeft = '3px solid #999';
+            }
+        }
+        
+        // Añadir órdenes agrupadas por ticket
+        for (var ticketId in ticketGroups) {
+            var ticketRows = [];
+            var group = ticketGroups[ticketId];
+            
+            // Crear filas para cada orden del ticket
+            for (var i = 0; i < group.orders.length; i++) {
+                var order = group.orders[i];
+                var row = this.createDeliveryRow(order);
+                deliveryBody.appendChild(row);
+                ticketRows.push(row);
+            }
+            
+            // Aplicar estilos a las filas del ticket
+            applyTicketStyles(ticketRows, ticketId, group.serviceType);
+        }
+        
+        // Añadir órdenes individuales
+        for (var i = 0; i < individualOrders.length; i++) {
+            var row = this.createDeliveryRow(individualOrders[i]);
             deliveryBody.appendChild(row);
+            
+            // Estilo para órdenes individuales
+            row.style.backgroundColor = '#ffffff'; // Blanco para órdenes individuales
         }
     },
+    
     // Crear fila para una orden en reparto
     createDeliveryRow: function(order) {
         var row = document.createElement('tr');
