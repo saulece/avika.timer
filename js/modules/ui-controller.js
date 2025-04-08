@@ -104,42 +104,55 @@ Avika.ui = {
             console.error("Sección no encontrada:", sectionId);
         }
     },
-    showNotification: function(message) {
-        var notification = Avika.utils.getElement('notification');
-        if (!notification) {
-            Avika.utils.log.warn('Elemento de notificación no encontrado');
-            return;
-        }
-        
-        notification.textContent = message;
-        notification.style.display = 'block';
-        
-        // Usar constante definida centralmente
-        var timeout = Avika.utils.TIME_CONSTANTS.NOTIFICATION_TIMEOUT_MS;
-        
-        // Limpiar cualquier temporizador existente para evitar solapamientos
-        if (this._notificationTimer) {
-            clearTimeout(this._notificationTimer);
-        }
-        
-        // Guardar referencia al temporizador
-        this._notificationTimer = setTimeout(function() {
-            notification.style.display = 'none';
-        }, timeout);
-    },
+    // Función mejorada para mostrar notificaciones con tipos
+showNotification: function(message, type) {
+    var notification = Avika.utils.getElement('notification');
+    if (!notification) {
+        Avika.utils.log.warn('Elemento de notificación no encontrado');
+        return;
+    }
     
-    padZero: function(num) {
-        return (num < 10 ? '0' : '') + num;
-    },
-
-    formatTime: function(date) {
-        if (!date) return '--:--:--';
+    // Eliminar clases anteriores
+    notification.className = '';
+    notification.classList.add('notification');
+    
+    // Añadir clase según el tipo
+    type = type || 'info'; // Tipos: 'info', 'success', 'warning', 'error'
+    notification.classList.add('notification-' + type);
+    
+    // Establecer el mensaje
+    notification.textContent = message;
+    
+    // Mostrar con animación
+    notification.style.display = 'block';
+    notification.style.opacity = '0';
+    
+    // Animación de entrada
+    setTimeout(function() {
+        notification.style.opacity = '1';
+        notification.style.transform = 'translateY(0)';
+    }, 10);
+    
+    // Usar constante definida centralmente
+    var timeout = Avika.utils.TIME_CONSTANTS.NOTIFICATION_TIMEOUT_MS;
+    
+    // Limpiar cualquier temporizador existente para evitar solapamientos
+    if (this._notificationTimer) {
+        clearTimeout(this._notificationTimer);
+    }
+    
+    // Guardar referencia al temporizador
+    this._notificationTimer = setTimeout(function() {
+        // Animación de salida
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateY(20px)';
         
-        var hours = this.padZero(date.getHours());
-        var minutes = this.padZero(date.getMinutes());
-        var seconds = this.padZero(date.getSeconds());
-        return hours + ':' + minutes + ':' + seconds;
-    },
+        // Ocultar después de la animación
+        setTimeout(function() {
+            notification.style.display = 'none';
+        }, 300);
+    }, timeout);
+},
     
     // Función para manejar subcategorías
     selectCategory: function(category) {

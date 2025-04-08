@@ -2012,3 +2012,55 @@ tr:hover td {
 .back-to-categories:hover {
     transform: translateX(-3px);
 }
+/* Notificaciones mejoradas */
+.notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    max-width: 350px;
+    z-index: 1000;
+    display: none;
+    font-weight: 500;
+    transition: opacity 0.3s, transform 0.3s;
+    transform: translateY(20px);
+}
+
+.notification-info {
+    background-color: var(--notification-bg);
+    color: white;
+    border-left: 4px solid #27ae60;
+}
+
+.notification-success {
+    background-color: #27ae60;
+    color: white;
+    border-left: 4px solid #219653;
+}
+
+.notification-warning {
+    background-color: #f39c12;
+    color: white;
+    border-left: 4px solid #d35400;
+}
+
+.notification-error {
+    background-color: #e74c3c;
+    color: white;
+    border-left: 4px solid #c0392b;
+}
+
+@media (max-width: 768px) {
+    .notification {
+        max-width: 90%;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        right: auto;
+    }
+    
+    .notification.show {
+        transform: translateX(-50%) translateY(0);
+    }
+}
