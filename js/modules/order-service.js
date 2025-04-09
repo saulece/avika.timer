@@ -501,5 +501,77 @@ Avika.orderService = {
         };
         
         return serviceTypes[serviceType] || serviceType;
+    },
+    
+    // Función para guardar un ticket completo con múltiples platillos
+    saveTicket: function(items, serviceType, notes, deliveryTime) {
+        console.log("Guardando ticket con", items.length, "platillos");
+        
+        // Validar parámetros
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            console.error("No hay platillos para guardar");
+            return false;
+        }
+        
+        // Verificar que Avika.data existe y está inicializado
+        if (!Avika.data) {
+            Avika.data = {};
+            console.warn('Avika.data no existe, inicializando objeto vacío');
+        }
+        
+        // Verificar que pendingOrders existe
+        if (!Avika.data.pendingOrders) {
+            Avika.data.pendingOrders = [];
+        }
+        
+        try {
+            // Generar un ID único para el ticket
+            var ticketId = new Date().getTime().toString() + Math.floor(Math.random() * 1000);
+            var now = new Date();
+            
+            // Crear órdenes para cada platillo del ticket
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                
+                // Crear la orden
+                var order = {
+                    id: now.getTime().toString() + Math.floor(Math.random() * 1000) + i,
+                    ticketId: ticketId,
+                    dish: item.dish,
+                    category: item.category,
+                    categoryDisplay: item.categoryDisplay || Avika.config.categoryNames[item.category],
+                    quantity: item.quantity || 1,
+                    customizations: item.customizations || [],
+                    serviceType: serviceType || 'comedor',
+                    notes: notes || '',
+                    startTime: now,
+                    startTimeFormatted: this.formatTime(now),
+                    isSpecialCombo: item.isSpecialCombo || false,
+                    finished: false
+                };
+                
+                // Si es un combo especial, inicializar estados de cocinas
+                if (item.isSpecialCombo) {
+                    order.hotKitchenFinished = false;
+                    order.coldKitchenFinished = false;
+                }
+                
+                // Agregar a órdenes pendientes
+                Avika.data.pendingOrders.push(order);
+            }
+            
+            // Limpiar caché de búsqueda
+            this._orderCache = {};
+            
+            // Guardar datos
+            if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+                Avika.storage.guardarDatosLocales();
+            }
+            
+            return true;
+        } catch (error) {
+            console.error("Error al guardar ticket:", error);
+            return false;
+        }
     }
 };
