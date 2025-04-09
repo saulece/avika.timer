@@ -660,29 +660,11 @@ Avika.stats = {
         return peakHour;
     },
 
-    // Función para renderizar gráfico de estadísticas
+    // Función para renderizar gráfico de estadísticas (desactivada para evitar errores)
     renderStatisticsChart: function(data, labels, chartId) {
-        const ctx = document.getElementById(chartId).getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Order Count',
-                    data: data,
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
+        // Función desactivada para evitar errores con elementos canvas inexistentes
+        console.log('Renderizado de gráficos desactivado');
+        return;
     },
 
     // Función para calcular tiempo promedio de servicio por día de la semana
@@ -701,6 +683,12 @@ Avika.stats = {
 
     // Función para mejorar estadísticas
     enhanceStatistics: function() {
+        // Verificar si hay órdenes completadas
+        if (!Avika.data || !Avika.data.completedOrders || Avika.data.completedOrders.length === 0) {
+            console.log('No hay órdenes completadas para calcular estadísticas');
+            return;
+        }
+        
         const completedOrders = Avika.data.completedOrders;
         const filteredOrders = Avika.stats.filterOrdersByTime(completedOrders, new Date('2025-04-01'), new Date('2025-04-07'));
         const peakHour = Avika.stats.calculatePeakHours(filteredOrders);
@@ -708,11 +696,7 @@ Avika.stats = {
 
         console.log('Peak Hour:', peakHour);
         console.log('Average Service Times by Day:', averageServiceTimes);
-
-        // Render a chart for visualization
-        Avika.stats.renderStatisticsChart(averageServiceTimes, ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], 'serviceTimeChart');
+        
+        // Ya no intentamos renderizar gráficos
     }
 };
-
-// Llamar a la función para mejorar estadísticas
-Avika.stats.enhanceStatistics();
