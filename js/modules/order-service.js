@@ -414,18 +414,71 @@ Avika.orderService = {
                     }
                 }
                 
-                // Si es a domicilio o para llevar, gestionar transición
+                // Determinar el flujo según el tipo de servicio
                 if (ticketStatus.serviceType === 'domicilio' || ticketStatus.serviceType === 'para-llevar') {
+                    // Para domicilio o para llevar, mostrar botón de registrar salida
                     console.log("Ticket a domicilio o para llevar listo para reparto");
-                    
-                    // Forzar actualización de la tabla para mostrar botones de entrega
                     this.updatePendingTable();
+                } 
+                else if (ticketStatus.serviceType === 'ordena-espera' || ticketStatus.serviceType === 'comedor') {
+                    // Para ordena y espera o comedor, mover directamente a completados
+                    console.log("Ticket de " + ticketStatus.serviceType + " completado, moviendo a platillos completados");
+                    
+                    // Asegurar que existe el array de completados
+                    if (!Avika.data.completedOrders) {
+                        Avika.data.completedOrders = [];
+                    }
+                    
+                    // Mover todos los platillos del ticket a completados
+                    var indicesToRemove = [];
+                    
+                    for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                        var item = Avika.data.pendingOrders[i];
+                        if (item.ticketId === ticketId) {
+                            // Configurar tiempo de finalización
+                            var endTime = new Date();
+                            item.endTime = endTime;
+                            item.endTimeFormatted = this.formatTime(endTime);
+                            
+                            // Calcular tiempo total de preparación
+                            var prepTimeMillis = endTime - new Date(item.startTime);
+                            var prepTimeSecs = Math.floor(prepTimeMillis / 1000);
+                            item.prepTime = this.formatElapsedTime(prepTimeSecs);
+                            
+                            // Mover a completados
+                            Avika.data.completedOrders.unshift(item);
+                            
+                            // Marcar para eliminar de pendientes
+                            indicesToRemove.push(i);
+                        }
+                    }
+                    
+                    // Eliminar platillos del ticket de pendientes (en orden inverso para no afectar índices)
+                    for (var i = indicesToRemove.length - 1; i >= 0; i--) {
+                        Avika.data.pendingOrders.splice(indicesToRemove[i], 1);
+                    }
+                    
+                    // Actualizar tablas
+                    this.updatePendingTable();
+                    this.updateCompletedTable();
                 }
             }
         }
         
         // Actualizar la interfaz
         this.updatePendingTable();
+        
+        // Guardar cambios
+        if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+            Avika.storage.guardarDatosLocales();
+        }
+        
+        // Mostrar notificación
+        this.showNotification('¡' + order.dish + ' marcado como listo!', 'success');
+    },
+
+// Función para finalizar una cocina fría (para combos especiales)
+finishColdKitchen: function(orderId) {
         
         // Guardar cambios
         if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
