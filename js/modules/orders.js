@@ -169,7 +169,8 @@ Avika.orders = {
         order.preparationTimeFormatted = formatElapsedTime(order.preparationTime);
         
         // Manejar el platillo según su tipo de servicio
-        if (order.serviceType === 'comedor' || order.serviceType === 'ordenar-esperar') {
+        // Los tickets de ordena y espera (para-llevar) ahora se comportan como comedor
+        if (order.serviceType === 'comedor' || order.serviceType === 'ordenar-esperar' || order.serviceType === 'para-llevar') {
             // Verificar si este platillo es parte de un ticket
             if (order.ticketId) {
                 // Verificar el estado completo del ticket
