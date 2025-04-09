@@ -170,9 +170,8 @@ Avika.orders = {
         
         // Manejar el platillo según su tipo de servicio
         // Los tickets de ordena y espera (para-llevar) ahora se comportan como comedor
-        // excepto los combos especiales que tienen dos registros de cocina
-        if (order.serviceType === 'comedor' || 
-            (order.serviceType === 'para-llevar' && (!order.isSpecialCombo || !order.ticketId))) {
+        // TODOS los tickets de ordena y espera pasan directamente a platillos completados
+        if (order.serviceType === 'comedor' || order.serviceType === 'para-llevar') {
             // Verificar si este platillo es parte de un ticket
             if (order.ticketId) {
                 // Verificar el estado completo del ticket
@@ -231,8 +230,7 @@ Avika.orders = {
                     Avika.ui.updateCompletedTable();
                 }
             }
-        } else if (order.serviceType === 'domicilio' || 
-                  (order.serviceType === 'para-llevar' && order.isSpecialCombo && order.ticketId)) {
+        } else if (order.serviceType === 'domicilio') {
             // Si todos los platillos del ticket están terminados, actualizar estado del ticket
             if (order.ticketId) {
                 // Verificar el estado completo del ticket
@@ -254,7 +252,7 @@ Avika.orders = {
                         }
                     }
                     
-                    console.log("Ticket a domicilio o para llevar listo para reparto");
+                    console.log("Ticket a domicilio listo para reparto");
                     
                     // Mover todos los items a la sección de reparto
                     if (!Avika.data.deliveryOrders) {
@@ -283,7 +281,7 @@ Avika.orders = {
                     }
                 }
             } else {
-                // Platillo individual de domicilio o para llevar
+                // Platillo individual de domicilio
                 // Marcar como listo para reparto
                 order.readyForDelivery = true;
                 order.kitchenFinished = true;
@@ -581,9 +579,8 @@ Avika.orders = {
             }
             
             if (orderIndex !== -1) {
-                if (order.serviceType === 'comedor' || 
-                    (order.serviceType === 'para-llevar' && !order.isSpecialCombo)) {
-                    // Para comedor y ordena y espera (excepto combos especiales), mover a completados
+                if (order.serviceType === 'comedor' || order.serviceType === 'para-llevar') {
+                    // Para comedor y ordena y espera, mover a completados
                     if (!Avika.data.completedOrders) {
                         Avika.data.completedOrders = [];
                     }
@@ -594,9 +591,8 @@ Avika.orders = {
                     if (Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
                         Avika.ui.updateCompletedTable();
                     }
-                } else if (order.serviceType === 'domicilio' || 
-                          (order.serviceType === 'para-llevar' && order.isSpecialCombo)) {
-                    // Para domicilio o para llevar con combos especiales, mover a reparto
+                } else if (order.serviceType === 'domicilio') {
+                    // Para domicilio, mover a reparto
                     order.readyForDelivery = true;
                     order.kitchenFinished = true;
                     order.finishTime = new Date();
@@ -648,9 +644,8 @@ Avika.orders = {
             }
             
             // Procesar los items según el tipo de servicio
-            if ((serviceType === 'comedor') || 
-                (serviceType === 'para-llevar' && !order.isSpecialCombo)) {
-                console.log("Ticket de comedor u ordena y espera (no combo especial) listo, moviendo a completados");
+            if (serviceType === 'comedor' || serviceType === 'para-llevar') {
+                console.log("Ticket de comedor u ordena y espera listo, moviendo a completados");
                 
                 // Mover todos los items a la sección de completados
                 if (!Avika.data.completedOrders) {
@@ -671,9 +666,8 @@ Avika.orders = {
                 if (Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
                     Avika.ui.updateCompletedTable();
                 }
-            } else if (serviceType === 'domicilio' || 
-                      (serviceType === 'para-llevar' && order.isSpecialCombo)) {
-                console.log("Ticket a domicilio o para llevar (combo especial) listo para reparto");
+            } else if (serviceType === 'domicilio') {
+                console.log("Ticket a domicilio listo para reparto");
                 
                 // Mover todos los items a la sección de reparto
                 if (!Avika.data.deliveryOrders) {
