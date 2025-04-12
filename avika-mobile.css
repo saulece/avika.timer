@@ -28,6 +28,14 @@
         vertical-align: top;
     }
     
+    /* Mejorar contraste de texto en encabezados */
+    th {
+        background-color: #2980b9 !important; /* Azul más oscuro para mejor contraste */
+        color: #ffffff !important; /* Blanco puro para mejor contraste */
+        font-weight: bold;
+        text-shadow: 0px 1px 1px rgba(0,0,0,0.3); /* Sombra sutil para mejorar legibilidad */
+    }
+    
     /* Mejorar la visualización de las filas */
     tr {
         border-bottom: 1px solid var(--border-color);
@@ -36,6 +44,7 @@
     /* Mejorar la visualización de las celdas */
     td {
         word-break: break-word;
+        color: #333333 !important; /* Color de texto oscuro para mejor contraste */
     }
     
     /* Ajustar ancho de columnas para móviles */
@@ -70,6 +79,20 @@
     /* Añadir espacio entre elementos en la celda del platillo */
     .dish-cell > div {
         margin-bottom: 3px;
+        color: #333333 !important; /* Asegurar contraste */
+    }
+    
+    /* Mejorar contraste para todos los textos en celdas */
+    .dish-name {
+        color: #222222 !important;
+    }
+    
+    .ticket-id {
+        color: #2980b9 !important; /* Azul más oscuro para mejor contraste */
+    }
+    
+    .dish-category, .service-type, .dish-customization, .order-notes {
+        color: #444444 !important;
     }
     
     .dish-name {
@@ -113,13 +136,35 @@
         min-width: 110px;
         border-radius: 8px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-        font-weight: 500;
+        font-weight: 600; /* Texto más grueso para mejor contraste */
+        color: #ffffff !important; /* Asegurar texto blanco en botones */
+        text-shadow: 0px 1px 1px rgba(0,0,0,0.2); /* Sombra sutil para mejorar legibilidad */
     }
     
     /* Mejorar el contraste de los botones */
     .action-btn:active {
         transform: translateY(1px);
         box-shadow: 0 0 1px rgba(0,0,0,0.2);
+    }
+    
+    /* Asegurar contraste en tipos específicos de botones */
+    .filter-btn {
+        color: #333333 !important; /* Color oscuro para botones de filtro */
+        background-color: #f0f0f0 !important;
+        border: 1px solid #cccccc;
+    }
+    
+    /* Botones específicos */
+    .action-btn.departure-btn {
+        background-color: #e67e22 !important; /* Naranja más oscuro */
+    }
+    
+    .action-btn.arrival-btn {
+        background-color: #27ae60 !important; /* Verde más oscuro */
+    }
+    
+    .action-btn.kitchen-btn {
+        background-color: #2980b9 !important; /* Azul más oscuro */
     }
     
     /* Optimizar layout de tablas en móviles */
@@ -165,6 +210,11 @@
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     
+    /* Asegurar contraste en todas las secciones */
+    .pending-orders-section h2 {
+        color: #333333 !important;
+    }
+    
     /* Mejorar encabezados de secciones */
     .pending-orders-section h2 {
         font-size: 1.3rem;
@@ -200,8 +250,10 @@
         margin-bottom: 5px;
         padding: 8px 10px;
         border-radius: 6px;
-        border: 1px solid var(--border-color);
+        border: 1px solid #cccccc; /* Borde más visible */
         background-color: #f8f8f8;
+        color: #333333 !important; /* Texto oscuro para mejor contraste */
+        font-weight: 500; /* Texto semi-negrita para mejor legibilidad */
     }
     
     .filter-select {

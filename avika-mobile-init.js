@@ -3,7 +3,60 @@ document.addEventListener('DOMContentLoaded', function() {
     // Detectar si es un dispositivo móvil
     const isMobile = window.innerWidth <= 768;
     
+    // Función para asegurar contraste de texto
+    function ensureTextContrast() {
+        // Asegurar contraste en encabezados de tabla
+        document.querySelectorAll('th').forEach(function(th) {
+            th.style.backgroundColor = '#2980b9';
+            th.style.color = '#ffffff';
+            th.style.fontWeight = 'bold';
+            th.style.textShadow = '0px 1px 1px rgba(0,0,0,0.3)';
+        });
+        
+        // Asegurar contraste en celdas
+        document.querySelectorAll('td').forEach(function(td) {
+            td.style.color = '#333333';
+        });
+        
+        // Asegurar contraste en nombres de platillos
+        document.querySelectorAll('.dish-name').forEach(function(el) {
+            el.style.color = '#222222';
+        });
+        
+        // Asegurar contraste en IDs de tickets
+        document.querySelectorAll('.ticket-id').forEach(function(el) {
+            el.style.color = '#2980b9';
+        });
+        
+        // Asegurar contraste en botones
+        document.querySelectorAll('.action-btn').forEach(function(btn) {
+            btn.style.color = '#ffffff';
+            btn.style.fontWeight = '600';
+            btn.style.textShadow = '0px 1px 1px rgba(0,0,0,0.2)';
+        });
+        
+        // Asegurar contraste en botones de filtro
+        document.querySelectorAll('.filter-btn').forEach(function(btn) {
+            btn.style.color = '#333333';
+            btn.style.backgroundColor = '#f0f0f0';
+            btn.style.border = '1px solid #cccccc';
+        });
+    }
+    
     if (isMobile) {
+        // Aplicar mejoras de contraste
+        ensureTextContrast();
+        
+        // Volver a aplicar después de cargar completamente
+        window.addEventListener('load', ensureTextContrast);
+        
+        // Volver a aplicar cuando se actualice el DOM (para elementos dinámicos)
+        const observer = new MutationObserver(function(mutations) {
+            ensureTextContrast();
+        });
+        
+        observer.observe(document.body, { childList: true, subtree: true });
+        
         // Añadir clase para identificar que estamos en móvil
         document.body.classList.add('mobile-device');
         
