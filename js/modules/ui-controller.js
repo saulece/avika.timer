@@ -622,8 +622,32 @@ Avika.ui = {
                     dishCell.appendChild(notesInfo);
                 }
             } else {
-                // En escritorio, solo el nombre del platillo
-                dishCell.textContent = order.dish + (order.quantity > 1 ? ' (' + order.quantity + ')' : '');
+                // En escritorio, mejor formato para el nombre del platillo
+                dishCell.className = 'dish-cell';
+                
+                // Nombre del platillo con mejor formato
+                var dishNameDiv = document.createElement('div');
+                dishNameDiv.className = 'dish-name';
+                
+                // Si hay cantidad mayor a 1, mostrarla
+                if (order.quantity > 1) {
+                    var quantitySpan = document.createElement('span');
+                    quantitySpan.className = 'dish-quantity';
+                    quantitySpan.textContent = order.quantity + 'x ';
+                    dishNameDiv.appendChild(quantitySpan);
+                }
+                
+                // Agregar el nombre del platillo
+                dishNameDiv.appendChild(document.createTextNode(order.dish));
+                dishCell.appendChild(dishNameDiv);
+                
+                // Si es parte de un ticket, mostrar el ID del ticket
+                if (order.ticketId) {
+                    var ticketIdDiv = document.createElement('div');
+                    ticketIdDiv.className = 'ticket-id';
+                    ticketIdDiv.textContent = 'Ticket #' + order.ticketId.substring(order.ticketId.length - 5);
+                    dishCell.appendChild(ticketIdDiv);
+                }
             }
             row.appendChild(dishCell);
             
@@ -672,48 +696,77 @@ Avika.ui = {
             if (!isMobile) {
                 // Celda de detalles (solo en escritorio)
                 var detailsCell = document.createElement('td');
-                var details = '';
+                detailsCell.className = 'details-container';
                 
-                // Construir los detalles correctamente
+                // Tipo de servicio
                 if (order.serviceType) {
-                    details += Avika.config.serviceNames[order.serviceType] || order.serviceType;
+                    var serviceDiv = document.createElement('div');
+                    serviceDiv.className = 'service-type';
+                    serviceDiv.textContent = Avika.config.serviceNames[order.serviceType] || order.serviceType;
+                    if (order.isSpecialCombo) {
+                        serviceDiv.textContent += ' (Combo Especial)';
+                    }
+                    detailsCell.appendChild(serviceDiv);
                 }
                 
-                if (order.ticketId) {
-                    details += ' | Ticket #' + order.ticketId.substring(order.ticketId.length - 5);
-                }
-                
+                // Categoría
                 if (order.category) {
-                    details += ' | ' + (Avika.config.categoryNames[order.category] || order.category);
+                    var categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'dish-category';
+                    categoryDiv.textContent = Avika.config.categoryNames[order.category] || order.category;
+                    detailsCell.appendChild(categoryDiv);
                 }
                 
-                if (order.isSpecialCombo) {
-                    details += ' (Combo Especial)';
-                }
-                
+                // Personalizaciones
                 if (order.customizations && order.customizations.length > 0) {
-                    details += ' | ' + order.customizations.map(function(code) {
+                    var customDiv = document.createElement('div');
+                    customDiv.className = 'dish-customization';
+                    customDiv.textContent = order.customizations.map(function(code) {
                         return Avika.config.customizationOptions[code] || code;
                     }).join(', ');
+                    detailsCell.appendChild(customDiv);
                 }
                 
-                if (order.notes) {
-                    details += ' | Notas: ' + order.notes;
+                // Notas
+                if (order.notes && order.notes.trim() !== '') {
+                    var notesDiv = document.createElement('div');
+                    notesDiv.className = 'order-notes';
+                    notesDiv.textContent = order.notes;
+                    detailsCell.appendChild(notesDiv);
                 }
                 
-                if (order.deliveryDepartureTimeFormatted) {
-                    details += ' | Salida: ' + order.deliveryDepartureTimeFormatted;
-                }
-                
-                if (order.deliveryArrivalTimeFormatted) {
-                    details += ' | Entrega: ' + order.deliveryArrivalTimeFormatted;
+                // Información de entrega
+                if (order.deliveryDepartureTimeFormatted || order.deliveryArrivalTimeFormatted) {
+                    var deliveryDiv = document.createElement('div');
+                    deliveryDiv.className = 'dish-details';
+                    var deliveryText = '';
+                    
+                    if (order.deliveryDepartureTimeFormatted) {
+                        deliveryText += 'Salida: ' + order.deliveryDepartureTimeFormatted;
+                    }
+                    
+                    if (order.deliveryArrivalTimeFormatted) {
+                        if (deliveryText) deliveryText += ' | ';
+                        deliveryText += 'Entrega: ' + order.deliveryArrivalTimeFormatted;
+                    }
                     
                     if (order.deliveryTimeFormatted) {
-                        details += ' | Tiempo de entrega: ' + order.deliveryTimeFormatted;
+                        if (deliveryText) deliveryText += ' | ';
+                        deliveryText += 'Tiempo: ' + order.deliveryTimeFormatted;
                     }
+                    
+                    deliveryDiv.textContent = deliveryText;
+                    detailsCell.appendChild(deliveryDiv);
                 }
                 
-                detailsCell.textContent = details || 'Sin detalles';
+                // Si no hay detalles, mostrar un mensaje
+                if (detailsCell.children.length === 0) {
+                    var noDetailsDiv = document.createElement('div');
+                    noDetailsDiv.className = 'dish-details';
+                    noDetailsDiv.textContent = 'Sin detalles';
+                    detailsCell.appendChild(noDetailsDiv);
+                }
+                
                 row.appendChild(detailsCell);
             }
             
@@ -1045,7 +1098,40 @@ Avika.ui = {
         
         // Celda del platillo
         var dishCell = document.createElement('td');
-        dishCell.textContent = order.dish + (order.quantity > 1 ? ' (' + order.quantity + ')' : '');
+        dishCell.className = 'dish-cell';
+        
+        // Nombre del platillo con mejor formato
+        var dishNameDiv = document.createElement('div');
+        dishNameDiv.className = 'dish-name';
+        
+        // Si hay cantidad mayor a 1, mostrarla
+        if (order.quantity > 1) {
+            var quantitySpan = document.createElement('span');
+            quantitySpan.className = 'dish-quantity';
+            quantitySpan.textContent = order.quantity + 'x ';
+            dishNameDiv.appendChild(quantitySpan);
+        }
+        
+        // Agregar el nombre del platillo
+        dishNameDiv.appendChild(document.createTextNode(order.dish));
+        dishCell.appendChild(dishNameDiv);
+        
+        // Si es parte de un ticket, mostrar el ID del ticket
+        if (order.ticketId) {
+            var ticketIdDiv = document.createElement('div');
+            ticketIdDiv.className = 'ticket-id';
+            ticketIdDiv.textContent = 'Ticket #' + order.ticketId.substring(order.ticketId.length - 5);
+            dishCell.appendChild(ticketIdDiv);
+        }
+        
+        // Categoría del platillo si está disponible
+        if (order.category) {
+            var categoryDiv = document.createElement('div');
+            categoryDiv.className = 'dish-category';
+            categoryDiv.textContent = Avika.config.categoryNames[order.category] || order.category;
+            dishCell.appendChild(categoryDiv);
+        }
+        
         row.appendChild(dishCell);
         
         // Celda de hora de salida (o estado "Listo para salida")
@@ -1078,29 +1164,32 @@ Avika.ui = {
         
         // Celda de detalles
         var detailsCell = document.createElement('td');
-        var detailsText = '';
-
-        // Añadir información de categoría
-        detailsText += Avika.config.categoryNames[order.category] || order.category;
-
-        // Añadir personalizaciones si existen
-        if (order.customizations && order.customizations.length) {
-            detailsText += ', ' + order.customizations.map(function(code) {
+        detailsCell.className = 'details-container';
+        
+        // Tipo de servicio
+        var serviceDiv = document.createElement('div');
+        serviceDiv.className = 'service-type';
+        serviceDiv.textContent = Avika.config.serviceNames[order.serviceType] || order.serviceType;
+        detailsCell.appendChild(serviceDiv);
+        
+        // Personalizaciones
+        if (order.customizations && order.customizations.length > 0) {
+            var customDiv = document.createElement('div');
+            customDiv.className = 'dish-customization';
+            customDiv.textContent = order.customizations.map(function(code) {
                 return Avika.config.customizationOptions[code] || code;
             }).join(', ');
+            detailsCell.appendChild(customDiv);
         }
-
-        // Añadir notas si existen
-        if (order.notes) {
-            detailsText += '<br><span class="notes">' + order.notes + '</span>';
+        
+        // Notas
+        if (order.notes && order.notes.trim() !== '') {
+            var notesDiv = document.createElement('div');
+            notesDiv.className = 'order-notes';
+            notesDiv.textContent = order.notes;
+            detailsCell.appendChild(notesDiv);
         }
-
-        // Añadir información del ticket
-        if (order.ticketId) {
-            detailsText += '<br><span class="ticket-info">Ticket #' + order.ticketId.substring(order.ticketId.length - 5) + '</span>';
-        }
-
-        detailsCell.innerHTML = detailsText;
+        
         row.appendChild(detailsCell);
 
         // Celda de acción
@@ -1135,7 +1224,40 @@ Avika.ui = {
         
         // Celda del platillo
         var dishCell = document.createElement('td');
-        dishCell.textContent = order.dish + (order.quantity > 1 ? ' (' + order.quantity + ')' : '');
+        dishCell.className = 'dish-cell';
+        
+        // Nombre del platillo con mejor formato
+        var dishNameDiv = document.createElement('div');
+        dishNameDiv.className = 'dish-name';
+        
+        // Si hay cantidad mayor a 1, mostrarla
+        if (order.quantity > 1) {
+            var quantitySpan = document.createElement('span');
+            quantitySpan.className = 'dish-quantity';
+            quantitySpan.textContent = order.quantity + 'x ';
+            dishNameDiv.appendChild(quantitySpan);
+        }
+        
+        // Agregar el nombre del platillo
+        dishNameDiv.appendChild(document.createTextNode(order.dish));
+        dishCell.appendChild(dishNameDiv);
+        
+        // Si es parte de un ticket, mostrar el ID del ticket
+        if (order.ticketId) {
+            var ticketIdDiv = document.createElement('div');
+            ticketIdDiv.className = 'ticket-id';
+            ticketIdDiv.textContent = 'Ticket #' + order.ticketId.substring(order.ticketId.length - 5);
+            dishCell.appendChild(ticketIdDiv);
+        }
+        
+        // Categoría del platillo si está disponible
+        if (order.categoryDisplay) {
+            var categoryDiv = document.createElement('div');
+            categoryDiv.className = 'dish-category';
+            categoryDiv.textContent = order.categoryDisplay;
+            dishCell.appendChild(categoryDiv);
+        }
+        
         row.appendChild(dishCell);
         
         // Celda de inicio
@@ -1152,30 +1274,32 @@ Avika.ui = {
         
         // Celda de detalles
         var detailsCell = document.createElement('td');
+        detailsCell.className = 'details-container';
         
-        var detailsText = '';
+        // Tipo de servicio
+        var serviceDiv = document.createElement('div');
+        serviceDiv.className = 'service-type';
+        serviceDiv.textContent = Avika.config.serviceNames[order.serviceType] || order.serviceType;
+        detailsCell.appendChild(serviceDiv);
         
-        // Añadir información de servicio
-        detailsText += Avika.config.serviceNames[order.serviceType] || order.serviceType;
-        
-        // Añadir personalizaciones si existen
-        if (order.customizations && order.customizations.length) {
-            detailsText += ', ' + order.customizations.map(function(code) {
+        // Personalizaciones
+        if (order.customizations && order.customizations.length > 0) {
+            var customDiv = document.createElement('div');
+            customDiv.className = 'dish-customization';
+            customDiv.textContent = order.customizations.map(function(code) {
                 return Avika.config.customizationOptions[code] || code;
             }).join(', ');
+            detailsCell.appendChild(customDiv);
         }
         
-        // Añadir notas si existen
-        if (order.notes) {
-            detailsText += '<br><span class="notes">' + order.notes + '</span>';
+        // Notas
+        if (order.notes && order.notes.trim() !== '') {
+            var notesDiv = document.createElement('div');
+            notesDiv.className = 'order-notes';
+            notesDiv.textContent = order.notes;
+            detailsCell.appendChild(notesDiv);
         }
         
-        // Añadir información del ticket
-        if (order.ticketId) {
-            detailsText += '<br><span class="ticket-info">Ticket #' + order.ticketId.substring(order.ticketId.length - 5) + '</span>';
-        }
-        
-        detailsCell.innerHTML = detailsText;
         row.appendChild(detailsCell);
         
         // Celda de acciones
