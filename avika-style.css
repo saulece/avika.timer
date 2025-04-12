@@ -2134,6 +2134,60 @@ tr:hover td {
     margin-bottom: 2px;
 }
 
+/* Estilos para platillos en preparación - Solución simplificada */
+.order-row {
+    border-left: 3px solid transparent;
+    transition: background-color 0.2s ease;
+}
+
+/* Colores específicos por tipo de servicio */
+.service-type-comedor {
+    background-color: #e6f2ff !important;
+    border-left-color: #0066cc !important;
+}
+
+.service-type-domicilio {
+    background-color: #ffe6e6 !important;
+    border-left-color: #cc0000 !important;
+}
+
+.service-type-para-llevar {
+    background-color: #e6ffe6 !important;
+    border-left-color: #00cc00 !important;
+}
+
+.service-type-ordena-y-espera,
+.service-type-ordenar-esperar {
+    background-color: #fff9e6 !important;
+    border-left-color: #cccc00 !important;
+}
+
+/* Estilos para filas simplificadas */
+.simplified-row {
+    height: auto !important;
+    padding: 5px 0 !important;
+}
+
+.simplified-row td {
+    padding: 5px 8px !important;
+    vertical-align: middle !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.simplified-row .service-cell {
+    font-weight: bold !important;
+    width: 100px !important;
+    max-width: 100px !important;
+    color: #333 !important;
+}
+
+.simplified-row .dish-cell {
+    font-weight: normal !important;
+    color: #333 !important;
+}
+
 /* Estilos específicos para dispositivos móviles */
 @media screen and (max-width: 768px) {
     body {
@@ -2162,6 +2216,41 @@ tr:hover td {
     .dish-cell {
         padding: 8px 5px 5px 5px;
         min-width: 100px;
+    }
+    
+    /* Estilos específicos para filas simplificadas en móviles */
+    .simplified-row {
+        height: auto !important;
+        padding: 3px 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+    }
+    
+    .simplified-row td {
+        padding: 4px 6px !important;
+        border: none !important;
+        box-shadow: none !important;
+        background-image: none !important;
+    }
+    
+    /* Estilo para el botón de finalizar */
+    .finish-button.btn.btn-success {
+        background-color: #2ecc71;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 0.9em;
+        cursor: pointer;
+    }
+    
+    .simplified-row .service-cell {
+        font-size: 0.9em !important;
+        width: 90px !important;
+    }
+    
+    .simplified-row .dish-cell {
+        font-size: 0.9em !important;
     }
     
     .dish-name {

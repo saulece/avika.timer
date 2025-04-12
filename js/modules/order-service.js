@@ -436,7 +436,7 @@ Avika.orderService = {
         for (var i = 0; i < sortedOrders.length; i++) {
             var order = sortedOrders[i];
             
-            // Crear fila
+            // Crear fila con enfoque simplificado
             var row = document.createElement('tr');
             row.className = 'order-row simplified-row';
             row.setAttribute('data-id', order.id);
@@ -447,7 +447,9 @@ Avika.orderService = {
             }
             
             // Aplicar clase según tipo de servicio para estabilizar colores
-            row.classList.add('service-type-' + order.serviceType);
+            // Asegurarse de que el tipo de servicio sea válido
+            var serviceType = order.serviceType || 'comedor';
+            row.classList.add('service-type-' + serviceType);
             
             // Crear celdas (simplificadas: solo tipo de servicio y platillo)
             var serviceCell = document.createElement('td');
@@ -461,9 +463,9 @@ Avika.orderService = {
             var actionsCell = document.createElement('td');
             actionsCell.className = 'actions-cell';
             
-            // Botón de finalizar
+            // Botón de finalizar con estilo simplificado
             var finishButton = document.createElement('button');
-            finishButton.className = 'finish-button';
+            finishButton.className = 'finish-button btn btn-success';
             finishButton.textContent = 'Finalizar';
             finishButton.setAttribute('data-id', order.id);
             finishButton.onclick = function() {
