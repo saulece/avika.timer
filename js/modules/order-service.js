@@ -422,7 +422,7 @@ Avika.orderService = {
         // Verificar que hay órdenes pendientes
         if (!Avika.data || !Avika.data.pendingOrders || Avika.data.pendingOrders.length === 0) {
             var emptyRow = document.createElement('tr');
-            emptyRow.innerHTML = '<td colspan="6" class="empty-table">No hay órdenes pendientes</td>';
+            emptyRow.innerHTML = '<td colspan="3" class="empty-table">No hay órdenes pendientes</td>';
             tableBody.appendChild(emptyRow);
             return;
         }
@@ -438,7 +438,7 @@ Avika.orderService = {
             
             // Crear fila
             var row = document.createElement('tr');
-            row.className = 'order-row';
+            row.className = 'order-row simplified-row';
             row.setAttribute('data-id', order.id);
             
             // Aplicar clase según estado
@@ -446,26 +446,17 @@ Avika.orderService = {
                 row.classList.add('finished');
             }
             
-            // Crear celdas
-            var timeCell = document.createElement('td');
-            timeCell.className = 'time-cell';
-            timeCell.textContent = order.startTimeFormatted;
+            // Aplicar clase según tipo de servicio para estabilizar colores
+            row.classList.add('service-type-' + order.serviceType);
+            
+            // Crear celdas (simplificadas: solo tipo de servicio y platillo)
+            var serviceCell = document.createElement('td');
+            serviceCell.className = 'service-cell service-type';
+            serviceCell.textContent = this.getServiceTypeDisplay(order.serviceType);
             
             var dishCell = document.createElement('td');
             dishCell.className = 'dish-cell';
             dishCell.textContent = order.dish;
-            
-            var categoryCell = document.createElement('td');
-            categoryCell.className = 'category-cell';
-            categoryCell.textContent = order.categoryDisplay || order.category;
-            
-            var serviceCell = document.createElement('td');
-            serviceCell.className = 'service-cell';
-            serviceCell.textContent = this.getServiceTypeDisplay(order.serviceType);
-            
-            var notesCell = document.createElement('td');
-            notesCell.className = 'notes-cell';
-            notesCell.textContent = order.notes || '-';
             
             var actionsCell = document.createElement('td');
             actionsCell.className = 'actions-cell';
@@ -483,12 +474,9 @@ Avika.orderService = {
             // Agregar botón a celda de acciones
             actionsCell.appendChild(finishButton);
             
-            // Agregar celdas a fila
-            row.appendChild(timeCell);
-            row.appendChild(dishCell);
-            row.appendChild(categoryCell);
+            // Agregar celdas a fila (solo las necesarias)
             row.appendChild(serviceCell);
-            row.appendChild(notesCell);
+            row.appendChild(dishCell);
             row.appendChild(actionsCell);
             
             // Agregar fila a tabla

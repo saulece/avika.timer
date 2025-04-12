@@ -6,7 +6,18 @@ document.addEventListener('DOMContentLoaded', function() {
         'domicilio': '#ffe6e6', // Rojo más consistente para domicilio
         'para-llevar': '#e6ffe6', // Verde más consistente para llevar
         'ordena-y-espera': '#fff9e6', // Amarillo claro para ordena y espera
+        'ordenar-esperar': '#fff9e6', // Alias para ordena y espera
         'otro': '#f5f5f5' // Gris claro para otros
+    };
+    
+    // Colores de borde para cada tipo de servicio
+    const BORDER_COLORS = {
+        'comedor': '#0066cc',
+        'domicilio': '#cc0000',
+        'para-llevar': '#00cc00',
+        'ordena-y-espera': '#cccc00',
+        'ordenar-esperar': '#cccc00',
+        'otro': '#999999'
     };
 
     // Función para aplicar colores consistentes a los tickets
@@ -40,6 +51,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             currentServiceType = 'para-llevar';
                         } else if (serviceText.includes('ordena y espera')) {
                             currentServiceType = 'ordena-y-espera';
+                        } else if (serviceText.includes('ordenar') && serviceText.includes('esperar')) {
+                            currentServiceType = 'ordenar-esperar';
                         } else {
                             currentServiceType = 'otro';
                         }
@@ -51,6 +64,29 @@ document.addEventListener('DOMContentLoaded', function() {
                             rows: [],
                             serviceType: currentServiceType
                         };
+                    }
+                }
+            }
+            
+            // Verificar si la fila tiene una clase de tipo de servicio directa (para filas simplificadas)
+            if (!currentTicketId && !currentServiceType) {
+                for (const className of row.classList) {
+                    if (className.startsWith('service-type-')) {
+                        const serviceType = className.replace('service-type-', '');
+                        // Crear un ID temporal basado en la posición de la fila
+                        const tempId = 'simplified-' + Array.from(rows).indexOf(row);
+                        
+                        if (!ticketGroups[tempId]) {
+                            ticketGroups[tempId] = {
+                                rows: [row],
+                                serviceType: serviceType
+                            };
+                        } else {
+                            ticketGroups[tempId].rows.push(row);
+                        }
+                        
+                        // No seguir procesando esta fila
+                        return;
                     }
                 }
             }
@@ -72,6 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
         for (const ticketId in ticketGroups) {
             const group = ticketGroups[ticketId];
             const color = TICKET_COLORS[group.serviceType] || TICKET_COLORS.otro;
+            const borderColor = BORDER_COLORS[group.serviceType] || BORDER_COLORS.otro;
             
             // Aplicar color a todas las filas del ticket
             group.rows.forEach((row, index) => {
@@ -84,11 +121,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 if (index === group.rows.length - 1) {
                     row.classList.add('ticket-last-row');
-                    row.style.borderBottom = '2px solid #999';
+                    row.style.borderBottom = '2px solid ' + borderColor;
                 }
                 
-                // Añadir borde izquierdo a todas las filas del ticket
-                row.style.borderLeft = '3px solid #999';
+                // Añadir borde izquierdo a todas las filas del ticket con el color correspondiente
+                row.style.borderLeft = '3px solid ' + borderColor;
+                
+                // Asegurar que las clases de tipo de servicio estén presentes para CSS
+                if (!row.classList.contains('service-type-' + group.serviceType)) {
+                    row.classList.add('service-type-' + group.serviceType);
+                }
             });
         }
     }
