@@ -2,9 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Avika - Temporizador de Sushi</title>
     <link rel="stylesheet" href="avika-style.css">
+    <link rel="stylesheet" href="avika-mobile.css">
 </head>
 <body>
     <div class="loading-indicator"></div>
@@ -50,13 +51,13 @@
                     <button id="btn-apply-filter" class="filter-btn">Aplicar filtros</button>
                     <button id="btn-clear-filter" class="filter-btn">Limpiar filtros</button>
                 </div>
-                <table>
+                <table class="mobile-optimized-table">
                     <thead>
                         <tr>
                             <th>Platillo</th>
-                            <th>Inicio</th>
+                            <th class="mobile-hide-sm">Inicio</th>
                             <th>Tiempo</th> <!-- Modificado para acortar el texto -->
-                            <th>Detalles</th>
+                            <th class="mobile-hide-sm">Detalles</th>
                             <th>Acción</th>
                         </tr>
                     </thead>
@@ -79,13 +80,13 @@
         <button id="btn-apply-delivery-filter" class="filter-btn">Aplicar filtro</button>
         <button id="btn-clear-delivery-filter" class="filter-btn">Limpiar filtro</button>
     </div>
-    <table>
+    <table class="mobile-optimized-table">
         <thead>
             <tr>
                 <th>Platillo</th>
-                <th>Salida</th>
-                <th>Tiempo en reparto</th>
-                <th>Detalles</th>
+                <th class="mobile-hide-sm">Salida</th>
+                <th>Tiempo</th>
+                <th class="mobile-hide-sm">Detalles</th>
                 <th>Acción</th>
             </tr>
         </thead>
@@ -103,13 +104,13 @@
                     <button id="btn-show-stats" class="filter-btn">Ver promedios</button>
                     <button id="btn-clear-history" class="filter-btn">Limpiar historial</button>
                 </div>
-                <table>
+                <table class="mobile-optimized-table" id="completed-table">
                     <thead id="completed-header">
                         <tr>
-                            <th style="width: 20%">Platillo</th>
-                            <th style="width: 15%">Inicio</th>
-                            <th style="width: 15%">Fin</th>
-                            <th style="width: 50%">Detalles</th>
+                            <th>Platillo</th>
+                            <th class="mobile-hide-sm">Inicio</th>
+                            <th>Fin</th>
+                            <th class="mobile-hide-sm">Detalles</th>
                         </tr>
                     </thead>
                     <tbody id="completed-body">
@@ -198,6 +199,7 @@
     <script src="js/modules/orders.js"></script>
     <script src="js/modules/storage.js"></script>
     <script src="js/modules/stats.js"></script>
+    <script src="avika-mobile-init.js"></script>
     <script src="avika-init.js"></script>
 </body>
 </html>

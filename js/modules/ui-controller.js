@@ -1095,6 +1095,7 @@ Avika.ui = {
     // Crear fila para una orden en reparto
     createDeliveryRow: function(order) {
         var row = document.createElement('tr');
+        var isMobile = window.innerWidth <= 768;
         
         // Celda del platillo
         var dishCell = document.createElement('td');
@@ -1132,10 +1133,38 @@ Avika.ui = {
             dishCell.appendChild(categoryDiv);
         }
         
+        // En móviles, añadir información de servicio en la celda del platillo
+        if (isMobile) {
+            // Tipo de servicio
+            var serviceDiv = document.createElement('div');
+            serviceDiv.className = 'service-type';
+            serviceDiv.textContent = Avika.config.serviceNames[order.serviceType] || order.serviceType;
+            dishCell.appendChild(serviceDiv);
+            
+            // Personalizaciones
+            if (order.customizations && order.customizations.length > 0) {
+                var customDiv = document.createElement('div');
+                customDiv.className = 'dish-customization';
+                customDiv.textContent = order.customizations.map(function(code) {
+                    return Avika.config.customizationOptions[code] || code;
+                }).join(', ');
+                dishCell.appendChild(customDiv);
+            }
+            
+            // Notas
+            if (order.notes && order.notes.trim() !== '') {
+                var notesDiv = document.createElement('div');
+                notesDiv.className = 'order-notes';
+                notesDiv.textContent = order.notes;
+                dishCell.appendChild(notesDiv);
+            }
+        }
+        
         row.appendChild(dishCell);
         
         // Celda de hora de salida (o estado "Listo para salida")
         var departureCell = document.createElement('td');
+        departureCell.className = 'mobile-hide-sm';
         if (order.deliveryDepartureTime) {
             departureCell.textContent = order.deliveryDepartureTimeFormatted || '--:--:--';
         } else {
@@ -1221,6 +1250,7 @@ Avika.ui = {
     },
     createOrderRow: function(order) {
         var row = document.createElement('tr');
+        var isMobile = window.innerWidth <= 768;
         
         // Celda del platillo
         var dishCell = document.createElement('td');
@@ -1258,10 +1288,37 @@ Avika.ui = {
             dishCell.appendChild(categoryDiv);
         }
         
+        // En móviles, añadir información de servicio en la celda del platillo
+        if (isMobile) {
+            var serviceDiv = document.createElement('div');
+            serviceDiv.className = 'service-type';
+            serviceDiv.textContent = Avika.config.serviceNames[order.serviceType] || order.serviceType;
+            dishCell.appendChild(serviceDiv);
+            
+            // Personalizaciones
+            if (order.customizations && order.customizations.length > 0) {
+                var customDiv = document.createElement('div');
+                customDiv.className = 'dish-customization';
+                customDiv.textContent = order.customizations.map(function(code) {
+                    return Avika.config.customizationOptions[code] || code;
+                }).join(', ');
+                dishCell.appendChild(customDiv);
+            }
+            
+            // Notas
+            if (order.notes && order.notes.trim() !== '') {
+                var notesDiv = document.createElement('div');
+                notesDiv.className = 'order-notes';
+                notesDiv.textContent = order.notes;
+                dishCell.appendChild(notesDiv);
+            }
+        }
+        
         row.appendChild(dishCell);
         
         // Celda de inicio
         var startCell = document.createElement('td');
+        startCell.className = 'mobile-hide-sm';
         startCell.textContent = order.startTimeFormatted;
         row.appendChild(startCell);
         

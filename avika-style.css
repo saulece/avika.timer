@@ -2115,6 +2115,8 @@ tr:hover td {
     display: block;
     padding: 5px 0;
     min-width: 120px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 /* Estilos para el nombre del platillo */
@@ -2130,6 +2132,144 @@ tr:hover td {
     font-size: 0.85rem;
     display: block;
     margin-bottom: 2px;
+}
+
+/* Estilos específicos para dispositivos móviles */
+@media screen and (max-width: 768px) {
+    body {
+        padding: 10px;
+        font-size: 14px;
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .container {
+        padding: 10px;
+    }
+    
+    /* Mejorar tablas en móviles */
+    table {
+        font-size: 14px;
+    }
+    
+    th, td {
+        padding: 8px 5px;
+    }
+    
+    /* Mejorar visualización de platillos en preparación y reparto */
+    .dish-cell {
+        padding: 8px 5px 5px 5px;
+        min-width: 100px;
+    }
+    
+    .dish-name {
+        font-size: 1rem;
+        margin-bottom: 2px;
+    }
+    
+    .dish-quantity {
+        font-size: 0.9rem;
+    }
+    
+    .ticket-id {
+        font-size: 0.7rem;
+        margin-top: 1px;
+        margin-left: 0;
+        display: block;
+    }
+    
+    .dish-category {
+        font-size: 0.7rem;
+        margin-top: 1px;
+    }
+    
+    .service-type {
+        font-size: 0.8rem;
+    }
+    
+    .dish-customization {
+        font-size: 0.75rem;
+    }
+    
+    .order-notes {
+        font-size: 0.75rem;
+    }
+    
+    /* Mejorar botones en móviles */
+    .action-btn {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+        margin: 2px;
+        min-width: 100px;
+    }
+    
+    /* Optimizar para iPhone */
+    @supports (-webkit-touch-callout: none) {
+        /* Estilos específicos para iOS */
+        body {
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        .action-btn {
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: 8px;
+        }
+        
+        input, select, textarea {
+            font-size: 16px; /* Evita zoom al enfocar en iOS */
+        }
+    }
+    
+    /* Mejorar layout de tablas en móviles */
+    .mobile-optimized-table {
+        width: 100%;
+        table-layout: fixed;
+    }
+    
+    .mobile-optimized-table th:nth-child(1),
+    .mobile-optimized-table td:nth-child(1) {
+        width: 40%;
+    }
+    
+    .mobile-optimized-table th:nth-child(2),
+    .mobile-optimized-table td:nth-child(2) {
+        width: 20%;
+    }
+    
+    .mobile-optimized-table th:nth-child(3),
+    .mobile-optimized-table td:nth-child(3) {
+        width: 20%;
+    }
+    
+    .mobile-optimized-table th:nth-child(4),
+    .mobile-optimized-table td:nth-child(4) {
+        width: 20%;
+    }
+    
+    /* Ocultar columnas menos importantes en pantallas muy pequeñas */
+    @media screen and (max-width: 480px) {
+        .mobile-hide-sm {
+            display: none;
+        }
+        
+        .mobile-optimized-table th:nth-child(1),
+        .mobile-optimized-table td:nth-child(1) {
+            width: 50%;
+        }
+        
+        .mobile-optimized-table th:nth-child(3),
+        .mobile-optimized-table td:nth-child(3) {
+            width: 25%;
+        }
+        
+        .mobile-optimized-table th:nth-child(4),
+        .mobile-optimized-table td:nth-child(4) {
+            width: 25%;
+        }
+    }
 }
 
 /* Notificaciones mejoradas */

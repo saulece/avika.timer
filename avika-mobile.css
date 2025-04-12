@@ -1,0 +1,292 @@
+/* Estilos específicos para dispositivos móviles - Avika Timer */
+
+/* Estilos generales para móviles */
+@media screen and (max-width: 768px) {
+    body {
+        padding: 10px;
+        font-size: 14px;
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .container {
+        padding: 10px;
+    }
+    
+    /* Mejorar tablas en móviles */
+    table {
+        font-size: 14px;
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+    }
+    
+    th, td {
+        padding: 8px 5px;
+        vertical-align: top;
+    }
+    
+    /* Mejorar la visualización de las filas */
+    tr {
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    /* Mejorar la visualización de las celdas */
+    td {
+        word-break: break-word;
+    }
+    
+    /* Ajustar ancho de columnas para móviles */
+    .mobile-optimized-table th:nth-child(1),
+    .mobile-optimized-table td:nth-child(1) {
+        width: 50%;
+    }
+    
+    .mobile-optimized-table th:nth-child(3),
+    .mobile-optimized-table td:nth-child(3) {
+        width: 20%;
+    }
+    
+    .mobile-optimized-table th:nth-child(5),
+    .mobile-optimized-table td:nth-child(5) {
+        width: 30%;
+    }
+    
+    /* Ocultar columnas menos importantes en móviles */
+    .mobile-hide-sm {
+        display: none !important;
+    }
+    
+    /* Mejorar visualización de platillos en preparación y reparto */
+    .dish-cell {
+        padding: 8px 5px 5px 5px;
+        min-width: 100px;
+        width: 50%;
+        line-height: 1.3;
+    }
+    
+    /* Añadir espacio entre elementos en la celda del platillo */
+    .dish-cell > div {
+        margin-bottom: 3px;
+    }
+    
+    .dish-name {
+        font-size: 1rem;
+        margin-bottom: 2px;
+    }
+    
+    .dish-quantity {
+        font-size: 0.9rem;
+    }
+    
+    .ticket-id {
+        font-size: 0.7rem;
+        margin-top: 1px;
+        margin-left: 0;
+        display: block;
+    }
+    
+    .dish-category {
+        font-size: 0.7rem;
+        margin-top: 1px;
+    }
+    
+    .service-type {
+        font-size: 0.8rem;
+    }
+    
+    .dish-customization {
+        font-size: 0.75rem;
+    }
+    
+    .order-notes {
+        font-size: 0.75rem;
+    }
+    
+    /* Mejorar botones en móviles */
+    .action-btn {
+        padding: 10px 12px;
+        font-size: 0.95rem;
+        margin: 3px;
+        min-width: 110px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        font-weight: 500;
+    }
+    
+    /* Mejorar el contraste de los botones */
+    .action-btn:active {
+        transform: translateY(1px);
+        box-shadow: 0 0 1px rgba(0,0,0,0.2);
+    }
+    
+    /* Optimizar layout de tablas en móviles */
+    .mobile-optimized-table {
+        width: 100%;
+        table-layout: fixed;
+    }
+    
+    .mobile-optimized-table th:nth-child(1),
+    .mobile-optimized-table td:nth-child(1) {
+        width: 50%;
+    }
+    
+    .mobile-optimized-table th:nth-child(3),
+    .mobile-optimized-table td:nth-child(3) {
+        width: 20%;
+    }
+    
+    .mobile-optimized-table th:nth-child(5),
+    .mobile-optimized-table td:nth-child(5) {
+        width: 30%;
+    }
+    
+    /* Ajustes para los filtros */
+    .filter-panel {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .filter-select, .filter-btn {
+        flex: 1 1 auto;
+        min-width: 120px;
+        margin-bottom: 5px;
+    }
+    
+    /* Ajustes para secciones */
+    .pending-orders-section {
+        margin-bottom: 25px;
+        padding: 10px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    /* Mejorar encabezados de secciones */
+    .pending-orders-section h2 {
+        font-size: 1.3rem;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    /* Ajustes para botones de acción */
+    .action-btns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-bottom: 10px;
+    }
+    
+    .action-btns .action-btn {
+        flex: 1 1 auto;
+        min-width: 120px;
+    }
+    
+    /* Ajustes para filtros */
+    .filter-panel, .filter-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 12px;
+    }
+    
+    .filter-select, .filter-btn {
+        flex: 1 1 auto;
+        min-width: 120px;
+        margin-bottom: 5px;
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        background-color: #f8f8f8;
+    }
+    
+    .filter-select {
+        -webkit-appearance: none;
+        appearance: none;
+        background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        padding-right: 30px;
+    }
+    
+    /* Ajustes para iPhone */
+    @supports (-webkit-touch-callout: none) {
+        /* Estilos específicos para iOS */
+        body {
+            -webkit-text-size-adjust: 100%;
+            -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+        }
+        
+        .action-btn {
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: 8px;
+            touch-action: manipulation; /* Mejora la respuesta táctil */
+        }
+        
+        input, select, textarea {
+            font-size: 16px; /* Evita zoom al enfocar en iOS */
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: 0;
+        }
+        
+        /* Mejoras específicas para Safari en iOS */
+        table {
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Evitar selección de texto no deseada */
+        .action-btn, .dish-name, .ticket-id {
+            -webkit-user-select: none;
+            user-select: none;
+        }
+    }
+}
+
+/* Estilos específicos para pantallas muy pequeñas (iPhone SE, etc.) */
+@media screen and (max-width: 375px) {
+    /* Ajustes adicionales para iPhone */
+    .mobile-optimized-table th:nth-child(1),
+    .mobile-optimized-table td:nth-child(1) {
+        width: 60%;
+    }
+    
+    .mobile-optimized-table th:nth-child(3),
+    .mobile-optimized-table td:nth-child(3) {
+        width: 15%;
+    }
+    
+    .mobile-optimized-table th:nth-child(5),
+    .mobile-optimized-table td:nth-child(5) {
+        width: 25%;
+    }
+    
+    /* Ajustar tamaño de botones para pantallas pequeñas */
+    .action-btn {
+        min-width: 80px;
+        padding: 6px 8px;
+    }
+    
+    /* Ajustar tamaño de texto para pantallas pequeñas */
+    body {
+        padding: 5px;
+    }
+    
+    .dish-name {
+        font-size: 0.95rem;
+    }
+    
+    .action-btn {
+        padding: 8px 5px;
+        font-size: 0.85rem;
+    }
+    
+    header h1 {
+        font-size: 1.3rem;
+    }
+}
