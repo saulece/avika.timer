@@ -2095,7 +2095,8 @@ Avika.ui = {
                 this.state.ticketItems,
                 ticketService,
                 ticketNotes,
-                ticketTime
+                ticketTime,
+                ticketTime // Pasar la hora de entrada como parámetro adicional
             );
             
             if (success) {

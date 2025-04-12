@@ -72,6 +72,11 @@ Avika.orderService = {
         // Implementación de respaldo en caso de que Avika.utils no esté disponible
         return (num < 10 ? '0' : '') + num;
     },
+    
+    // Función para validar fechas
+    isValidDate: function(date) {
+        return date instanceof Date && !isNaN(date.getTime());
+    },
 
     formatTime: function(date) {
         // Reutilizar la función de Avika.utils para mantener consistencia
@@ -504,7 +509,7 @@ Avika.orderService = {
     },
     
     // Función para guardar un ticket completo con múltiples platillos
-    saveTicket: function(items, serviceType, notes, deliveryTime) {
+    saveTicket: function(items, serviceType, notes, deliveryTime, entryTime) {
         console.log("Guardando ticket con", items.length, "platillos");
         
         // Validar parámetros
@@ -529,6 +534,9 @@ Avika.orderService = {
             var ticketId = new Date().getTime().toString() + Math.floor(Math.random() * 1000);
             var now = new Date();
             
+            // Usar la hora de entrada especificada si existe, de lo contrario usar la hora actual
+            var startTime = entryTime && this.isValidDate(entryTime) ? entryTime : now;
+            
             // Crear órdenes para cada platillo del ticket
             for (var i = 0; i < items.length; i++) {
                 var item = items[i];
@@ -544,8 +552,8 @@ Avika.orderService = {
                     customizations: item.customizations || [],
                     serviceType: serviceType || 'comedor',
                     notes: notes || '',
-                    startTime: now,
-                    startTimeFormatted: this.formatTime(now),
+                    startTime: startTime,
+                    startTimeFormatted: this.formatTime(startTime),
                     isSpecialCombo: item.isSpecialCombo || false,
                     finished: false
                 };
@@ -572,6 +580,160 @@ Avika.orderService = {
         } catch (error) {
             console.error("Error al guardar ticket:", error);
             return false;
+        }
+    },
+    
+    // Función para actualizar todos los temporizadores
+    updateAllTimers: function() {
+        try {
+            // Verificar que los datos existen antes de actualizar
+            if (!Avika.data) {
+                console.warn('Avika.data no está disponible para actualizar temporizadores');
+                return;
+            }
+            
+            // Actualizar temporizadores de platillos en preparación
+            if (Array.isArray(Avika.data.pendingOrders) && Avika.data.pendingOrders.length > 0) {
+                this.updatePendingTimers();
+            }
+            
+            // Actualizar temporizadores de platillos en reparto
+            if (Array.isArray(Avika.data.deliveryOrders) && Avika.data.deliveryOrders.length > 0) {
+                this.updateDeliveryTimers();
+            }
+        } catch (error) {
+            console.error('Error al actualizar temporizadores:', error);
+        }
+    },
+    
+    // Actualizar temporizadores de platillos en preparación
+    updatePendingTimers: function() {
+        var pendingBody = document.getElementById('pending-body');
+        if (!pendingBody) return;
+        
+        var timerCells = pendingBody.querySelectorAll('.timer-cell');
+        if (timerCells.length === 0) return;
+        
+        var now = new Date(); // Calcular la hora actual una sola vez
+        
+        // Usar constantes definidas centralmente
+        var TEN_MINUTES = 600; // 10 minutos en segundos
+        var FIFTEEN_MINUTES = 900; // 15 minutos en segundos
+        
+        if (Avika.utils && Avika.utils.TIME_CONSTANTS) {
+            TEN_MINUTES = Avika.utils.TIME_CONSTANTS.TEN_MINUTES_IN_SECONDS;
+            FIFTEEN_MINUTES = Avika.utils.TIME_CONSTANTS.FIFTEEN_MINUTES_IN_SECONDS;
+        }
+        
+        // Crear un mapa de órdenes para búsqueda más eficiente
+        var orderMap = {};
+        if (Array.isArray(Avika.data.pendingOrders)) {
+            Avika.data.pendingOrders.forEach(function(order) {
+                if (order && order.id) {
+                    orderMap[order.id] = order;
+                }
+            });
+        }
+        
+        for (var i = 0; i < timerCells.length; i++) {
+            var timerCell = timerCells[i];
+            var orderId = timerCell.getAttribute('data-id');
+            if (!orderId) continue;
+            
+            // Buscar la orden usando el mapa (mucho más eficiente)
+            var order = orderMap[orderId];
+            if (!order) continue;
+            
+            // Validar que startTime sea una fecha válida
+            var startTime;
+            try {
+                startTime = new Date(order.startTime);
+                if (isNaN(startTime.getTime())) throw new Error("Fecha inválida");
+            } catch (e) {
+                console.warn("Formato de fecha inválido para la orden:", orderId);
+                timerCell.textContent = "--:--:--";
+                continue;
+            }
+            
+            var elapsedMillis = now - startTime;
+            var elapsedSeconds = Math.floor(elapsedMillis / 1000);
+            
+            // Usar la función formatElapsedTime para mantener consistencia
+            timerCell.textContent = this.formatElapsedTime(elapsedSeconds);
+            
+            // Añadir clases de advertencia según el tiempo transcurrido
+            timerCell.classList.remove('warning', 'alert');
+            
+            // Más de 10 minutos: advertencia
+            if (elapsedSeconds >= TEN_MINUTES) {
+                timerCell.classList.add('warning');
+            }
+            
+            // Más de 15 minutos: alerta
+            if (elapsedSeconds >= FIFTEEN_MINUTES) {
+                timerCell.classList.add('alert');
+            }
+        }
+    },
+    
+    // Actualizar temporizadores de platillos en reparto
+    updateDeliveryTimers: function() {
+        var deliveryBody = document.getElementById('delivery-body');
+        if (!deliveryBody) return;
+        
+        var timerCells = deliveryBody.querySelectorAll('.timer-cell');
+        if (timerCells.length === 0) return;
+        
+        var now = new Date(); // Calcular la hora actual una sola vez
+        
+        // Crear un mapa de órdenes para búsqueda más eficiente
+        var orderMap = {};
+        if (Array.isArray(Avika.data.deliveryOrders)) {
+            Avika.data.deliveryOrders.forEach(function(order) {
+                if (order && order.id) {
+                    orderMap[order.id] = order;
+                }
+            });
+        }
+        
+        for (var i = 0; i < timerCells.length; i++) {
+            var timerCell = timerCells[i];
+            var orderId = timerCell.getAttribute('data-id');
+            if (!orderId) continue;
+            
+            // Buscar la orden usando el mapa
+            var order = orderMap[orderId];
+            if (!order) continue;
+            
+            // Validar que deliveryDepartureTime sea una fecha válida
+            var departureTime;
+            try {
+                departureTime = new Date(order.deliveryDepartureTime);
+                if (isNaN(departureTime.getTime())) throw new Error("Fecha inválida");
+            } catch (e) {
+                console.warn("Formato de fecha inválido para la orden en reparto:", orderId);
+                timerCell.textContent = "--:--:--";
+                continue;
+            }
+            
+            var elapsedMillis = now - departureTime;
+            var elapsedSeconds = Math.floor(elapsedMillis / 1000);
+            
+            // Usar la función formatElapsedTime para mantener consistencia
+            timerCell.textContent = this.formatElapsedTime(elapsedSeconds);
+            
+            // Añadir clases de advertencia según el tiempo transcurrido
+            timerCell.classList.remove('warning', 'alert');
+            
+            // Más de 30 minutos: advertencia
+            if (elapsedSeconds >= 1800) { // 30 minutos
+                timerCell.classList.add('warning');
+            }
+            
+            // Más de 45 minutos: alerta
+            if (elapsedSeconds >= 2700) { // 45 minutos
+                timerCell.classList.add('alert');
+            }
         }
     }
 };
