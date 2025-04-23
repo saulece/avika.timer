@@ -675,6 +675,7 @@ Avika.ui = {
                     deliveryInfo.style.color = '#555';
                     
                     var deliveryText = '';
+                    
                     if (order.deliveryDepartureTimeFormatted) {
                         deliveryText += 'Salida: ' + order.deliveryDepartureTimeFormatted;
                     }
@@ -2778,4 +2779,148 @@ Avika.ui = {
         document.getElementById('category-selection-step').style.display = 'none';
         document.getElementById('dish-selection-step').style.display = 'none';
     }
+};
+
+// === Asignar clases de color de fondo por tipo de servicio ===
+function getComandaClass(serviceType) {
+    switch(serviceType) {
+        case 'comedor': return 'comanda-comedor';
+        case 'domicilio': return 'comanda-domicilio';
+        case 'ordenaespera': return 'comanda-ordenaespera';
+        default: return '';
+    }
+}
+
+// MODIFICADO: Crear fila para orden completada con clase de color consistente y sin info redundante
+Avika.ui.updateCompletedTable.createCompletedRow = function(order) {
+    var tr = document.createElement('tr');
+    tr.className = 'simplified-row ' + getComandaClass(order.serviceType);
+    // Solo info esencial
+    var tdDish = document.createElement('td');
+    tdDish.className = 'dish-cell';
+    tdDish.innerHTML = '<span class="dish-name">' + order.dish + '</span>' +
+        (order.quantity > 1 ? ' <span class="dish-quantity">x' + order.quantity + '</span>' : '');
+    var tdService = document.createElement('td');
+    tdService.className = 'service-cell';
+    tdService.textContent = order.serviceType.charAt(0).toUpperCase() + order.serviceType.slice(1);
+    var tdTime = document.createElement('td');
+    tdTime.className = 'time-cell';
+    tdTime.textContent = order.completionTime || '';
+    tr.appendChild(tdDish);
+    tr.appendChild(tdService);
+    tr.appendChild(tdTime);
+    return tr;
+};
+
+// MODIFICADO: Aplicar clase de color consistente en preparación y reparto
+Avika.ui.updatePendingTable.applyTicketStyles = function(rows, ticketId, serviceType) {
+    var cls = getComandaClass(serviceType);
+    rows.forEach(function(row) {
+        row.classList.add(cls);
+    });
+};
+Avika.ui.updateDeliveryTable.applyTicketStyles = function(rows, ticketId, serviceType) {
+    var cls = getComandaClass(serviceType);
+    rows.forEach(function(row) {
+        row.classList.add(cls);
+    });
+};
+
+// MODIFICADO: Inicializar el registro de tickets completados al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    // Otras inicializaciones existentes...
+    
+    // Limpiar el registro de tickets completados para evitar problemas con sesiones anteriores
+    if (Avika.orders && typeof Avika.orders.resetCompletedTickets === 'function') {
+        Avika.orders.resetCompletedTickets();
+    }
+});
+
+// MODIFICADO: Función para exportar a Excel sin duplicados
+Avika.ui.exportToExcel = function() {
+    // Verificar que haya órdenes completadas
+    if (!Avika.data.completedOrders || Avika.data.completedOrders.length === 0) {
+        this.showNotification('No hay órdenes completadas para exportar', 'warning');
+        return;
+    }
+    
+    // Crear un conjunto para rastrear tickets ya procesados
+    var processedTickets = new Set();
+    
+    // Crear una tabla para la exportación
+    var table = document.createElement('table');
+    
+    // Crear encabezado
+    var thead = document.createElement('thead');
+    var headerRow = document.createElement('tr');
+    
+    // Definir columnas
+    var columns = ['Platillo', 'Cantidad', 'Servicio', 'Hora', 'Notas'];
+    
+    // Agregar encabezados
+    columns.forEach(function(column) {
+        var th = document.createElement('th');
+        th.textContent = column;
+        headerRow.appendChild(th);
+    });
+    
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    
+    // Crear cuerpo de la tabla
+    var tbody = document.createElement('tbody');
+    
+    // Agregar filas para cada orden completada
+    Avika.data.completedOrders.forEach(function(order) {
+        // Evitar duplicados para tickets de domicilio
+        if (order.serviceType === 'domicilio' && order.ticketId) {
+            if (processedTickets.has(order.ticketId)) {
+                return; // Saltar este registro si ya procesamos este ticket
+            }
+            processedTickets.add(order.ticketId);
+        }
+        
+        var row = document.createElement('tr');
+        
+        // Agregar celdas
+        var tdDish = document.createElement('td');
+        tdDish.textContent = order.dish;
+        row.appendChild(tdDish);
+        
+        var tdQuantity = document.createElement('td');
+        tdQuantity.textContent = order.quantity || 1;
+        row.appendChild(tdQuantity);
+        
+        var tdService = document.createElement('td');
+        tdService.textContent = order.serviceType;
+        row.appendChild(tdService);
+        
+        var tdTime = document.createElement('td');
+        tdTime.textContent = order.completionTime || '';
+        row.appendChild(tdTime);
+        
+        var tdNotes = document.createElement('td');
+        tdNotes.textContent = order.notes || '';
+        row.appendChild(tdNotes);
+        
+        tbody.appendChild(row);
+    });
+    
+    table.appendChild(tbody);
+    
+    // Convertir la tabla a Excel
+    var wb = XLSX.utils.table_to_book(table, {sheet: "Órdenes Completadas"});
+    
+    // Generar archivo y descargar
+    var date = new Date();
+    var fileName = 'ordenes_completadas_' + 
+                  date.getFullYear() + '-' + 
+                  ('0' + (date.getMonth() + 1)).slice(-2) + '-' + 
+                  ('0' + date.getDate()).slice(-2) + '_' + 
+                  ('0' + date.getHours()).slice(-2) + '-' + 
+                  ('0' + date.getMinutes()).slice(-2) + '.xlsx';
+    
+    XLSX.writeFile(wb, fileName);
+    
+    this.showNotification('Archivo Excel generado: ' + fileName, 'success');
 };

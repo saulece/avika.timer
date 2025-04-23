@@ -2413,3 +2413,45 @@ tr:hover td {
         transform: translateX(-50%) translateY(0);
     }
 }
+
+/* === Colores de fondo consistentes para comandas === */
+.comanda-comedor {
+    background-color: #e3f2fd !important;
+    color: #222 !important;
+}
+.comanda-domicilio {
+    background-color: #fff3e0 !important;
+    color: #222 !important;
+}
+.comanda-ordenaespera {
+    background-color: #e8f5e9 !important;
+    color: #222 !important;
+}
+
+/* === Mejorar contraste de texto === */
+.comanda-comedor .dish-name, .comanda-domicilio .dish-name, .comanda-ordenaespera .dish-name {
+    color: #222 !important;
+}
+
+/* === Eliminar líneas internas y recuadros innecesarios === */
+table, th, td {
+    border: none !important;
+}
+tr, td, th {
+    box-shadow: none !important;
+}
+
+/* === Mejorar visualización móvil === */
+@media (max-width: 600px) {
+    .pending-orders-section, .completed-orders-section, .delivery-orders-section {
+        padding: 8px !important;
+        font-size: 0.96em;
+    }
+    .dish-name, .dish-quantity, .service-type {
+        font-size: 1em !important;
+    }
+    .action-btn {
+        min-width: 80px !important;
+        font-size: 0.97em !important;
+    }
+}
