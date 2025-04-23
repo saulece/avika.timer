@@ -302,6 +302,48 @@ Avika.orderService = {
         this.showNotification('¡Cocina Fría de ' + order.dish + ' terminada!', 'success');
     },
     
+    // Función para finalizar una cocina caliente (para combos especiales)
+    finishHotKitchen: function(orderId) {
+        console.log("Finalizando cocina caliente:", orderId);
+
+        // Buscar el índice de la orden en el array de órdenes pendientes
+        var orderIndex = -1;
+        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+            if (Avika.data.pendingOrders[i].id === orderId) {
+                orderIndex = i;
+                break;
+            }
+        }
+
+        if (orderIndex === -1) {
+            console.error("No se encontró la orden con ID:", orderId);
+            this.showNotification("Error: No se encontró la orden solicitada", "error");
+            return;
+        }
+
+        var order = Avika.data.pendingOrders[orderIndex];
+        order.hotKitchenFinished = true;
+
+        // Verificar si ambas cocinas están terminadas
+        if (order.hotKitchenFinished && order.coldKitchenFinished) {
+            order.finished = true;
+            order.endTime = new Date();
+            order.preparationTime = Math.floor((order.endTime - new Date(order.startTime)) / 1000);
+            order.preparationTimeFormatted = this.formatElapsedTime(order.preparationTime);
+
+            // Actualizar la interfaz
+            this.updatePendingTable();
+        }
+
+        // Guardar cambios
+        if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+            Avika.storage.guardarDatosLocales();
+        }
+
+        // Mostrar notificación
+        this.showNotification('¡Cocina Caliente de ' + order.dish + ' terminada!', 'success');
+    },
+    
     // Función para verificar si todos los platillos de un ticket están terminados
     checkTicketCompletionStatus: function(ticketId) {
         if (!ticketId) return false;
