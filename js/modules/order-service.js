@@ -302,48 +302,6 @@ Avika.orderService = {
         this.showNotification('¡Cocina Fría de ' + order.dish + ' terminada!', 'success');
     },
     
-    // Función para finalizar una cocina caliente (para combos especiales)
-    finishHotKitchen: function(orderId) {
-        console.log("Finalizando cocina caliente:", orderId);
-
-        // Buscar el índice de la orden en el array de órdenes pendientes
-        var orderIndex = -1;
-        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            if (Avika.data.pendingOrders[i].id === orderId) {
-                orderIndex = i;
-                break;
-            }
-        }
-
-        if (orderIndex === -1) {
-            console.error("No se encontró la orden con ID:", orderId);
-            this.showNotification("Error: No se encontró la orden solicitada", "error");
-            return;
-        }
-
-        var order = Avika.data.pendingOrders[orderIndex];
-        order.hotKitchenFinished = true;
-
-        // Verificar si ambas cocinas están terminadas
-        if (order.hotKitchenFinished && order.coldKitchenFinished) {
-            order.finished = true;
-            order.endTime = new Date();
-            order.preparationTime = Math.floor((order.endTime - new Date(order.startTime)) / 1000);
-            order.preparationTimeFormatted = this.formatElapsedTime(order.preparationTime);
-
-            // Actualizar la interfaz
-            this.updatePendingTable();
-        }
-
-        // Guardar cambios
-        if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
-            Avika.storage.guardarDatosLocales();
-        }
-
-        // Mostrar notificación
-        this.showNotification('¡Cocina Caliente de ' + order.dish + ' terminada!', 'success');
-    },
-    
     // Función para verificar si todos los platillos de un ticket están terminados
     checkTicketCompletionStatus: function(ticketId) {
         if (!ticketId) return false;
@@ -464,7 +422,7 @@ Avika.orderService = {
         // Verificar que hay órdenes pendientes
         if (!Avika.data || !Avika.data.pendingOrders || Avika.data.pendingOrders.length === 0) {
             var emptyRow = document.createElement('tr');
-            emptyRow.innerHTML = '<td colspan="3" class="empty-table">No hay órdenes pendientes</td>';
+            emptyRow.innerHTML = '<td colspan="6" class="empty-table">No hay órdenes pendientes</td>';
             tableBody.appendChild(emptyRow);
             return;
         }
@@ -478,9 +436,9 @@ Avika.orderService = {
         for (var i = 0; i < sortedOrders.length; i++) {
             var order = sortedOrders[i];
             
-            // Crear fila con enfoque simplificado
+            // Crear fila
             var row = document.createElement('tr');
-            row.className = 'order-row simplified-row';
+            row.className = 'order-row';
             row.setAttribute('data-id', order.id);
             
             // Aplicar clase según estado
@@ -488,26 +446,33 @@ Avika.orderService = {
                 row.classList.add('finished');
             }
             
-            // Aplicar clase según tipo de servicio para estabilizar colores
-            // Asegurarse de que el tipo de servicio sea válido
-            var serviceType = order.serviceType || 'comedor';
-            row.classList.add('service-type-' + serviceType);
-            
-            // Crear celdas (simplificadas: solo tipo de servicio y platillo)
-            var serviceCell = document.createElement('td');
-            serviceCell.className = 'service-cell service-type';
-            serviceCell.textContent = this.getServiceTypeDisplay(order.serviceType);
+            // Crear celdas
+            var timeCell = document.createElement('td');
+            timeCell.className = 'time-cell';
+            timeCell.textContent = order.startTimeFormatted;
             
             var dishCell = document.createElement('td');
             dishCell.className = 'dish-cell';
             dishCell.textContent = order.dish;
             
+            var categoryCell = document.createElement('td');
+            categoryCell.className = 'category-cell';
+            categoryCell.textContent = order.categoryDisplay || order.category;
+            
+            var serviceCell = document.createElement('td');
+            serviceCell.className = 'service-cell';
+            serviceCell.textContent = this.getServiceTypeDisplay(order.serviceType);
+            
+            var notesCell = document.createElement('td');
+            notesCell.className = 'notes-cell';
+            notesCell.textContent = order.notes || '-';
+            
             var actionsCell = document.createElement('td');
             actionsCell.className = 'actions-cell';
             
-            // Botón de finalizar con estilo simplificado
+            // Botón de finalizar
             var finishButton = document.createElement('button');
-            finishButton.className = 'finish-button btn btn-success';
+            finishButton.className = 'finish-button';
             finishButton.textContent = 'Finalizar';
             finishButton.setAttribute('data-id', order.id);
             finishButton.onclick = function() {
@@ -518,9 +483,12 @@ Avika.orderService = {
             // Agregar botón a celda de acciones
             actionsCell.appendChild(finishButton);
             
-            // Agregar celdas a fila (solo las necesarias)
-            row.appendChild(serviceCell);
+            // Agregar celdas a fila
+            row.appendChild(timeCell);
             row.appendChild(dishCell);
+            row.appendChild(categoryCell);
+            row.appendChild(serviceCell);
+            row.appendChild(notesCell);
             row.appendChild(actionsCell);
             
             // Agregar fila a tabla
