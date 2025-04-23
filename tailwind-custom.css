@@ -1,0 +1,184 @@
+/* 
+ * Archivo de personalización de Tailwind CSS para Avika
+ * Este archivo complementa los estilos base pero no los reemplaza
+ * para mantener la compatibilidad con el diseño existente
+ */
+
+/* Variables personalizadas que se integran con Tailwind */
+:root {
+  --avika-primary: #4a6da7;
+  --avika-secondary: #ff9800;
+  --avika-success: #4caf50;
+  --avika-danger: #f44336;
+  --avika-warning: #ff9800;
+  --avika-info: #2196f3;
+  --avika-light: #f5f5f5;
+  --avika-dark: #333333;
+}
+
+/* Clases de utilidad adicionales específicas para Avika */
+.avika-card {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background-color: white;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.avika-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  color: white;
+  transition: background-color 0.2s;
+}
+
+.avika-btn-primary {
+  background-color: #4a6da7;
+}
+.avika-btn-primary:hover {
+  background-color: #3a5a8a;
+}
+
+.avika-btn-secondary {
+  background-color: #ff9800;
+}
+.avika-btn-secondary:hover {
+  background-color: #e68a00;
+}
+
+.avika-btn-success {
+  background-color: #4caf50;
+}
+.avika-btn-success:hover {
+  background-color: #3d8b40;
+}
+
+.avika-btn-danger {
+  background-color: #f44336;
+}
+.avika-btn-danger:hover {
+  background-color: #d32f2f;
+}
+
+/* Mejoras para tablas */
+.avika-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.avika-table th {
+  background-color: #f3f4f6;
+  text-align: left;
+  padding: 0.5rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.avika-table td {
+  border-top: 1px solid #e5e7eb;
+  padding: 0.5rem;
+}
+
+.avika-table tr:hover {
+  background-color: #f9fafb;
+}
+
+/* Estilos para formularios */
+.avika-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+}
+.avika-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(74, 109, 167, 0.5);
+}
+
+.avika-select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+}
+.avika-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(74, 109, 167, 0.5);
+}
+
+.avika-textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+}
+.avika-textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(74, 109, 167, 0.5);
+}
+
+/* Estilos para notificaciones */
+.avika-notification {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  max-width: 28rem;
+  z-index: 50;
+}
+
+.avika-notification-success {
+  background-color: #4caf50;
+  color: white;
+}
+
+.avika-notification-error {
+  background-color: #f44336;
+  color: white;
+}
+
+.avika-notification-warning {
+  background-color: #ff9800;
+  color: white;
+}
+
+/* Estilos para secciones de la aplicación */
+.avika-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.avika-section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1f2937;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+/* Estilos para el modo móvil */
+@media (max-width: 768px) {
+  .avika-card {
+    padding: 0.75rem;
+  }
+  
+  .avika-btn {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .avika-section {
+    padding: 0.75rem;
+  }
+  
+  .avika-section-title {
+    font-size: 1.125rem;
+  }
+}
