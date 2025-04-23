@@ -43,6 +43,12 @@ Avika.orders = {
     // MODIFICADO: Evitar duplicados de tickets de domicilio en registro y exportación
     _completedTickets: new Set(),
 
+    // Función para reiniciar el registro de tickets completados
+    resetCompletedTickets: function() {
+        this._completedTickets = new Set();
+        console.log("Registro de tickets completados reiniciado");
+    },
+    
     // Función para iniciar la preparación de un platillo
     startPreparation: function() {
         console.log("Iniciando preparación de platillo");
@@ -1010,5 +1016,29 @@ Avika.orders = {
             
             return false;
         }
-    }
+    },
+    
+    // Función para finalizar cocina caliente (para combos especiales)
+    finishHotKitchen: function(orderId) {
+        if (Avika.orderService && typeof Avika.orderService.finishHotKitchen === 'function') {
+            return Avika.orderService.finishHotKitchen(orderId);
+        } else {
+            console.error("Error: La función finishHotKitchen no está disponible en orderService");
+            if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                Avika.ui.showNotification('Error al procesar cocina caliente. Consulta la consola para más detalles.', 'error');
+            }
+        }
+    },
+    
+    // Función para finalizar cocina fría (para combos especiales)
+    finishColdKitchen: function(orderId) {
+        if (Avika.orderService && typeof Avika.orderService.finishColdKitchen === 'function') {
+            return Avika.orderService.finishColdKitchen(orderId);
+        } else {
+            console.error("Error: La función finishColdKitchen no está disponible en orderService");
+            if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                Avika.ui.showNotification('Error al procesar cocina fría. Consulta la consola para más detalles.', 'error');
+            }
+        }
+    },
 };
