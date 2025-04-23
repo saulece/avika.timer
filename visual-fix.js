@@ -28,149 +28,166 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Función principal para aplicar correcciones visuales
     function applyVisualFixes() {
-        // 1. Corregir estilos de celdas y distribución de información
-        fixCellStyles();
+        // 1. Corregir la visualización de la información de los platillos
+        fixDishInformation();
         
         // 2. Eliminar recuadros cambiantes de colores no deseados
-        removeUnwantedColorChanges();
-        
-        // 3. Mejorar la distribución de información
-        improveInformationLayout();
+        fixTicketColors();
     }
     
-    // Corregir estilos de celdas para una mejor visualización
-    function fixCellStyles() {
-        // Aplicar estilos a todas las celdas de información de platillos
+    // Corregir la visualización de la información de los platillos
+    function fixDishInformation() {
+        // Mejorar la visualización de la información en las celdas de platillos
         const dishCells = document.querySelectorAll('.dish-cell');
         dishCells.forEach(cell => {
-            // Asegurar que el padding sea consistente
-            cell.style.padding = '8px';
+            // Crear un contenedor estructurado para la información
+            if (!cell.querySelector('.dish-info-container')) {
+                // Crear contenedor principal
+                const container = document.createElement('div');
+                container.className = 'dish-info-container';
+                container.style.display = 'flex';
+                container.style.flexDirection = 'column';
+                container.style.gap = '4px';
+                
+                // Mover todos los elementos al contenedor
+                while (cell.firstChild) {
+                    // Conservar el elemento ticket-label fuera del contenedor si existe
+                    if (cell.firstChild.className === 'ticket-label') {
+                        const ticketLabel = cell.firstChild;
+                        cell.removeChild(ticketLabel);
+                        cell.appendChild(ticketLabel);
+                        continue;
+                    }
+                    container.appendChild(cell.firstChild);
+                }
+                
+                cell.appendChild(container);
+            }
             
-            // Mejorar la visualización del nombre del platillo
+            // Mejorar el estilo del nombre del platillo
             const dishName = cell.querySelector('.dish-name');
             if (dishName) {
                 dishName.style.fontWeight = 'bold';
-                dishName.style.marginBottom = '4px';
+                dishName.style.fontSize = '1.05em';
+                dishName.style.color = '#333';
+                dishName.style.padding = '2px 0';
             }
             
-            // Mejorar la visualización de la categoría
+            // Mejorar el estilo de la categoría
             const category = cell.querySelector('.dish-category');
             if (category) {
                 category.style.fontSize = '0.85em';
                 category.style.color = '#666';
-                category.style.marginBottom = '2px';
+                category.style.padding = '1px 0';
+                category.style.fontStyle = 'italic';
+            }
+            
+            // Mejorar el estilo del ID del ticket
+            const ticketId = cell.querySelector('.ticket-id');
+            if (ticketId) {
+                ticketId.style.fontSize = '0.85em';
+                ticketId.style.color = '#555';
+                ticketId.style.fontWeight = 'bold';
+                ticketId.style.padding = '1px 0';
             }
         });
         
-        // Mejorar la visualización de los detalles
+        // Mejorar la visualización de la información en las celdas de detalles
         const detailsCells = document.querySelectorAll('.details-container');
         detailsCells.forEach(cell => {
-            cell.style.padding = '8px';
+            // Crear un contenedor estructurado para la información
+            if (!cell.querySelector('.details-info-container')) {
+                // Crear contenedor principal
+                const container = document.createElement('div');
+                container.className = 'details-info-container';
+                container.style.display = 'flex';
+                container.style.flexDirection = 'column';
+                container.style.gap = '4px';
+                
+                // Mover todos los elementos al contenedor
+                while (cell.firstChild) {
+                    container.appendChild(cell.firstChild);
+                }
+                
+                cell.appendChild(container);
+            }
             
-            // Mejorar la visualización del tipo de servicio
+            // Mejorar el estilo del tipo de servicio
             const serviceType = cell.querySelector('.service-type');
             if (serviceType) {
                 serviceType.style.fontWeight = 'bold';
-                serviceType.style.marginBottom = '4px';
+                serviceType.style.fontSize = '0.95em';
+                serviceType.style.color = '#444';
+                serviceType.style.padding = '2px 0';
             }
             
-            // Mejorar la visualización de las personalizaciones
+            // Mejorar el estilo de las personalizaciones
             const customization = cell.querySelector('.dish-customization');
             if (customization) {
                 customization.style.fontSize = '0.85em';
                 customization.style.color = '#555';
-                customization.style.marginBottom = '2px';
+                customization.style.padding = '1px 0';
             }
             
-            // Mejorar la visualización de las notas
+            // Mejorar el estilo de las notas
             const notes = cell.querySelector('.order-notes');
             if (notes) {
                 notes.style.fontSize = '0.85em';
                 notes.style.fontStyle = 'italic';
-                notes.style.color = '#777';
+                notes.style.color = '#666';
+                notes.style.padding = '1px 0';
+                notes.style.borderLeft = '2px solid #ddd';
+                notes.style.paddingLeft = '4px';
+                notes.style.marginTop = '2px';
             }
         });
     }
     
-    // Eliminar recuadros cambiantes de colores no deseados
-    function removeUnwantedColorChanges() {
-        // Establecer colores consistentes para los tickets
+    // Corregir los colores de los tickets para evitar cambios no deseados
+    function fixTicketColors() {
+        // Colores consistentes para cada tipo de servicio
+        const TICKET_COLORS = {
+            'comedor': '#e6f2ff',      // Azul claro para comedor
+            'domicilio': '#ffe6e6',    // Rojo claro para domicilio
+            'para-llevar': '#e6ffe6',  // Verde claro para llevar
+            'ordena-y-espera': '#fff9e6', // Amarillo claro para ordena y espera
+            'otro': '#f5f5f5'          // Gris claro para otros
+        };
+        
+        // Buscar todas las filas de tickets
         const rows = document.querySelectorAll('tr');
         
+        // Procesar cada fila
         rows.forEach(row => {
             // Verificar si es una fila de ticket (tiene borde izquierdo)
             if (row.style.borderLeft && row.style.borderLeft.includes('solid')) {
-                // Asegurar que el color de fondo sea consistente y no cambie
-                const currentBg = row.style.backgroundColor;
+                // Determinar el tipo de servicio
+                let serviceType = 'otro';
+                const serviceTypeElement = row.querySelector('.service-type');
                 
-                if (currentBg) {
-                    // Fijar el color para evitar cambios
-                    row.setAttribute('data-fixed-bg', currentBg);
-                    
-                    // Prevenir cambios de color con !important
-                    if (!row.hasAttribute('data-fixed-style')) {
-                        const style = document.createElement('style');
-                        const rowId = 'row-' + Math.random().toString(36).substr(2, 9);
-                        row.id = rowId;
-                        style.textContent = `#${rowId} { background-color: ${currentBg} !important; }`;
-                        document.head.appendChild(style);
-                        row.setAttribute('data-fixed-style', 'true');
+                if (serviceTypeElement) {
+                    const serviceText = serviceTypeElement.textContent.toLowerCase();
+                    if (serviceText.includes('comedor')) {
+                        serviceType = 'comedor';
+                    } else if (serviceText.includes('domicilio')) {
+                        serviceType = 'domicilio';
+                    } else if (serviceText.includes('para llevar') || serviceText.includes('ordena y espera')) {
+                        serviceType = 'para-llevar';
                     }
                 }
-            }
-        });
-    }
-    
-    // Mejorar la distribución de información
-    function improveInformationLayout() {
-        // Mejorar la distribución en celdas de detalles
-        const detailsCells = document.querySelectorAll('.details-container');
-        detailsCells.forEach(cell => {
-            // Crear un contenedor para organizar mejor la información
-            if (!cell.querySelector('.details-wrapper')) {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'details-wrapper';
-                wrapper.style.display = 'flex';
-                wrapper.style.flexDirection = 'column';
-                wrapper.style.gap = '4px';
                 
-                // Mover todos los elementos al wrapper
-                while (cell.firstChild) {
-                    wrapper.appendChild(cell.firstChild);
+                // Aplicar color consistente
+                const color = TICKET_COLORS[serviceType];
+                
+                // Fijar el color para evitar cambios
+                if (!row.hasAttribute('data-fixed-color')) {
+                    row.style.backgroundColor = color;
+                    row.setAttribute('data-fixed-color', 'true');
+                    
+                    // Añadir un estilo inline con !important para prevenir cambios
+                    row.style.setProperty('background-color', color, 'important');
                 }
-                
-                cell.appendChild(wrapper);
             }
-        });
-        
-        // Mejorar la distribución en celdas de platillos
-        const dishCells = document.querySelectorAll('.dish-cell');
-        dishCells.forEach(cell => {
-            // Crear un contenedor para organizar mejor la información
-            if (!cell.querySelector('.dish-wrapper')) {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'dish-wrapper';
-                wrapper.style.display = 'flex';
-                wrapper.style.flexDirection = 'column';
-                wrapper.style.gap = '4px';
-                
-                // Mover todos los elementos al wrapper
-                while (cell.firstChild) {
-                    wrapper.appendChild(cell.firstChild);
-                }
-                
-                cell.appendChild(wrapper);
-            }
-        });
-        
-        // Mejorar la visualización de los botones de acción
-        const actionButtons = document.querySelectorAll('.kitchen-btn, .action-btn');
-        actionButtons.forEach(button => {
-            button.style.margin = '2px 0';
-            button.style.padding = '6px 8px';
-            button.style.width = '100%';
-            button.style.textAlign = 'center';
-            button.style.borderRadius = '4px';
         });
     }
 });
@@ -191,6 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .mobile-optimized-table td {
             border: 1px solid #e0e0e0;
             vertical-align: top;
+            padding: 8px;
             transition: none !important;
         }
         
@@ -213,7 +231,7 @@ document.addEventListener('DOMContentLoaded', function() {
         /* Mejorar la visualización de la información de platillos */
         .dish-name {
             font-weight: bold;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
         
         .dish-category, .dish-customization {
@@ -226,21 +244,19 @@ document.addEventListener('DOMContentLoaded', function() {
             font-size: 0.85em;
             font-style: italic;
             color: #777;
+            border-left: 2px solid #ddd;
+            padding-left: 4px;
+            margin-top: 2px;
         }
         
         /* Mejorar la visualización en móviles */
         @media screen and (max-width: 768px) {
-            .dish-wrapper, .details-wrapper {
-                padding: 4px 0;
+            .dish-info-container, .details-info-container {
+                padding: 2px 0;
             }
             
             .mobile-optimized-table td {
-                padding: 8px 6px;
-            }
-            
-            .kitchen-btn, .action-btn {
-                padding: 8px 6px !important;
-                font-size: 0.9em !important;
+                padding: 6px;
             }
         }
     `;
