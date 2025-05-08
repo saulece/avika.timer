@@ -26,17 +26,17 @@ window.Avika = Object.assign({
             TIMER_UPDATE_INTERVAL_MS: 2000    // 2 segundos
         },
         
-        // Función para validar fechas
+        // Función para validar fechas - Implementación centralizada
         isValidDate: function(date) {
             return date instanceof Date && !isNaN(date.getTime());
         },
         
-        // Función para añadir ceros a números
+        // Función para añadir ceros a números - Implementación centralizada
         padZero: function(num) {
             return (num < 10 ? '0' : '') + num;
         },
         
-        // Función para formatear tiempo
+        // Función para formatear tiempo - Implementación centralizada
         formatTime: function(date) {
             if (!date) return '--:--:--';
             
@@ -46,7 +46,7 @@ window.Avika = Object.assign({
             return hours + ':' + minutes + ':' + seconds;
         },
         
-        // Función para formatear tiempo transcurrido
+        // Función para formatear tiempo transcurrido - Implementación centralizada
         formatElapsedTime: function(seconds) {
             if (seconds === undefined || seconds === null || isNaN(seconds)) {
                 return '--:--:--';
@@ -59,7 +59,7 @@ window.Avika = Object.assign({
             return this.padZero(hours) + ':' + this.padZero(minutes) + ':' + this.padZero(secs);
         },
         
-        // Sistema de logging
+        // Sistema de logging centralizado
         log: {
             level: 'info', // 'debug', 'info', 'warn', 'error', 'none'
             
@@ -80,7 +80,7 @@ window.Avika = Object.assign({
             }
         },
         
-        // Función segura para obtener elementos DOM
+        // Función segura para obtener elementos DOM - Implementación centralizada
         getElement: function(id) {
             var el = document.getElementById(id);
             if (!el && this.log) this.log.warn('Elemento no encontrado:', id);

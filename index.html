@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Avika - Temporizador de Sushi</title>
     <link rel="stylesheet" href="avika-style.css">
-    <link rel="stylesheet" href="avika-mobile.css">
     <link rel="stylesheet" href="ticket-styles.css">
+    <link rel="stylesheet" href="avika-modules.css">
 </head>
 <body>
     <div class="loading-indicator"></div>
@@ -187,6 +187,11 @@
     <button id="btn-compact-mode" class="compact-mode-toggle" title="Cambiar a modo ultra-compacto">
         <span id="compact-icon">🔍</span>
     </button>
+    
+    <!-- Botón de configuración -->
+    <button id="btn-settings" class="settings-toggle" title="Configuración">
+        <span id="settings-icon">⚙️</span>
+    </button>
 
     <!-- Scripts -->
     <!-- SheetJS para exportación a Excel -->
@@ -194,12 +199,28 @@
     <script src="avika-core.js"></script>
     <script src="js/modules/config.js"></script>
     <script src="js/modules/optimization.js"></script>
-    <script src="js/modules/ui-controller.js"></script>
+    
+    <!-- Módulos UI modularizados -->
+    <script src="js/modules/ui-core.js"></script>
+    <script src="js/modules/ui-notifications.js"></script>
+    <script src="js/modules/ui-tables.js"></script>
+    <script src="js/modules/ui-rows.js"></script>
+    <script src="js/modules/ui-timers.js"></script>
+    <script src="js/modules/ui-filters.js"></script>
+    <script src="js/modules/ui-modals.js"></script>
+    <script src="js/modules/ui-tickets.js"></script>
+    <script src="js/modules/ui-tickets-functions.js"></script>
+    <script src="js/modules/ui-export-import.js"></script>
+    <script src="js/modules/ui-settings.js"></script>
+    
+    <!-- Controlador principal de UI (orquestador) -->
+    <script src="js/modules/ui-main.js"></script>
+    
+    <!-- Otros módulos -->
     <script src="js/modules/order-service.js"></script>
     <script src="js/modules/orders.js"></script>
     <script src="js/modules/storage.js"></script>
     <script src="js/modules/stats.js"></script>
-    <script src="avika-mobile-init.js"></script>
     <script src="ticket-unified.js"></script>
     <script src="avika-init.js"></script>
 </body>

@@ -222,20 +222,27 @@ Avika.optimization = {
         this.throttledUpdateTimers = this.adaptiveThrottle(
             function() {
                 // Verificar si hay órdenes que actualizar antes de llamar a las funciones
-                const hasPendingOrders = Avika.data && Avika.data.pendingOrders && 
+                const hasPendingOrders = Avika.data && Array.isArray(Avika.data.pendingOrders) && 
                                         Avika.data.pendingOrders.length > 0;
                                         
-                const hasDeliveryOrders = Avika.data && Avika.data.deliveryOrders && 
+                const hasDeliveryOrders = Avika.data && Array.isArray(Avika.data.deliveryOrders) && 
                                          Avika.data.deliveryOrders.length > 0;
                 
-                // Solo actualizar si hay órdenes pendientes
-                if (hasPendingOrders && typeof Avika.ui?.updatePendingTimers === 'function') {
-                    Avika.ui.updatePendingTimers();
-                }
-                
-                // Solo actualizar si hay órdenes en reparto
-                if (hasDeliveryOrders && typeof Avika.ui?.updateDeliveryTimers === 'function') {
-                    Avika.ui.updateDeliveryTimers();
+                // Usar la función centralizada en Avika.ui para actualizar todos los temporizadores
+                if ((hasPendingOrders || hasDeliveryOrders) && typeof Avika.ui?.updateAllTimers === 'function') {
+                    // Llamar directamente a updateAllTimers que orquesta todas las actualizaciones
+                    Avika.ui.updateAllTimers();
+                } else {
+                    // Actualizar individualmente si la función principal no está disponible (fallback)
+                    // Solo actualizar si hay órdenes pendientes
+                    if (hasPendingOrders && typeof Avika.ui?.updatePendingTimers === 'function') {
+                        Avika.ui.updatePendingTimers();
+                    }
+                    
+                    // Solo actualizar si hay órdenes en reparto
+                    if (hasDeliveryOrders && typeof Avika.ui?.updateDeliveryTimers === 'function') {
+                        Avika.ui.updateDeliveryTimers();
+                    }
                 }
             }, 
             500,   // Mínimo retraso: 500ms (2 actualizaciones por segundo)
