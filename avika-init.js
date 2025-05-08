@@ -1,3 +1,4 @@
+// ====== PROBLEMA 1: CORREGIR EL INIT.JS ======
 // avika-init.js - Script de inicialización para la aplicación Avika
 // Este script debe cargarse después de todos los demás scripts de Avika
 
@@ -27,21 +28,13 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    // Verificar que Avika.utils existe
-    if (!Avika.utils) {
-        console.error("Error crítico: Avika.utils no encontrado");
-        return;
-    }
-    
     console.log("Estado de Avika:", {
         ui: !!Avika.ui,
         data: !!Avika.data,
         config: !!Avika.config,
         orders: !!Avika.orders,
         orderService: !!Avika.orderService,
-        storage: !!Avika.storage,
-        utils: !!Avika.utils,
-        optimization: !!Avika.optimization
+        storage: !!Avika.storage
     });
     
     // Comprobar inicialización de datos
@@ -66,27 +59,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function initServiceButtons() {
         console.log("Inicializando botones de servicio...");
         
-        // Función auxiliar para agregar event listeners de forma segura
-        function addSafeEventListener(id, event, callback) {
-            var element = document.getElementById(id);
-            if (element) {
-                element.addEventListener(event, callback);
-                return true;
-            } else {
-                console.warn(`Elemento con ID '${id}' no encontrado en el DOM`);
-                return false;
-            }
-        }
-        
-        addSafeEventListener('btn-comedor', 'click', function() {
+        document.getElementById('btn-comedor').addEventListener('click', function() {
             Avika.ui.selectService(this, 'comedor');
         });
         
-        addSafeEventListener('btn-domicilio', 'click', function() {
+        document.getElementById('btn-domicilio').addEventListener('click', function() {
             Avika.ui.selectService(this, 'domicilio');
         });
         
-        addSafeEventListener('btn-para-llevar', 'click', function() {
+        document.getElementById('btn-para-llevar').addEventListener('click', function() {
             Avika.ui.selectService(this, 'para-llevar');
         });
         
@@ -97,23 +78,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function initQuantityButtons() {
         console.log("Inicializando botones de cantidad...");
         
-        // Función auxiliar para agregar event listeners de forma segura
-        function addSafeEventListener(id, event, callback) {
-            var element = document.getElementById(id);
-            if (element) {
-                element.addEventListener(event, callback);
-                return true;
-            } else {
-                console.warn(`Elemento con ID '${id}' no encontrado en el DOM`);
-                return false;
-            }
-        }
-        
-        addSafeEventListener('btn-decrease', 'click', function() {
+        document.getElementById('btn-decrease').addEventListener('click', function() {
             Avika.ui.changeQuantity(-1);
         });
         
-        addSafeEventListener('btn-increase', 'click', function() {
+        document.getElementById('btn-increase').addEventListener('click', function() {
             Avika.ui.changeQuantity(1);
         });
         
@@ -124,32 +93,19 @@ document.addEventListener('DOMContentLoaded', function() {
     function initActionButtons() {
         console.log("Inicializando botones de acción...");
         
-        // Función auxiliar para agregar event listeners de forma segura
-        function addSafeEventListener(id, event, callback) {
-            var element = document.getElementById(id);
-            if (element) {
-                element.addEventListener(event, callback);
-                return true;
-            } else {
-                console.warn(`Elemento con ID '${id}' no encontrado en el DOM`);
-                return false;
-            }
-        }
-        
-        // Botones de navegación
-        addSafeEventListener('btn-back-to-categories', 'click', function() {
+        document.getElementById('btn-back-to-categories').addEventListener('click', function() {
             Avika.ui.showSection('categories-section');
         });
         
-        addSafeEventListener('btn-back-to-dishes', 'click', function() {
+        document.getElementById('btn-back-to-dishes').addEventListener('click', function() {
             Avika.ui.showSection('dishes-section');
         });
         
-        addSafeEventListener('btn-start', 'click', function() {
+        document.getElementById('btn-start').addEventListener('click', function() {
             Avika.orders.startPreparation();
         });
         
-        addSafeEventListener('btn-cancel', 'click', function() {
+        document.getElementById('btn-cancel').addEventListener('click', function() {
             Avika.ui.showSection('categories-section');
         });
         
@@ -159,127 +115,127 @@ document.addEventListener('DOMContentLoaded', function() {
             btnNewTicket.addEventListener('click', function() {
                 Avika.ui.enableTicketMode();
             });
-        } else {
-            console.warn("Elemento 'btn-new-ticket' no encontrado");
+            // Botones de filtrado
+document.getElementById('btn-apply-filter').addEventListener('click', function() {
+    Avika.ui.aplicarFiltros();
+});
+
+document.getElementById('btn-clear-filter').addEventListener('click', function() {
+    Avika.ui.limpiarFiltros();
+});
         }
-        
-        // Botones de filtrado
-        addSafeEventListener('btn-apply-filter', 'click', function() {
-            Avika.ui.aplicarFiltros();
-        });
-        
-        addSafeEventListener('btn-clear-filter', 'click', function() {
-            Avika.ui.limpiarFiltros();
-        });
         
         // Botones de filtrado para historial
         var btnShowAllHistory = document.getElementById('btn-show-all-history');
         var btnShowRecent = document.getElementById('btn-show-recent');
         
-        if (btnShowAllHistory && btnShowRecent) {
+        if (btnShowAllHistory) {
             btnShowAllHistory.addEventListener('click', function() {
                 btnShowAllHistory.classList.add('active');
                 btnShowRecent.classList.remove('active');
                 Avika.ui.updateCompletedTable(true);
             });
-            
+        }
+        
+        if (btnShowRecent) {
             btnShowRecent.addEventListener('click', function() {
                 btnShowRecent.classList.add('active');
                 btnShowAllHistory.classList.remove('active');
                 Avika.ui.updateCompletedTable(false);
             });
-        } else {
-            console.warn("Elementos de filtrado de historial no encontrados");
         }
         
         // Botón de exportar
-        addSafeEventListener('btn-export', 'click', function() {
-            Avika.stats.exportarDatos();
-        });
+        var btnExport = document.getElementById('btn-export');
+        if (btnExport) {
+            btnExport.addEventListener('click', function() {
+                Avika.stats.exportarDatos();
+            });
+        }
         
         // Botón para desbloquear tickets atorados
-        addSafeEventListener('btn-force-complete', 'click', function() {
+        document.getElementById('btn-force-complete').onclick = function() {
             Avika.ui.showForceCompleteModal();
-        });
+        };
         
         // Botón para ver estadísticas y promedios
-        addSafeEventListener('btn-show-stats', 'click', function() {
-            Avika.stats.calcularPromedios();
-        });
-        
+        var btnShowStats = document.getElementById('btn-show-stats');
+        if (btnShowStats) {
+            btnShowStats.addEventListener('click', function() {
+                Avika.stats.calcularPromedios();
+            });
+        }
         // Botones de filtrado para reparto
-        addSafeEventListener('btn-apply-delivery-filter', 'click', function() {
-            var filterElement = document.getElementById('filter-delivery-time');
-            if (filterElement) {
-                var tiempoSeleccionado = filterElement.value;
-                Avika.ui.filtrarReparto(tiempoSeleccionado);
-            }
-        });
-        
-        addSafeEventListener('btn-clear-delivery-filter', 'click', function() {
-            var filterElement = document.getElementById('filter-delivery-time');
-            if (filterElement) {
-                filterElement.value = 'todos';
-                Avika.ui.limpiarFiltrosReparto();
-            }
-        });
+document.getElementById('btn-apply-delivery-filter').addEventListener('click', function() {
+    var tiempoSeleccionado = document.getElementById('filter-delivery-time').value;
+    Avika.ui.filtrarReparto(tiempoSeleccionado);
+});
+
+document.getElementById('btn-clear-delivery-filter').addEventListener('click', function() {
+    document.getElementById('filter-delivery-time').value = 'todos';
+    Avika.ui.limpiarFiltrosReparto();
+});
 
         // Botón para limpiar historial
-        addSafeEventListener('btn-clear-history', 'click', function() {
-            Avika.storage.limpiarHistorial();
-        });
+        var btnClearHistory = document.getElementById('btn-clear-history');
+        if (btnClearHistory) {
+            btnClearHistory.addEventListener('click', function() {
+                Avika.storage.limpiarHistorial();
+            });
+        }
         
         console.log("Botones de acción inicializados correctamente");
     }
     
     // Cargar datos guardados
-    function loadSavedData() {
-        console.log("Cargando datos guardados...");
-        try {
-            // Verificar que Avika y Avika.data existen
-            if (!window.Avika) {
-                window.Avika = {};
-                console.warn('window.Avika no existía durante loadSavedData, inicializando objeto global');
-            }
-            
-            if (!Avika.data) {
-                Avika.data = {};
-                console.warn('Avika.data no existía durante loadSavedData, inicializando objeto de datos');
+function loadSavedData() {
+    console.log("Cargando datos guardados...");
+    try {
+        // Verificar que Avika y Avika.data existen
+        if (!window.Avika) {
+            window.Avika = {};
+            console.warn('window.Avika no existía durante loadSavedData, inicializando objeto global');
         }
         
-            // Verificar que los arrays existen
-            if (!Array.isArray(Avika.data.pendingOrders)) {
-                Avika.data.pendingOrders = [];
-                console.warn('Avika.data.pendingOrders no era un array, inicializando');
-            }
-            
-            if (!Array.isArray(Avika.data.deliveryOrders)) {
-                Avika.data.deliveryOrders = [];
-                console.warn('Avika.data.deliveryOrders no era un array, inicializando');
-            }
-            
-            if (!Array.isArray(Avika.data.completedOrders)) {
-                Avika.data.completedOrders = [];
-                console.warn('Avika.data.completedOrders no era un array, inicializando');
-            }
-            
-            // Verificar que el módulo de almacenamiento esté disponible
-            if (Avika.storage && typeof Avika.storage.cargarDatosGuardados === 'function') {
-                Avika.storage.cargarDatosGuardados();
-                console.log("Datos cargados correctamente");
-            } else {
-                console.warn("Módulo de almacenamiento no disponible, no se pudieron cargar datos");
-            }
-        } catch (e) {
-            console.error("Error al cargar datos:", e);
-            // Asegurar que los arrays existen en caso de error
-            if (!Avika.data) Avika.data = {};
-            if (!Array.isArray(Avika.data.pendingOrders)) Avika.data.pendingOrders = [];
-            if (!Array.isArray(Avika.data.deliveryOrders)) Avika.data.deliveryOrders = [];
-            if (!Array.isArray(Avika.data.completedOrders)) Avika.data.completedOrders = [];
+        if (!Avika.data) {
+            Avika.data = {};
+            console.warn('Avika.data no existía durante loadSavedData, inicializando objeto de datos');
         }
+        
+        // Verificar que los arrays existen
+        if (!Array.isArray(Avika.data.pendingOrders)) {
+            Avika.data.pendingOrders = [];
+            console.warn('Avika.data.pendingOrders no era un array, inicializando');
+        }
+        
+        if (!Array.isArray(Avika.data.deliveryOrders)) {
+            Avika.data.deliveryOrders = [];
+            console.warn('Avika.data.deliveryOrders no era un array, inicializando');
+        }
+        
+        if (!Array.isArray(Avika.data.completedOrders)) {
+            Avika.data.completedOrders = [];
+            console.warn('Avika.data.completedOrders no era un array, inicializando');
+        }
+        
+        // Verificar que el módulo de almacenamiento esté disponible
+        if (Avika.storage && typeof Avika.storage.cargarDatosGuardados === 'function') {
+            Avika.storage.cargarDatosGuardados();
+            console.log("Datos cargados correctamente");
+        } else {
+            console.warn("Módulo de almacenamiento no disponible, no se pudieron cargar datos");
+        }
+    } catch (e) {
+        console.error("Error al cargar datos:", e);
+        // Asegurar que los arrays existen en caso de error
+        if (!Avika.data) Avika.data = {};
+        if (!Array.isArray(Avika.data.pendingOrders)) Avika.data.pendingOrders = [];
+        if (!Array.isArray(Avika.data.deliveryOrders)) Avika.data.deliveryOrders = [];
+        if (!Array.isArray(Avika.data.completedOrders)) Avika.data.completedOrders = [];
     }
-    
+}
+
+// Inicialización de la aplicación
     // Inicialización de la aplicación
     function initApp() {
         console.log("Inicializando aplicación...");
@@ -311,95 +267,60 @@ document.addEventListener('DOMContentLoaded', function() {
             Avika.data.completedOrders = [];
         }
         
-        // Inicializar componentes de UI solo si Avika.ui.init no está disponible
-        // Estos manejadores ahora deberían ser gestionados por ui-main.js
-        if (!Avika.ui || typeof Avika.ui.init !== 'function') {
-            console.warn('Avika.ui.init no está disponible, usando inicialización manual de componentes UI');
-            initCategoryButtons();
-            initServiceButtons();
-            initQuantityButtons();
-            initActionButtons();
-        }
+        // Inicializar componentes de UI
+        initCategoryButtons(); // Ahora es seguro llamarlo porque maneja el caso de botones faltantes
+        initServiceButtons();
+        initQuantityButtons();
+        initActionButtons();
         
-        // Cargar datos guardados si no está disponible en ui-main.js
-        if (!Avika.ui || typeof Avika.ui.loadInitialData !== 'function') {
-            console.warn('Avika.ui.loadInitialData no está disponible, usando carga manual de datos');
-            loadSavedData();
-        }
+        // Cargar datos guardados
+        loadSavedData();
         
         // Configurar actualizaciones periódicas (optimizadas)
-        // Iniciar la primera actualización de temporizadores
-        const timerUpdateInterval = Avika.utils && Avika.utils.TIME_CONSTANTS ? 
-            Avika.utils.TIME_CONSTANTS.TIMER_UPDATE_INTERVAL_MS : 2000;
-            
-        if (Avika.optimization && Avika.optimization.throttledUpdateTimers) {
-            // Usar la función optimizada con throttle adaptativo
-            Avika.optimization.throttledUpdateTimers();
-            console.log("Utilizando actualización de temporizadores optimizada adaptativa");
-        } else if (Avika.ui && typeof Avika.ui.updateAllTimers === 'function') {
-            // Iniciar el ciclo de actualización autogestionado en UI
-            Avika.ui.updateAllTimers();
-            console.log("Utilizando actualización de temporizadores estándar");
-        } else {
-            // Fallback a un intervalo simple si no hay mejores opciones
-            console.warn("Usando método de actualización de temporizadores de respaldo");
-            setInterval(function() {
-                // NOTA: Ya no usamos Avika.orderService.updateAllTimers porque ha sido centralizado en Avika.ui
-                if (Avika.ui && typeof Avika.ui.updateAllTimers === 'function') {
-                    Avika.ui.updateAllTimers();
-                }
-            }, timerUpdateInterval);
-        }
+setInterval(function() {
+    // Usar la función throttled para mejor rendimiento
+    if (Avika.optimization && Avika.optimization.throttledUpdateTimers) {
+        Avika.optimization.throttledUpdateTimers();
+    } else if (Avika.orderService && typeof Avika.orderService.updateAllTimers === 'function') {
+        // Fallback a la función normal si no está disponible la optimizada
+        Avika.orderService.updateAllTimers();
+    } else if (Avika.ui && typeof Avika.ui.updateAllTimers === 'function') {
+        // Fallback a la función anterior si existe
+        Avika.ui.updateAllTimers();
+    }
+}, Avika.utils && Avika.utils.TIME_CONSTANTS ? 
+   Avika.utils.TIME_CONSTANTS.TIMER_UPDATE_INTERVAL_MS : 2000);
 
-        // Configurar autoguardado con optimización
-        const autoSaveInterval = Avika.utils && Avika.utils.TIME_CONSTANTS ? 
-            Avika.utils.TIME_CONSTANTS.AUTO_SAVE_INTERVAL_MS : 
-            (Avika.config && Avika.config.autoSaveInterval || 30000);
-            
-        // Usar debounce para el autoguardado si está disponible
-        if (Avika.optimization && typeof Avika.optimization.debounce === 'function') {
-            const debouncedSave = Avika.optimization.debounce(function() {
-                if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
-                    console.log("Guardando datos (debounced)...");
-                    Avika.storage.guardarDatosLocales();
-                }
-            }, 1000); // 1 segundo de debounce
-            
-            // Configurar intervalo de guardado
-            setInterval(debouncedSave, autoSaveInterval);
-            
-            // También guardar al salir de la página
-            window.addEventListener('beforeunload', function() {
-                if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
-                    Avika.storage.guardarDatosLocales();
-                }
-            });
-        } else {
-            // Método tradicional si no está disponible debounce
-            setInterval(function() {
-                if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
-                    Avika.storage.guardarDatosLocales();
-                }
-            }, autoSaveInterval);
-        }
-        
-        console.log("Inicialización básica completa");
-        
-        // Inicializar UI centralizada si está disponible
-        if (Avika.ui && typeof Avika.ui.init === 'function') {
-            console.log("Inicializando UI centralizada...");
-            Avika.ui.init();
-        } else {
-            console.warn("Avika.ui.init no está disponible, la UI puede no estar completamente inicializada");
-        }
+// Configurar autoguardado
+setInterval(function() {
+    if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+        Avika.storage.guardarDatosLocales();
+    }
+}, Avika.utils && Avika.utils.TIME_CONSTANTS ? 
+   Avika.utils.TIME_CONSTANTS.AUTO_SAVE_INTERVAL_MS : 
+   (Avika.config && Avika.config.autoSaveInterval || 30000));
         
         console.log("Inicialización completa");
     }
     
     // Iniciar la aplicación
-    initApp();
+    try {
+        initApp();
+        // Ya no activamos automáticamente el modo de tickets al iniciar la aplicación
+        // El usuario debe hacer clic en el botón 'Nuevo Ticket/Comanda' manualmente
+    } catch (e) {
+        console.error("Error fatal durante la inicialización:", e);
+        alert("Error al inicializar la aplicación. Consulta la consola para más detalles.");
+    }
     
-    // NOTA: La gestión del modo compacto ha sido movida a los módulos UI centralizados
-    // (ui-core.js, ui-modals.js, ui-settings.js)
-    // Los event listeners para el modo compacto ahora son manejados por estos módulos
+    // Botón para modo compacto
+    document.getElementById('btn-compact-mode').addEventListener('click', function() {
+        Avika.ui.toggleCompactMode();
+    });
+
+    // Restaurar preferencias de modo compacto si existe
+    if (localStorage.getItem('avika_compact_mode') === 'true') {
+        document.body.classList.add('ultra-compact-mode');
+        document.getElementById('compact-icon').textContent = '📱';
+    }
 });
