@@ -205,13 +205,34 @@ Avika.ui.setupEventHandlers = function() {
             Avika.ui.showConfirmationModal(
                 '¿Estás seguro de que deseas limpiar el historial? Esta acción no se puede deshacer.',
                 function() {
-                    if (Avika.data.completedOrders) {
-                        Avika.data.completedOrders = [];
-                        if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
-                            Avika.storage.guardarDatosLocales();
+                    if (Avika.orders && typeof Avika.orders.clearCompletedOrders === 'function') {
+                        var result = Avika.orders.clearCompletedOrders();
+                        
+                        // Manejar el resultado
+                        if (result && result.success) {
+                            // Actualizar tablas según sea necesario
+                            if (Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
+                                Avika.ui.updateCompletedTable(false);
+                            }
+                            
+                            // Mostrar notificación
+                            if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                                Avika.ui.showNotification('Historial limpiado con éxito', 'success');
+                            }
+                        } else {
+                            // Si la operación fue cancelada o falló
+                            console.log('Operación de limpieza cancelada o fallida');
                         }
-                        Avika.ui.updateCompletedTable(false);
-                        Avika.ui.showNotification('Historial limpiado con éxito', 'success');
+                    } else {
+                        // Implementación de respaldo si la función no está disponible
+                        if (Avika.data.completedOrders) {
+                            Avika.data.completedOrders = [];
+                            if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+                                Avika.storage.guardarDatosLocales();
+                            }
+                            Avika.ui.updateCompletedTable(false);
+                            Avika.ui.showNotification('Historial limpiado con éxito', 'success');
+                        }
                     }
                 }
             );
@@ -219,15 +240,84 @@ Avika.ui.setupEventHandlers = function() {
     }
     
     // Botón de exportar datos
-    var exportBtn = document.getElementById('btn-export');
-    if (exportBtn) {
-        exportBtn.addEventListener('click', function() {
-            if (Avika.stats && typeof Avika.stats.exportToExcel === 'function') {
-                Avika.stats.exportToExcel();
-            } else {
-                Avika.ui.showNotification('Función de exportación no disponible', 'error');
+    var exportDataBtn = document.getElementById('btn-export');
+    if (exportDataBtn) {
+        exportDataBtn.addEventListener('click', function() {
+            if (Avika.ui && typeof Avika.ui.exportData === 'function') {
+                Avika.ui.exportData();
             }
         });
+    }
+    
+    // Agregar botón para restaurar historial de órdenes completadas
+    var historySection = document.querySelector('.completed-orders-section');
+    if (historySection) {
+        var restoreHistoryBtn = document.createElement('button');
+        restoreHistoryBtn.id = 'restore-history-btn';
+        restoreHistoryBtn.className = 'action-btn';
+        restoreHistoryBtn.textContent = 'Restaurar historial';
+        restoreHistoryBtn.title = 'Restaurar historial de órdenes completadas desde la última copia de seguridad';
+        
+        // Insertar botón después del botón de limpiar historial
+        var actionBtnsContainer = historySection.querySelector('.action-btns');
+        if (actionBtnsContainer && clearHistoryBtn) {
+            actionBtnsContainer.insertBefore(restoreHistoryBtn, clearHistoryBtn.nextSibling);
+            
+            // Agregar evento al botón
+            restoreHistoryBtn.addEventListener('click', function() {
+                if (Avika.orders && typeof Avika.orders.restoreCompletedOrdersBackup === 'function') {
+                    var result = Avika.orders.restoreCompletedOrdersBackup();
+                    
+                    // Manejar el resultado
+                    if (result && result.success) {
+                        if (result.requiresConfirmation) {
+                            // Mostrar confirmación
+                            Avika.ui.showConfirmationModal(
+                                result.confirmationMessage,
+                                function() {
+                                    // Aplicar la restauración después de la confirmación
+                                    if (Avika.orders && typeof Avika.orders.applyCompletedOrdersBackup === 'function') {
+                                        var applyResult = Avika.orders.applyCompletedOrdersBackup(result.backupData);
+                                        
+                                        // Manejar el resultado de la aplicación
+                                        if (applyResult && applyResult.success) {
+                                            // Actualizar tablas según sea necesario
+                                            if (applyResult.updatedTables && Array.isArray(applyResult.updatedTables)) {
+                                                applyResult.updatedTables.forEach(function(tableType) {
+                                                    if (tableType === 'completedTable' && Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
+                                                        Avika.ui.updateCompletedTable();
+                                                    }
+                                                });
+                                            }
+                                            
+                                            // Mostrar notificación
+                                            if (applyResult.message && Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                                                Avika.ui.showNotification(applyResult.message, applyResult.messageType || 'success');
+                                            }
+                                        } else if (applyResult && !applyResult.success) {
+                                            // Mostrar error
+                                            if (applyResult.message && Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                                                Avika.ui.showNotification(applyResult.message, applyResult.messageType || 'error');
+                                            }
+                                        }
+                                    }
+                                }
+                            );
+                        } else {
+                            // Mostrar notificación
+                            if (result.message && Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                                Avika.ui.showNotification(result.message, result.messageType || 'success');
+                            }
+                        }
+                    } else if (result && !result.success) {
+                        // Mostrar error
+                        if (result.message && Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                            Avika.ui.showNotification(result.message, result.messageType || 'error');
+                        }
+                    }
+                }
+            });
+        }
     }
 };
 
@@ -280,57 +370,8 @@ Avika.ui.showSection = function(sectionId) {
     }
 };
 
-// Función para forzar a completar un ticket entero (desbloquear tickets atorados)
-Avika.ui.forceCompleteTicket = function(ticketId) {
-    if (!ticketId || !Avika.data.pendingOrders) {
-        return;
-    }
-    
-    var ticketOrders = Avika.data.pendingOrders.filter(function(order) {
-        return order.ticketId === ticketId;
-    });
-    
-    if (ticketOrders.length === 0) {
-        Avika.ui.showNotification('No se encontraron órdenes para el ticket: ' + ticketId, 'warning');
-        return;
-    }
-    
-    // Completar todas las órdenes del ticket
-    for (var i = 0; i < ticketOrders.length; i++) {
-        var order = ticketOrders[i];
-        
-        // Marcar como completada
-        order.completionTime = new Date().toISOString();
-        
-        // Formatear hora de finalización
-        if (Avika.utils && typeof Avika.utils.formatTime === 'function') {
-            order.completionTimeFormatted = Avika.utils.formatTime(new Date(order.completionTime));
-        }
-        
-        // Mover a órdenes completadas
-        if (!Avika.data.completedOrders) {
-            Avika.data.completedOrders = [];
-        }
-        Avika.data.completedOrders.push(order);
-    }
-    
-    // Eliminar órdenes del ticket de pendientes
-    Avika.data.pendingOrders = Avika.data.pendingOrders.filter(function(order) {
-        return order.ticketId !== ticketId;
-    });
-    
-    // Guardar datos
-    if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
-        Avika.storage.guardarDatosLocales();
-    }
-    
-    // Actualizar tablas
-    Avika.ui.updatePendingTable();
-    Avika.ui.updateCompletedTable(false);
-    
-    // Mostrar notificación
-    Avika.ui.showNotification('Ticket ' + ticketId + ' completado manualmente', 'success');
-};
+// NOTA: La función forceCompleteTicket ha sido movida a orders.js
+// Ahora se utiliza Avika.orders.forceCompleteTicket en su lugar
 
 // Función para mostrar el modal de selección de ticket a desbloquear
 Avika.ui.showForceCompleteModal = function() {
@@ -364,7 +405,13 @@ Avika.ui.showForceCompleteModal = function() {
             var selector = document.getElementById('ticket-selector');
             if (selector) {
                 var selectedTicket = selector.value;
-                Avika.ui.forceCompleteTicket(selectedTicket);
+                // Llamar a la implementación centralizada en el módulo orders.js
+                if (Avika.orders && typeof Avika.orders.forceCompleteTicket === 'function') {
+                    Avika.orders.forceCompleteTicket(selectedTicket);
+                } else {
+                    console.error('Error: Avika.orders.forceCompleteTicket no está disponible');
+                    Avika.ui.showNotification('Error al completar el ticket. Consulta la consola para más detalles.', 'error');
+                }
             }
         }
     );

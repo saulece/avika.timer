@@ -85,6 +85,130 @@ window.Avika = Object.assign({
             var el = document.getElementById(id);
             if (!el && this.log) this.log.warn('Elemento no encontrado:', id);
             return el;
+        },
+        
+        // Función eficiente para encontrar una orden por su ID - Implementación centralizada
+        findOrderById: function(orderId) {
+            if (!orderId) return null;
+            
+            // Crear un mapa de órdenes si no existe para mejorar el rendimiento
+            if (!this._orderCache) {
+                this._orderCache = {
+                    timestamp: Date.now(),
+                    pendingMap: {},
+                    deliveryMap: {},
+                    completedMap: {}
+                };
+                
+                // Llenar el mapa con las órdenes pendientes
+                if (Avika.data && Avika.data.pendingOrders) {
+                    for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                        var order = Avika.data.pendingOrders[i];
+                        if (order && order.id) {
+                            this._orderCache.pendingMap[order.id] = {
+                                order: order,
+                                type: 'pending',
+                                index: i
+                            };
+                        }
+                    }
+                }
+                
+                // Llenar el mapa con las órdenes en reparto
+                if (Avika.data && Avika.data.deliveryOrders) {
+                    for (var i = 0; i < Avika.data.deliveryOrders.length; i++) {
+                        var order = Avika.data.deliveryOrders[i];
+                        if (order && order.id) {
+                            this._orderCache.deliveryMap[order.id] = {
+                                order: order,
+                                type: 'delivery',
+                                index: i
+                            };
+                        }
+                    }
+                }
+                
+                // Llenar el mapa con las órdenes completadas (limitado a las más recientes para eficiencia)
+                if (Avika.data && Avika.data.completedOrders) {
+                    var maxCompletedToCache = 100; // Limitar a las 100 órdenes más recientes
+                    var completedToCache = Avika.data.completedOrders.slice(0, maxCompletedToCache);
+                    for (var i = 0; i < completedToCache.length; i++) {
+                        var order = completedToCache[i];
+                        if (order && order.id) {
+                            this._orderCache.completedMap[order.id] = {
+                                order: order,
+                                type: 'completed',
+                                index: i
+                            };
+                        }
+                    }
+                }
+            } else {
+                // Verificar si el caché es demasiado antiguo (más de 5 segundos) y regenerarlo si es necesario
+                if (Date.now() - this._orderCache.timestamp > 5000) {
+                    // Limpiar el caché para forzar su regeneración en la próxima llamada
+                    this._orderCache = null;
+                    return this.findOrderById(orderId); // Llamada recursiva para regenerar el caché
+                }
+            }
+            
+            // Buscar en los mapas de órdenes
+            if (this._orderCache.pendingMap[orderId]) {
+                return this._orderCache.pendingMap[orderId];
+            }
+            
+            if (this._orderCache.deliveryMap[orderId]) {
+                return this._orderCache.deliveryMap[orderId];
+            }
+            
+            if (this._orderCache.completedMap[orderId]) {
+                return this._orderCache.completedMap[orderId];
+            }
+            
+            // Si no se encuentra en el caché, buscar directamente en los arrays (menos eficiente)
+            if (Avika.data) {
+                // Buscar en órdenes pendientes
+                if (Avika.data.pendingOrders) {
+                    for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
+                        if (Avika.data.pendingOrders[i].id === orderId) {
+                            return {
+                                order: Avika.data.pendingOrders[i],
+                                type: 'pending',
+                                index: i
+                            };
+                        }
+                    }
+                }
+                
+                // Buscar en órdenes en reparto
+                if (Avika.data.deliveryOrders) {
+                    for (var i = 0; i < Avika.data.deliveryOrders.length; i++) {
+                        if (Avika.data.deliveryOrders[i].id === orderId) {
+                            return {
+                                order: Avika.data.deliveryOrders[i],
+                                type: 'delivery',
+                                index: i
+                            };
+                        }
+                    }
+                }
+                
+                // Buscar en órdenes completadas (limitado para eficiencia)
+                if (Avika.data.completedOrders) {
+                    var maxToSearch = Math.min(Avika.data.completedOrders.length, 100);
+                    for (var i = 0; i < maxToSearch; i++) {
+                        if (Avika.data.completedOrders[i].id === orderId) {
+                            return {
+                                order: Avika.data.completedOrders[i],
+                                type: 'completed',
+                                index: i
+                            };
+                        }
+                    }
+                }
+            }
+            
+            return null;
         }
     }
 }, window.Avika || {});

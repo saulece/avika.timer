@@ -383,7 +383,7 @@ Avika.ui.exportToExcel = function() {
     }
 };
 
-// Calcular tiempo transcurrido para exportación
+// Calcular tiempo transcurrido para exportación - Usando implementación centralizada
 Avika.ui.calculateElapsedTime = function(startTimeStr) {
     if (!startTimeStr) return 'N/A';
     
@@ -392,6 +392,7 @@ Avika.ui.calculateElapsedTime = function(startTimeStr) {
         var now = new Date();
         var elapsedSeconds = Math.floor((now - startTime) / 1000);
         
+        // Usar la implementación centralizada en Avika.utils
         return Avika.utils.formatElapsedTime(elapsedSeconds);
     } catch (e) {
         return 'Error';
@@ -400,66 +401,14 @@ Avika.ui.calculateElapsedTime = function(startTimeStr) {
 
 // Limpiar todos los datos
 Avika.ui.clearAllData = function() {
-    // Crear copia de seguridad de datos actuales
-    var backup = {
-        pendingOrders: Avika.data.pendingOrders || [],
-        deliveryOrders: Avika.data.deliveryOrders || [],
-        completedOrders: Avika.data.completedOrders || [],
-        config: Avika.config || {}
-    };
-    
-    // Almacenar copia de seguridad en localStorage
-    localStorage.setItem('avika_data_backup', JSON.stringify(backup));
-    
-    // Limpiar datos
-    Avika.data.pendingOrders = [];
-    Avika.data.deliveryOrders = [];
-    Avika.data.completedOrders = [];
-    
-    // Guardar datos
-    if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
-        Avika.storage.guardarDatosLocales();
-    }
-    
-    // Actualizar tablas
-    Avika.ui.updatePendingTable();
-    Avika.ui.updateDeliveryTable();
-    Avika.ui.updateCompletedTable(false);
-    
-    // Mostrar notificación con opción de restaurar
-    var notificationElement = document.getElementById('notification');
-    if (notificationElement) {
-        // Limpiar notificación existente
-        notificationElement.className = '';
-        notificationElement.classList.add('notification', 'notification-success');
-        
-        // Crear contenido con botón de restaurar
-        notificationElement.innerHTML = 'Todos los datos han sido eliminados. ' +
-            '<button id="btn-restore-backup" class="notification-btn">Restaurar datos anteriores</button>';
-        
-        // Mostrar notificación
-        notificationElement.style.display = 'block';
-        notificationElement.style.opacity = '1';
-        notificationElement.style.transform = 'translateY(0)';
-        
-        // Configurar botón de restaurar
-        var restoreBtn = document.getElementById('btn-restore-backup');
-        if (restoreBtn) {
-            restoreBtn.onclick = function() {
-                Avika.ui.restoreDataBackup();
-            };
-        }
-        
-        // Ocultar notificación después de 10 segundos
-        setTimeout(function() {
-            notificationElement.style.opacity = '0';
-            notificationElement.style.transform = 'translateY(20px)';
-            
-            setTimeout(function() {
-                notificationElement.style.display = 'none';
-            }, 300);
-        }, 10000);
+    // Llamar a la implementación centralizada en storage.js
+    if (Avika.storage && typeof Avika.storage.clearAllData === 'function') {
+        Avika.storage.clearAllData();
     } else {
-        Avika.ui.showNotification('Todos los datos han sido eliminados', 'success');
+        console.error('Error: Avika.storage.clearAllData no está disponible');
+        Avika.ui.showNotification('Error al limpiar los datos. Consulta la consola para más detalles.', 'error');
     }
 };
+
+// NOTA: La implementación completa de clearAllData ha sido movida a storage.js
+// Ahora se utiliza Avika.storage.clearAllData en su lugar

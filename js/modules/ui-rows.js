@@ -278,7 +278,33 @@ Avika.ui.createOrderRow = function(order) {
             if (this.classList.contains('finished')) return;
             var orderId = this.getAttribute('data-order-id');
             if (Avika.orders && typeof Avika.orders.finishIndividualItem === 'function') {
-                Avika.orders.finishIndividualItem(orderId);
+                var result = Avika.orders.finishIndividualItem(orderId);
+                
+                // Manejar el resultado
+                if (result && result.success) {
+                    // Actualizar tablas según sea necesario
+                    if (result.updatedTables && Array.isArray(result.updatedTables)) {
+                        result.updatedTables.forEach(function(tableType) {
+                            if (tableType === 'pendingTable' && Avika.ui && typeof Avika.ui.updatePendingTable === 'function') {
+                                Avika.ui.updatePendingTable();
+                            } else if (tableType === 'completedTable' && Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
+                                Avika.ui.updateCompletedTable();
+                            } else if (tableType === 'deliveryTable' && Avika.ui && typeof Avika.ui.updateDeliveryTable === 'function') {
+                                Avika.ui.updateDeliveryTable();
+                            }
+                        });
+                    }
+                    
+                    // Mostrar notificación
+                    if (result.message && Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                        Avika.ui.showNotification(result.message, result.messageType || 'success');
+                    }
+                } else if (result && !result.success) {
+                    // Mostrar error
+                    if (result.message && Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                        Avika.ui.showNotification(result.message, result.messageType || 'error');
+                    }
+                }
             }
         };
         actionContainer.appendChild(finishButton);
@@ -306,7 +332,33 @@ Avika.ui.createOrderRow = function(order) {
         finishButton.onclick = function() {
             var orderId = this.getAttribute('data-order-id');
             if (Avika.orders && typeof Avika.orders.finishPreparation === 'function') {
-                Avika.orders.finishPreparation(orderId);
+                var result = Avika.orders.finishPreparation(orderId);
+                
+                // Manejar el resultado
+                if (result && result.success) {
+                    // Actualizar tablas según sea necesario
+                    if (result.updatedTables && Array.isArray(result.updatedTables)) {
+                        result.updatedTables.forEach(function(tableType) {
+                            if (tableType === 'pendingTable' && Avika.ui && typeof Avika.ui.updatePendingTable === 'function') {
+                                Avika.ui.updatePendingTable();
+                            } else if (tableType === 'completedTable' && Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
+                                Avika.ui.updateCompletedTable();
+                            } else if (tableType === 'deliveryTable' && Avika.ui && typeof Avika.ui.updateDeliveryTable === 'function') {
+                                Avika.ui.updateDeliveryTable();
+                            }
+                        });
+                    }
+                    
+                    // Mostrar notificación
+                    if (result.message && Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                        Avika.ui.showNotification(result.message, result.messageType || 'success');
+                    }
+                } else if (result && !result.success) {
+                    // Mostrar error
+                    if (result.message && Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                        Avika.ui.showNotification(result.message, result.messageType || 'error');
+                    }
+                }
             }
         };
         actionContainer.appendChild(finishButton);

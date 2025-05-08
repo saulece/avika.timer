@@ -6,11 +6,19 @@ Avika.ui = Avika.ui || {};
 Avika.ui.updateCompletedTable = function(showAll) {
     // Registrar inicio para optimización
     var startTime = performance.now();
-    var completedTable = document.getElementById('completed-orders-table');
-    var completedBody = document.getElementById('completed-orders-body');
-    var completedCount = document.getElementById('completed-count');
     
-    if (!completedTable || !completedBody || !completedCount) {
+    // Usar Avika.optimization.getElement para acceso optimizado a elementos DOM
+    var completedBody, completedCount;
+    
+    if (Avika.optimization && typeof Avika.optimization.getElement === 'function') {
+        completedBody = Avika.optimization.getElement('completed-orders-body');
+        completedCount = Avika.optimization.getElement('completed-count');
+    } else {
+        completedBody = document.getElementById('completed-orders-body');
+        completedCount = document.getElementById('completed-count');
+    }
+    
+    if (!completedBody || !completedCount) {
         console.error("Elementos de la tabla de completados no encontrados");
         return;
     }
@@ -35,58 +43,16 @@ Avika.ui.updateCompletedTable = function(showAll) {
     var ordersToShow = showAll ? Avika.data.completedOrders : Avika.data.completedOrders.slice(0, 20);
     
     // Mantener un registro de las filas actualizadas para eliminar las obsoletas después
-    var updatedRowIds = [];
+    var updatedRowIds = new Set(); // Usar Set para mejor rendimiento
     
     // Actualizar o crear filas para cada orden
     for (var i = 0; i < ordersToShow.length; i++) {
         var order = ordersToShow[i];
         var rowId = 'completed-order-' + order.id;
-        updatedRowIds.push(rowId);
+        updatedRowIds.add(rowId);
         
-        // Preparar los datos de la celda
-        var rowData = {};
-        
-        // Columna de platillo
-        var dishContent = '<div class="dish-name">' + (order.quantity > 1 ? order.quantity + 'x ' : '') + order.dish + '</div>';
-        dishContent += '<div class="dish-info">';
-        
-        // Mostrar ticket ID si existe
-        if (order.ticketId) {
-            dishContent += '<span class="ticket-id">Ticket: ' + order.ticketId.substring(order.ticketId.length - 5) + '</span>';
-        }
-        
-        // Mostrar tipo de servicio
-        var serviceText = order.serviceType === 'comedor' ? 'Comedor' : 
-                         (order.serviceType === 'domicilio' ? 'Domicilio' : 'Para llevar');
-        dishContent += '<span class="service-type ' + order.serviceType + '">' + serviceText + '</span>';
-        
-        // Mostrar personalizaciones si existen
-        if (order.customizations && order.customizations.length > 0) {
-            dishContent += '<span class="customizations">' + order.customizations.join(', ') + '</span>';
-        }
-        
-        dishContent += '</div>';
-        rowData['dish'] = dishContent;
-        
-        // Columna de tiempos
-        var timeContent = '<div class="time-container">';
-        
-        // Tiempo de inicio
-        timeContent += '<div class="time-item"><span class="time-label">Inicio:</span> ' + 
-                      '<span class="time-value">' + (order.startTimeFormatted || '--:--:--') + '</span></div>';
-        
-        // Tiempo de preparación
-        timeContent += '<div class="time-item"><span class="time-label">Preparación:</span> ' + 
-                      '<span class="time-value">' + (order.preparationTimeFormatted || '--:--:--') + '</span></div>';
-        
-        // Tiempo de entrega (solo para domicilio)
-        if (order.serviceType === 'domicilio' && order.deliveryTimeFormatted) {
-            timeContent += '<div class="time-item"><span class="time-label">Entrega:</span> ' + 
-                          '<span class="time-value">' + order.deliveryTimeFormatted + '</span></div>';
-        }
-        
-        timeContent += '</div>';
-        rowData['time'] = timeContent;
+        // Preparar los datos de la celda usando la función centralizada
+        var rowData = this.generateCompletedRowData(order);
         
         // Actualizar o crear la fila usando la función optimizada
         if (Avika.optimization && typeof Avika.optimization.updateTableRow === 'function') {
@@ -97,10 +63,10 @@ Avika.ui.updateCompletedTable = function(showAll) {
     }
     
     // Eliminar filas obsoletas
-    var allRows = completedBody.querySelectorAll('tr');
+    var allRows = completedBody.querySelectorAll('tr[id^="completed-order-"]');
     for (var i = 0; i < allRows.length; i++) {
         var row = allRows[i];
-        if (row.id && row.id !== 'empty-completed-row' && updatedRowIds.indexOf(row.id) === -1) {
+        if (!updatedRowIds.has(row.id)) {
             row.remove();
         }
     }
@@ -109,11 +75,23 @@ Avika.ui.updateCompletedTable = function(showAll) {
     this.updateTimers();
     
     // Mostrar botón "Ver más" si hay más órdenes
-    var showMoreContainer = document.getElementById('show-more-completed-container');
+    var showMoreContainer;
+    if (Avika.optimization && typeof Avika.optimization.getElement === 'function') {
+        showMoreContainer = Avika.optimization.getElement('show-more-completed-container');
+    } else {
+        showMoreContainer = document.getElementById('show-more-completed-container');
+    }
+    
     if (showMoreContainer) {
         if (!showAll && Avika.data.completedOrders.length > 20) {
             showMoreContainer.style.display = 'block';
-            var showMoreButton = document.getElementById('show-more-completed');
+            var showMoreButton;
+            if (Avika.optimization && typeof Avika.optimization.getElement === 'function') {
+                showMoreButton = Avika.optimization.getElement('show-more-completed');
+            } else {
+                showMoreButton = document.getElementById('show-more-completed');
+            }
+            
             if (showMoreButton) {
                 showMoreButton.textContent = 'Ver todas (' + Avika.data.completedOrders.length + ')';
             }
@@ -121,15 +99,31 @@ Avika.ui.updateCompletedTable = function(showAll) {
             showMoreContainer.style.display = 'none';
         }
     }
+    
+    // Registrar tiempo de ejecución para optimización
+    if (Avika.utils && typeof Avika.utils.log === 'function') {
+        var endTime = performance.now();
+        Avika.utils.log.debug('updateCompletedTable ejecutado en ' + (endTime - startTime).toFixed(2) + 'ms');
+    }
 };
 
 // Actualizar tabla de órdenes pendientes
 Avika.ui.updatePendingTable = function() {
-    var pendingTable = document.getElementById('pending-orders-table');
-    var pendingBody = document.getElementById('pending-orders-body');
-    var pendingCount = document.getElementById('pending-count');
+    // Registrar inicio para optimización
+    var startTime = performance.now();
     
-    if (!pendingTable || !pendingBody || !pendingCount) {
+    // Usar Avika.optimization.getElement para acceso optimizado a elementos DOM
+    var pendingBody, pendingCount;
+    
+    if (Avika.optimization && typeof Avika.optimization.getElement === 'function') {
+        pendingBody = Avika.optimization.getElement('pending-orders-body');
+        pendingCount = Avika.optimization.getElement('pending-count');
+    } else {
+        pendingBody = document.getElementById('pending-orders-body');
+        pendingCount = document.getElementById('pending-count');
+    }
+    
+    if (!pendingBody || !pendingCount) {
         console.error("Elementos de la tabla de pendientes no encontrados");
         return;
     }
@@ -142,7 +136,13 @@ Avika.ui.updatePendingTable = function() {
     }
     
     // Eliminar fila vacía si existe
-    var emptyRow = document.getElementById('empty-pending-row');
+    var emptyRow;
+    if (Avika.optimization && typeof Avika.optimization.getElement === 'function') {
+        emptyRow = Avika.optimization.getElement('empty-pending-row');
+    } else {
+        emptyRow = document.getElementById('empty-pending-row');
+    }
+    
     if (emptyRow) {
         emptyRow.remove();
     }
@@ -151,13 +151,13 @@ Avika.ui.updatePendingTable = function() {
     pendingCount.textContent = Avika.data.pendingOrders.length;
     
     // Mantener un registro de las filas actualizadas para eliminar las obsoletas después
-    var updatedRowIds = [];
+    var updatedRowIds = new Set(); // Usar Set para mejor rendimiento
     
     // Actualizar o crear filas para cada orden
     for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
         var order = Avika.data.pendingOrders[i];
         var rowId = 'pending-order-' + order.id;
-        updatedRowIds.push(rowId);
+        updatedRowIds.add(rowId);
         
         // Preparar los datos de la celda
         var rowData = this.generatePendingRowData(order);
@@ -180,16 +180,22 @@ Avika.ui.updatePendingTable = function() {
     }
     
     // Eliminar filas obsoletas
-    var allRows = pendingBody.querySelectorAll('tr');
+    var allRows = pendingBody.querySelectorAll('tr[id^="pending-order-"]');
     for (var i = 0; i < allRows.length; i++) {
         var row = allRows[i];
-        if (row.id && row.id !== 'empty-pending-row' && updatedRowIds.indexOf(row.id) === -1) {
+        if (!updatedRowIds.has(row.id)) {
             row.remove();
         }
     }
     
     // Actualizar temporizadores
     this.updateTimers();
+    
+    // Registrar tiempo de ejecución para optimización
+    if (Avika.utils && typeof Avika.utils.log === 'function') {
+        var endTime = performance.now();
+        Avika.utils.log.debug('updatePendingTable ejecutado en ' + (endTime - startTime).toFixed(2) + 'ms');
+    }
 };
 
 // Actualizar temporizadores de todas las tablas
@@ -198,6 +204,55 @@ Avika.ui.updateTimers = function() {
     if (typeof this.updateAllTimers === 'function') {
         this.updateAllTimers();
     }
+};
+
+// Generar datos de fila para órdenes completadas
+Avika.ui.generateCompletedRowData = function(order) {
+    var rowData = {};
+    
+    // Columna de platillo
+    var dishContent = '<div class="dish-name">' + (order.quantity > 1 ? order.quantity + 'x ' : '') + order.dish + '</div>';
+    dishContent += '<div class="dish-info">';
+    
+    // Mostrar ticket ID si existe
+    if (order.ticketId) {
+        dishContent += '<span class="ticket-id">Ticket: ' + order.ticketId.substring(order.ticketId.length - 5) + '</span>';
+    }
+    
+    // Mostrar tipo de servicio
+    var serviceText = order.serviceType === 'comedor' ? 'Comedor' : 
+                     (order.serviceType === 'domicilio' ? 'Domicilio' : 'Para llevar');
+    dishContent += '<span class="service-type ' + order.serviceType + '">' + serviceText + '</span>';
+    
+    // Mostrar personalizaciones si existen
+    if (order.customizations && order.customizations.length > 0) {
+        dishContent += '<span class="customizations">' + order.customizations.join(', ') + '</span>';
+    }
+    
+    dishContent += '</div>';
+    rowData['dish'] = dishContent;
+    
+    // Columna de tiempos
+    var timeContent = '<div class="time-container">';
+    
+    // Tiempo de inicio
+    timeContent += '<div class="time-item"><span class="time-label">Inicio:</span> ' + 
+                  '<span class="time-value">' + (order.startTimeFormatted || '--:--:--') + '</span></div>';
+    
+    // Tiempo de preparación
+    timeContent += '<div class="time-item"><span class="time-label">Preparación:</span> ' + 
+                  '<span class="time-value">' + (order.preparationTimeFormatted || '--:--:--') + '</span></div>';
+    
+    // Tiempo de entrega (solo para domicilio)
+    if (order.serviceType === 'domicilio' && order.deliveryTimeFormatted) {
+        timeContent += '<div class="time-item"><span class="time-label">Entrega:</span> ' + 
+                      '<span class="time-value">' + order.deliveryTimeFormatted + '</span></div>';
+    }
+    
+    timeContent += '</div>';
+    rowData['time'] = timeContent;
+    
+    return rowData;
 };
 
 // Generar datos de fila para órdenes pendientes
@@ -282,8 +337,43 @@ Avika.ui.generatePendingRowData = function(order) {
         
         actionContent += '<button class="action-btn finish-btn' + finishClass + '" ' + 
                         'data-order-id="' + order.id + '" ' + 
-                        'onclick="Avika.orders.finishIndividualItem(\'' + order.id + '\')">' + 
+                        'onclick="handleFinishItem(\'' + order.id + '\')">' + 
                         finishText + '</button>';
+                        
+        // Asegurarse de que la función handleFinishItem esté definida globalmente
+        if (!window.handleFinishItem) {
+            window.handleFinishItem = function(orderId) {
+                if (Avika.orders && typeof Avika.orders.finishIndividualItem === 'function') {
+                    var result = Avika.orders.finishIndividualItem(orderId);
+                    
+                    // Manejar el resultado
+                    if (result && result.success) {
+                        // Actualizar tablas según sea necesario
+                        if (result.updatedTables && Array.isArray(result.updatedTables)) {
+                            result.updatedTables.forEach(function(tableType) {
+                                if (tableType === 'pendingTable' && Avika.ui && typeof Avika.ui.updatePendingTable === 'function') {
+                                    Avika.ui.updatePendingTable();
+                                } else if (tableType === 'completedTable' && Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
+                                    Avika.ui.updateCompletedTable();
+                                } else if (tableType === 'deliveryTable' && Avika.ui && typeof Avika.ui.updateDeliveryTable === 'function') {
+                                    Avika.ui.updateDeliveryTable();
+                                }
+                            });
+                        }
+                        
+                        // Mostrar notificación
+                        if (result.message && Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                            Avika.ui.showNotification(result.message, result.messageType || 'success');
+                        }
+                    } else if (result && !result.success) {
+                        // Mostrar error
+                        if (result.message && Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                            Avika.ui.showNotification(result.message, result.messageType || 'error');
+                        }
+                    }
+                }
+            };
+        }
         
     } else if (order.serviceType === 'domicilio') {
         // Para órdenes a domicilio individuales, mostrar botón de finalizar cocina
@@ -296,8 +386,43 @@ Avika.ui.generatePendingRowData = function(order) {
         // Para órdenes normales, mostrar botón de finalizar
         actionContent += '<button class="action-btn finish-btn" ' + 
                         'data-order-id="' + order.id + '" ' + 
-                        'onclick="Avika.orders.finishPreparation(\'' + order.id + '\')">' + 
+                        'onclick="handleFinishPreparation(\'' + order.id + '\')">' + 
                         'Terminar</button>';
+                        
+        // Asegurarse de que la función handleFinishPreparation esté definida globalmente
+        if (!window.handleFinishPreparation) {
+            window.handleFinishPreparation = function(orderId) {
+                if (Avika.orders && typeof Avika.orders.finishPreparation === 'function') {
+                    var result = Avika.orders.finishPreparation(orderId);
+                    
+                    // Manejar el resultado
+                    if (result && result.success) {
+                        // Actualizar tablas según sea necesario
+                        if (result.updatedTables && Array.isArray(result.updatedTables)) {
+                            result.updatedTables.forEach(function(tableType) {
+                                if (tableType === 'pendingTable' && Avika.ui && typeof Avika.ui.updatePendingTable === 'function') {
+                                    Avika.ui.updatePendingTable();
+                                } else if (tableType === 'completedTable' && Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
+                                    Avika.ui.updateCompletedTable();
+                                } else if (tableType === 'deliveryTable' && Avika.ui && typeof Avika.ui.updateDeliveryTable === 'function') {
+                                    Avika.ui.updateDeliveryTable();
+                                }
+                            });
+                        }
+                        
+                        // Mostrar notificación
+                        if (result.message && Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                            Avika.ui.showNotification(result.message, result.messageType || 'success');
+                        }
+                    } else if (result && !result.success) {
+                        // Mostrar error
+                        if (result.message && Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                            Avika.ui.showNotification(result.message, result.messageType || 'error');
+                        }
+                    }
+                }
+            };
+        }
     }
     
     actionContent += '</div>';
@@ -308,11 +433,21 @@ Avika.ui.generatePendingRowData = function(order) {
 
 // Actualizar tabla de órdenes en reparto
 Avika.ui.updateDeliveryTable = function() {
-    var deliveryTable = document.getElementById('delivery-orders-table');
-    var deliveryBody = document.getElementById('delivery-orders-body');
-    var deliveryCount = document.getElementById('delivery-count');
+    // Registrar inicio para optimización
+    var startTime = performance.now();
     
-    if (!deliveryTable || !deliveryBody || !deliveryCount) {
+    // Usar Avika.optimization.getElement para acceso optimizado a elementos DOM
+    var deliveryBody, deliveryCount;
+    
+    if (Avika.optimization && typeof Avika.optimization.getElement === 'function') {
+        deliveryBody = Avika.optimization.getElement('delivery-orders-body');
+        deliveryCount = Avika.optimization.getElement('delivery-count');
+    } else {
+        deliveryBody = document.getElementById('delivery-orders-body');
+        deliveryCount = document.getElementById('delivery-count');
+    }
+    
+    if (!deliveryBody || !deliveryCount) {
         console.error("Elementos de la tabla de reparto no encontrados");
         return;
     }
@@ -325,7 +460,13 @@ Avika.ui.updateDeliveryTable = function() {
     }
     
     // Eliminar fila vacía si existe
-    var emptyRow = document.getElementById('empty-delivery-row');
+    var emptyRow;
+    if (Avika.optimization && typeof Avika.optimization.getElement === 'function') {
+        emptyRow = Avika.optimization.getElement('empty-delivery-row');
+    } else {
+        emptyRow = document.getElementById('empty-delivery-row');
+    }
+    
     if (emptyRow) {
         emptyRow.remove();
     }
@@ -334,13 +475,13 @@ Avika.ui.updateDeliveryTable = function() {
     deliveryCount.textContent = Avika.data.deliveryOrders.length;
     
     // Mantener un registro de las filas actualizadas para eliminar las obsoletas después
-    var updatedRowIds = [];
+    var updatedRowIds = new Set(); // Usar Set para mejor rendimiento
     
     // Actualizar o crear filas para cada orden
     for (var i = 0; i < Avika.data.deliveryOrders.length; i++) {
         var order = Avika.data.deliveryOrders[i];
         var rowId = 'delivery-order-' + order.id;
-        updatedRowIds.push(rowId);
+        updatedRowIds.add(rowId);
         
         // Preparar los datos de la celda
         var rowData = this.generateDeliveryRowData(order);
@@ -354,16 +495,22 @@ Avika.ui.updateDeliveryTable = function() {
     }
     
     // Eliminar filas obsoletas
-    var allRows = deliveryBody.querySelectorAll('tr');
+    var allRows = deliveryBody.querySelectorAll('tr[id^="delivery-order-"]');
     for (var i = 0; i < allRows.length; i++) {
         var row = allRows[i];
-        if (row.id && row.id !== 'empty-delivery-row' && updatedRowIds.indexOf(row.id) === -1) {
+        if (!updatedRowIds.has(row.id)) {
             row.remove();
         }
     }
     
     // Actualizar temporizadores
     this.updateTimers();
+    
+    // Registrar tiempo de ejecución para optimización
+    if (Avika.utils && typeof Avika.utils.log === 'function') {
+        var endTime = performance.now();
+        Avika.utils.log.debug('updateDeliveryTable ejecutado en ' + (endTime - startTime).toFixed(2) + 'ms');
+    }
 };
 
 // Generar datos de fila para órdenes en reparto

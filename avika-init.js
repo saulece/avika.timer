@@ -311,14 +311,21 @@ document.addEventListener('DOMContentLoaded', function() {
             Avika.data.completedOrders = [];
         }
         
-        // Inicializar componentes de UI
-        initCategoryButtons(); // Ahora es seguro llamarlo porque maneja el caso de botones faltantes
-        initServiceButtons();
-        initQuantityButtons();
-        initActionButtons();
+        // Inicializar componentes de UI solo si Avika.ui.init no está disponible
+        // Estos manejadores ahora deberían ser gestionados por ui-main.js
+        if (!Avika.ui || typeof Avika.ui.init !== 'function') {
+            console.warn('Avika.ui.init no está disponible, usando inicialización manual de componentes UI');
+            initCategoryButtons();
+            initServiceButtons();
+            initQuantityButtons();
+            initActionButtons();
+        }
         
-        // Cargar datos guardados
-        loadSavedData();
+        // Cargar datos guardados si no está disponible en ui-main.js
+        if (!Avika.ui || typeof Avika.ui.loadInitialData !== 'function') {
+            console.warn('Avika.ui.loadInitialData no está disponible, usando carga manual de datos');
+            loadSavedData();
+        }
         
         // Configurar actualizaciones periódicas (optimizadas)
         // Iniciar la primera actualización de temporizadores
@@ -376,25 +383,23 @@ document.addEventListener('DOMContentLoaded', function() {
             }, autoSaveInterval);
         }
         
+        console.log("Inicialización básica completa");
+        
+        // Inicializar UI centralizada si está disponible
+        if (Avika.ui && typeof Avika.ui.init === 'function') {
+            console.log("Inicializando UI centralizada...");
+            Avika.ui.init();
+        } else {
+            console.warn("Avika.ui.init no está disponible, la UI puede no estar completamente inicializada");
+        }
+        
         console.log("Inicialización completa");
     }
     
     // Iniciar la aplicación
     initApp();
     
-    // Botón para modo compacto
-    var btnCompactMode = document.getElementById('btn-compact-mode');
-    if (btnCompactMode) {
-        btnCompactMode.addEventListener('click', function() {
-            Avika.ui.toggleCompactMode();
-        });
-    } else {
-        console.warn("Elemento 'btn-compact-mode' no encontrado");
-    }
-
-    // Restaurar preferencias de modo compacto si existe
-    if (localStorage.getItem('avika_compact_mode') === 'true') {
-        document.body.classList.add('ultra-compact-mode');
-        document.getElementById('compact-icon').textContent = '📱';
-    }
+    // NOTA: La gestión del modo compacto ha sido movida a los módulos UI centralizados
+    // (ui-core.js, ui-modals.js, ui-settings.js)
+    // Los event listeners para el modo compacto ahora son manejados por estos módulos
 });

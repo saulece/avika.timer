@@ -376,21 +376,21 @@ verificarIntegridad: function() {
                 // Verificar startTime
                 if (!orden.startTime) {
                     orden.startTime = ahoraISO;
-                    orden.startTimeFormatted = this.formatTime(ahora);
+                    orden.startTimeFormatted = Avika.utils.formatTime(ahora);
                     reparaciones++;
                 } else if (typeof orden.startTime !== 'string' || isNaN(new Date(orden.startTime).getTime())) {
                     orden.startTime = ahoraISO;
-                    orden.startTimeFormatted = this.formatTime(ahora);
+                    orden.startTimeFormatted = Avika.utils.formatTime(ahora);
                     reparaciones++;
                 }
 
                 // Verificar startTimeFormatted
                 if (!orden.startTimeFormatted || typeof orden.startTimeFormatted !== 'string') {
                     try {
-                        orden.startTimeFormatted = this.formatTime(new Date(orden.startTime));
+                        orden.startTimeFormatted = Avika.utils.formatTime(new Date(orden.startTime));
                         reparaciones++;
                     } catch (e) {
-                        orden.startTimeFormatted = this.formatTime(ahora);
+                        orden.startTimeFormatted = Avika.utils.formatTime(ahora);
                         reparaciones++;
                     }
                 }
@@ -475,22 +475,22 @@ verificarIntegridad: function() {
                 // Verificar startTime
                 if (!orden.startTime) {
                     orden.startTime = ahoraISO;
-                    orden.startTimeFormatted = this.formatTime(ahora);
+                    orden.startTimeFormatted = Avika.utils.formatTime(ahora);
                     reparaciones++;
                 } else if (typeof orden.startTime !== 'string' || isNaN(new Date(orden.startTime).getTime())) {
                     orden.startTime = ahoraISO;
-                    orden.startTimeFormatted = this.formatTime(ahora);
+                    orden.startTimeFormatted = Avika.utils.formatTime(ahora);
                     reparaciones++;
                 }
 
                 // Verificar preparationTime
                 if (!orden.preparationTime) {
                     orden.preparationTime = ahoraISO;
-                    orden.preparationTimeFormatted = this.formatTime(ahora);
+                    orden.preparationTimeFormatted = Avika.utils.formatTime(ahora);
                     reparaciones++;
                 } else if (typeof orden.preparationTime !== 'string' || isNaN(new Date(orden.preparationTime).getTime())) {
                     orden.preparationTime = ahoraISO;
-                    orden.preparationTimeFormatted = this.formatTime(ahora);
+                    orden.preparationTimeFormatted = Avika.utils.formatTime(ahora);
                     reparaciones++;
                 }
 
@@ -499,17 +499,17 @@ verificarIntegridad: function() {
                     if (typeof orden.deliveryDepartureTime !== 'string' || isNaN(new Date(orden.deliveryDepartureTime).getTime())) {
                         // Si el tiempo de salida es inválido, establecerlo a ahora
                         orden.deliveryDepartureTime = ahoraISO;
-                        orden.deliveryDepartureTimeFormatted = this.formatTime(ahora);
+                        orden.deliveryDepartureTimeFormatted = Avika.utils.formatTime(ahora);
                         reparaciones++;
                     }
 
                     // Verificar que deliveryDepartureTimeFormatted exista y sea válido
                     if (!orden.deliveryDepartureTimeFormatted || typeof orden.deliveryDepartureTimeFormatted !== 'string') {
                         try {
-                            orden.deliveryDepartureTimeFormatted = this.formatTime(new Date(orden.deliveryDepartureTime));
+                            orden.deliveryDepartureTimeFormatted = Avika.utils.formatTime(new Date(orden.deliveryDepartureTime));
                             reparaciones++;
                         } catch (e) {
-                            orden.deliveryDepartureTimeFormatted = this.formatTime(ahora);
+                            orden.deliveryDepartureTimeFormatted = Avika.utils.formatTime(ahora);
                             reparaciones++;
                         }
                     }
@@ -576,22 +576,22 @@ verificarIntegridad: function() {
                 // Verificar startTime
                 if (!orden.startTime) {
                     orden.startTime = ahoraISO;
-                    orden.startTimeFormatted = this.formatTime(ahora);
+                    orden.startTimeFormatted = Avika.utils.formatTime(ahora);
                     reparaciones++;
                 } else if (typeof orden.startTime !== 'string' || isNaN(new Date(orden.startTime).getTime())) {
                     orden.startTime = ahoraISO;
-                    orden.startTimeFormatted = this.formatTime(ahora);
+                    orden.startTimeFormatted = Avika.utils.formatTime(ahora);
                     reparaciones++;
                 }
 
                 // Verificar finishTime (obligatorio para órdenes completadas)
                 if (!orden.finishTime) {
                     orden.finishTime = ahoraISO;
-                    orden.finishTimeFormatted = this.formatTime(ahora);
+                    orden.finishTimeFormatted = Avika.utils.formatTime(ahora);
                     reparaciones++;
                 } else if (typeof orden.finishTime !== 'string' || isNaN(new Date(orden.finishTime).getTime())) {
                     orden.finishTime = ahoraISO;
-                    orden.finishTimeFormatted = this.formatTime(ahora);
+                    orden.finishTimeFormatted = Avika.utils.formatTime(ahora);
                     reparaciones++;
                 }
 
@@ -607,10 +607,10 @@ verificarIntegridad: function() {
                 // Verificar completionTimeFormatted
                 if (!orden.completionTimeFormatted || typeof orden.completionTimeFormatted !== 'string') {
                     try {
-                        orden.completionTimeFormatted = this.formatTime(new Date(orden.completionTime));
+                        orden.completionTimeFormatted = Avika.utils.formatTime(new Date(orden.completionTime));
                         reparaciones++;
                     } catch (e) {
-                        orden.completionTimeFormatted = this.formatTime(ahora);
+                        orden.completionTimeFormatted = Avika.utils.formatTime(ahora);
                         reparaciones++;
                     }
                 }
@@ -635,17 +635,17 @@ verificarIntegridad: function() {
                 if (orden.serviceType === 'domicilio' && orden.deliveryTime) {
                     if (typeof orden.deliveryTime !== 'string' || isNaN(new Date(orden.deliveryTime).getTime())) {
                         orden.deliveryTime = ahoraISO;
-                        orden.deliveryTimeFormatted = this.formatTime(ahora);
+                        orden.deliveryTimeFormatted = Avika.utils.formatTime(ahora);
                         reparaciones++;
                     }
 
                     // Verificar deliveryTimeFormatted
                     if (!orden.deliveryTimeFormatted || typeof orden.deliveryTimeFormatted !== 'string') {
                         try {
-                            orden.deliveryTimeFormatted = this.formatTime(new Date(orden.deliveryTime));
+                            orden.deliveryTimeFormatted = Avika.utils.formatTime(new Date(orden.deliveryTime));
                             reparaciones++;
                         } catch (e) {
-                            orden.deliveryTimeFormatted = this.formatTime(ahora);
+                            orden.deliveryTimeFormatted = Avika.utils.formatTime(ahora);
                             reparaciones++;
                         }
                     }
@@ -704,30 +704,99 @@ verificarIntegridad: function() {
     }
 },
 
-// Función auxiliar para formatear tiempo
-formatTime: function(date) {
-    if (!date) return '--:--:--';
-    
-    var hours = this.padZero(date.getHours());
-    var minutes = this.padZero(date.getMinutes());
-    var seconds = this.padZero(date.getSeconds());
-    return hours + ':' + minutes + ':' + seconds;
-},
+// Las funciones formatTime y padZero han sido eliminadas porque ahora utilizamos
+// directamente Avika.utils.formatTime y Avika.utils.padZero
 
-// Función auxiliar para añadir ceros a números
-padZero: function(num) {
-    return (num < 10 ? '0' : '') + num;
-},
-
-    // Función para limpiar historial
-    limpiarHistorial: function() {
-        if (confirm('¿Estás seguro de que deseas borrar todo el historial completado?')) {
-            Avika.data.completedOrders = [];
-            Avika.ui.updateCompletedTable();
-            Avika.storage.guardarDatosLocales();
-            Avika.ui.showNotification('Historial limpiado');
+// Función para limpiar historial
+limpiarHistorial: function() {
+    // Confirmar con el usuario antes de limpiar
+    if (confirm('¿Estás seguro de que deseas eliminar todo el historial de órdenes completadas?')) {
+        // Limpiar historial
+        Avika.data.completedOrders = [];
+        
+        // Guardar cambios
+        this.guardarDatosLocales();
+        
+        // Actualizar tabla de completados
+        if (Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
+            Avika.ui.updateCompletedTable(false);
         }
-    },
+    }
+},
+
+// Limpiar todos los datos
+clearAllData: function() {
+    // Crear copia de seguridad de datos actuales
+    var backup = {
+        pendingOrders: Avika.data.pendingOrders || [],
+        deliveryOrders: Avika.data.deliveryOrders || [],
+        completedOrders: Avika.data.completedOrders || [],
+        config: Avika.config || {}
+    };
+    
+    // Almacenar copia de seguridad en localStorage
+    localStorage.setItem('avika_data_backup', JSON.stringify(backup));
+    
+    // Limpiar datos
+    Avika.data.pendingOrders = [];
+    Avika.data.deliveryOrders = [];
+    Avika.data.completedOrders = [];
+    
+    // Guardar datos
+    this.guardarDatosLocales();
+    
+    // Actualizar tablas si UI está disponible
+    if (Avika.ui) {
+        if (typeof Avika.ui.updatePendingTable === 'function') {
+            Avika.ui.updatePendingTable();
+        }
+        if (typeof Avika.ui.updateDeliveryTable === 'function') {
+            Avika.ui.updateDeliveryTable();
+        }
+        if (typeof Avika.ui.updateCompletedTable === 'function') {
+            Avika.ui.updateCompletedTable(false);
+        }
+        
+        // Mostrar notificación con opción de restaurar
+        var notificationElement = document.getElementById('notification');
+        if (notificationElement) {
+            // Limpiar notificación existente
+            notificationElement.className = '';
+            notificationElement.classList.add('notification', 'notification-success');
+            
+            // Crear contenido con botón de restaurar
+            notificationElement.innerHTML = 'Todos los datos han sido eliminados. ' +
+                '<button id="btn-restore-backup" class="notification-btn">Restaurar datos anteriores</button>';
+            
+            // Mostrar notificación
+            notificationElement.style.display = 'block';
+            notificationElement.style.opacity = '1';
+            notificationElement.style.transform = 'translateY(0)';
+            
+            // Configurar botón de restaurar
+            var restoreBtn = document.getElementById('btn-restore-backup');
+            if (restoreBtn) {
+                restoreBtn.onclick = function() {
+                    if (Avika.ui && typeof Avika.ui.restoreDataBackup === 'function') {
+                        Avika.ui.restoreDataBackup();
+                    }
+                };
+            }
+            
+            // Ocultar notificación después de 10 segundos
+            setTimeout(function() {
+                notificationElement.style.opacity = '0';
+                notificationElement.style.transform = 'translateY(20px)';
+                
+                setTimeout(function() {
+                    notificationElement.style.display = 'none';
+                }, 300);
+            }, 10000);
+        } else if (typeof Avika.ui.showNotification === 'function') {
+            Avika.ui.showNotification('Todos los datos han sido eliminados', 'success');
+        }
+    }
+},
     
     // Inicializar el autoguardado
     iniciarAutoguardado: function() {
@@ -745,3 +814,4 @@ padZero: function(num) {
         console.log('Autoguardado iniciado con intervalo de ' + intervalo + 'ms');
     }
 };
+

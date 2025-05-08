@@ -81,51 +81,8 @@ Avika.ui.showSection = function(sectionId) {
     }
 };
 
-// Función mejorada para mostrar notificaciones con tipos
-Avika.ui.showNotification = function(message, type) {
-    type = type || 'info'; // Valores posibles: info, success, warning, error
-    
-    var notificationElement = document.getElementById('notification');
-    if (!notificationElement) {
-        console.error("Elemento de notificación no encontrado");
-        return;
-    }
-    
-    // Limpiar clases anteriores
-    notificationElement.className = '';
-    
-    // Añadir clase según el tipo
-    notificationElement.classList.add('notification', 'notification-' + type);
-    
-    // Establecer mensaje
-    notificationElement.textContent = message;
-    
-    // Mostrar notificación
-    notificationElement.style.display = 'block';
-    
-    // Aplicar animación de entrada
-    notificationElement.classList.add('notification-show');
-    
-    // Configurar temporizador para ocultar
-    if (Avika.ui._notificationTimeout) {
-        clearTimeout(Avika.ui._notificationTimeout);
-    }
-    
-    var timeoutDuration = Avika.utils && Avika.utils.TIME_CONSTANTS ? 
-                         Avika.utils.TIME_CONSTANTS.NOTIFICATION_TIMEOUT_MS : 3000;
-    
-    Avika.ui._notificationTimeout = setTimeout(function() {
-        // Aplicar animación de salida
-        notificationElement.classList.remove('notification-show');
-        notificationElement.classList.add('notification-hide');
-        
-        // Ocultar después de la animación
-        setTimeout(function() {
-            notificationElement.style.display = 'none';
-            notificationElement.classList.remove('notification-hide');
-        }, 300); // Duración de la animación
-    }, timeoutDuration);
-};
+// Función para mostrar notificaciones - Usando implementación centralizada en ui-notifications.js
+// La implementación completa se encuentra en ui-notifications.js
 
 // Funciones de utilidad para la UI
 Avika.ui.showLoading = function() {
@@ -146,69 +103,21 @@ Avika.ui.padZero = function(num) {
     return Avika.utils.padZero(num);
 };
 
-// Función para activar/desactivar modo ultra-compacto
+// Función para activar/desactivar modo ultra-compacto - Usando implementación centralizada en ui-modals.js
+// Esta función es un wrapper para mantener compatibilidad con el código existente
 Avika.ui.toggleCompactMode = function() {
-    var body = document.body;
-    var compactModeEnabled = body.classList.contains('compact-mode');
-    
-    if (compactModeEnabled) {
-        // Desactivar modo compacto
-        body.classList.remove('compact-mode');
-        localStorage.setItem('avika_compact_mode', 'false');
-        if (document.getElementById('btn-compact-mode')) {
-            document.getElementById('btn-compact-mode').textContent = 'Activar modo ultra-compacto';
-        }
-    } else {
-        // Activar modo compacto
-        body.classList.add('compact-mode');
-        localStorage.setItem('avika_compact_mode', 'true');
-        if (document.getElementById('btn-compact-mode')) {
-            document.getElementById('btn-compact-mode').textContent = 'Desactivar modo ultra-compacto';
-        }
-    }
-    
-    // Actualizar tablas para reflejar el nuevo modo
-    if (typeof Avika.ui.updatePendingTable === 'function') {
-        Avika.ui.updatePendingTable();
-    }
-    if (typeof Avika.ui.updateDeliveryTable === 'function') {
-        Avika.ui.updateDeliveryTable();
+    var compactModeEnabled = document.body.classList.contains('compact-mode');
+    // Llamar a la implementación centralizada con el parámetro adecuado
+    if (typeof Avika.ui.setCompactMode === 'function') {
+        Avika.ui.setCompactMode(!compactModeEnabled);
     }
 };
 
-// Verificar si un elemento está visible en el viewport
+// Verificar si un elemento está visible en el viewport - Usando implementación centralizada
 Avika.ui.isElementInViewport = function(el) {
-    if (!el) return false;
-    
-    var rect = el.getBoundingClientRect();
-    
-    return (
-        rect.top >= 0 &&
-        rect.left >= 0 &&
-        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-    );
+    // Usar la implementación optimizada de Avika.optimization
+    return Avika.optimization.isElementInViewport(el);
 };
 
-// Búsqueda optimizada de órdenes
-Avika.ui.findOrderById = function(id) {
-    // Buscar en órdenes pendientes
-    if (Avika.data && Avika.data.pendingOrders) {
-        for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-            if (Avika.data.pendingOrders[i].id === id) {
-                return { order: Avika.data.pendingOrders[i], type: 'pending', index: i };
-            }
-        }
-    }
-    
-    // Buscar en órdenes en reparto
-    if (Avika.data && Avika.data.deliveryOrders) {
-        for (var i = 0; i < Avika.data.deliveryOrders.length; i++) {
-            if (Avika.data.deliveryOrders[i].id === id) {
-                return { order: Avika.data.deliveryOrders[i], type: 'delivery', index: i };
-            }
-        }
-    }
-    
-    return null;
-};
+// Búsqueda optimizada de órdenes - Usando implementación centralizada en Avika.utils.findOrderById
+// La implementación se ha movido a Avika.utils para centralización

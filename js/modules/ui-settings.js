@@ -221,10 +221,14 @@ Avika.ui.saveSettings = function() {
     
     if (compactModeCheckbox) {
         Avika.config.compactMode = compactModeCheckbox.checked;
+        // Usar la implementación centralizada
+        Avika.ui.setCompactMode(Avika.config.compactMode);
     }
     
     if (darkModeCheckbox) {
         Avika.config.darkMode = darkModeCheckbox.checked;
+        // Usar la implementación centralizada
+        Avika.ui.setDarkMode(Avika.config.darkMode);
     }
     
     if (autoRefreshSelect) {
@@ -300,7 +304,34 @@ Avika.ui.disableAutoRefresh = function() {
     }
 };
 
-// Alternar modo compacto
+// Implementación centralizada para activar/desactivar modo compacto
+Avika.ui.setCompactMode = function(enable) {
+    var body = document.body;
+    
+    if (enable) {
+        body.classList.add('compact-mode');
+        localStorage.setItem('avika_compact_mode', 'true');
+        if (document.getElementById('btn-compact-mode')) {
+            document.getElementById('btn-compact-mode').textContent = 'Desactivar modo ultra-compacto';
+        }
+    } else {
+        body.classList.remove('compact-mode');
+        localStorage.setItem('avika_compact_mode', 'false');
+        if (document.getElementById('btn-compact-mode')) {
+            document.getElementById('btn-compact-mode').textContent = 'Activar modo ultra-compacto';
+        }
+    }
+    
+    // Actualizar tablas para reflejar el nuevo modo
+    if (typeof Avika.ui.updatePendingTable === 'function') {
+        Avika.ui.updatePendingTable();
+    }
+    if (typeof Avika.ui.updateDeliveryTable === 'function') {
+        Avika.ui.updateDeliveryTable();
+    }
+};
+
+// Alternar modo compacto - Función para compatibilidad con código existente
 Avika.ui.toggleCompactMode = function() {
     // Inicializar configuración si no existe
     if (!Avika.config) {
@@ -310,14 +341,10 @@ Avika.ui.toggleCompactMode = function() {
     // Alternar modo
     Avika.config.compactMode = !Avika.config.compactMode;
     
-    // Aplicar cambio
-    if (Avika.config.compactMode) {
-        document.body.classList.add('compact-mode');
-    } else {
-        document.body.classList.remove('compact-mode');
-    }
+    // Aplicar cambio usando la implementación centralizada
+    Avika.ui.setCompactMode(Avika.config.compactMode);
     
-    // Guardar configuración
+    // Guardar configuración completa
     if (Avika.storage && typeof Avika.storage.guardarConfiguracion === 'function') {
         Avika.storage.guardarConfiguracion();
     } else {
@@ -334,7 +361,18 @@ Avika.ui.toggleCompactMode = function() {
     Avika.ui.showNotification('Modo compacto ' + modoTexto, 'info');
 };
 
-// Alternar modo oscuro
+// Implementación centralizada para activar/desactivar modo oscuro
+Avika.ui.setDarkMode = function(enable) {
+    if (enable) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('avika_dark_mode', 'true');
+    } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('avika_dark_mode', 'false');
+    }
+};
+
+// Alternar modo oscuro - Función para compatibilidad con código existente
 Avika.ui.toggleDarkMode = function() {
     // Inicializar configuración si no existe
     if (!Avika.config) {
@@ -344,14 +382,10 @@ Avika.ui.toggleDarkMode = function() {
     // Alternar modo
     Avika.config.darkMode = !Avika.config.darkMode;
     
-    // Aplicar cambio
-    if (Avika.config.darkMode) {
-        document.body.classList.add('dark-mode');
-    } else {
-        document.body.classList.remove('dark-mode');
-    }
+    // Aplicar cambio usando la implementación centralizada
+    Avika.ui.setDarkMode(Avika.config.darkMode);
     
-    // Guardar configuración
+    // Guardar configuración completa
     if (Avika.storage && typeof Avika.storage.guardarConfiguracion === 'function') {
         Avika.storage.guardarConfiguracion();
     } else {

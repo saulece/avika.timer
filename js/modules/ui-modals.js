@@ -308,8 +308,15 @@ Avika.ui.showStatsModal = function() {
     // Actualizar contenido
     var statsContent = document.getElementById('stats-content');
     
-    // Calcular estadísticas
-    var stats = this.calculateStats();
+    // Calcular estadísticas usando la implementación centralizada en stats.js
+    var stats;
+    if (Avika.stats && typeof Avika.stats.calculateStats === 'function') {
+        stats = Avika.stats.calculateStats();
+    } else {
+        console.error('Error: Avika.stats.calculateStats no está disponible');
+        Avika.ui.showNotification('Error al calcular estadísticas. Consulta la consola para más detalles.', 'error');
+        return;
+    }
     
     // Formatear estadísticas
     var statsHtml = `
@@ -392,112 +399,8 @@ Avika.ui.showStatsModal = function() {
     modal.style.display = 'block';
 };
 
-// Calcular estadísticas
-Avika.ui.calculateStats = function() {
-    var stats = {
-        totalOrders: 0,
-        pendingOrders: 0,
-        deliveryOrders: 0,
-        completedOrders: 0,
-        avgPrepTime: 'No disponible',
-        avgDeliveryTime: 'No disponible',
-        avgTotalTime: 'No disponible',
-        byCategory: {},
-        byService: {
-            'comedor': 0,
-            'domicilio': 0,
-            'para-llevar': 0
-        }
-    };
-    
-    // Contar órdenes pendientes
-    if (Avika.data.pendingOrders) {
-        stats.pendingOrders = Avika.data.pendingOrders.length;
-    }
-    
-    // Contar órdenes en reparto
-    if (Avika.data.deliveryOrders) {
-        stats.deliveryOrders = Avika.data.deliveryOrders.length;
-    }
-    
-    // Contar órdenes completadas
-    if (Avika.data.completedOrders) {
-        stats.completedOrders = Avika.data.completedOrders.length;
-    }
-    
-    // Total de órdenes
-    stats.totalOrders = stats.pendingOrders + stats.deliveryOrders + stats.completedOrders;
-    
-    // Calcular tiempos promedio
-    if (Avika.data.completedOrders && Avika.data.completedOrders.length > 0) {
-        var totalPrepTime = 0;
-        var totalDeliveryTime = 0;
-        var totalTime = 0;
-        var prepCount = 0;
-        var deliveryCount = 0;
-        var totalCount = 0;
-        
-        for (var i = 0; i < Avika.data.completedOrders.length; i++) {
-            var order = Avika.data.completedOrders[i];
-            
-            // Tiempo de preparación
-            if (order.startTime && order.completionTime) {
-                var startTime = new Date(order.startTime);
-                var completionTime = new Date(order.completionTime);
-                var prepTime = Math.floor((completionTime - startTime) / 1000);
-                
-                totalPrepTime += prepTime;
-                prepCount++;
-                
-                // Tiempo total
-                totalTime += prepTime;
-                totalCount++;
-            }
-            
-            // Tiempo de entrega
-            if (order.serviceType === 'domicilio' && order.departureTime && order.arrivalTime) {
-                var departureTime = new Date(order.departureTime);
-                var arrivalTime = new Date(order.arrivalTime);
-                var deliveryTime = Math.floor((arrivalTime - departureTime) / 1000);
-                
-                totalDeliveryTime += deliveryTime;
-                deliveryCount++;
-            }
-            
-            // Contar por categoría
-            var category = order.category || 'sin-categoria';
-            if (!stats.byCategory[category]) {
-                stats.byCategory[category] = 0;
-            }
-            stats.byCategory[category]++;
-            
-            // Contar por servicio
-            var service = order.serviceType || 'comedor';
-            if (!stats.byService[service]) {
-                stats.byService[service] = 0;
-            }
-            stats.byService[service]++;
-        }
-        
-        // Calcular promedios
-        if (prepCount > 0) {
-            var avgPrepSeconds = Math.floor(totalPrepTime / prepCount);
-            stats.avgPrepTime = Avika.utils.formatElapsedTime(avgPrepSeconds);
-        }
-        
-        if (deliveryCount > 0) {
-            var avgDeliverySeconds = Math.floor(totalDeliveryTime / deliveryCount);
-            stats.avgDeliveryTime = Avika.utils.formatElapsedTime(avgDeliverySeconds);
-        }
-        
-        if (totalCount > 0) {
-            var avgTotalSeconds = Math.floor(totalTime / totalCount);
-            stats.avgTotalTime = Avika.utils.formatElapsedTime(avgTotalSeconds);
-        }
-    }
-    
-    return stats;
-};
+// NOTA: La función calculateStats ha sido movida a stats.js
+// Ahora se utiliza Avika.stats.calculateStats en su lugar
 
 // Mostrar modal de configuración
 Avika.ui.showSettingsModal = function() {
@@ -674,20 +577,45 @@ Avika.ui.saveSettings = function() {
     this.showNotification('Configuración guardada', 'success');
 };
 
-// Alternar modo compacto
-Avika.ui.toggleCompactMode = function(enable) {
+// Alternar modo compacto - Implementación centralizada
+Avika.ui.setCompactMode = function(enable) {
+    var body = document.body;
+    
     if (enable) {
-        document.body.classList.add('compact-mode');
+        body.classList.add('compact-mode');
+        localStorage.setItem('avika_compact_mode', 'true');
+        if (document.getElementById('btn-compact-mode')) {
+            document.getElementById('btn-compact-mode').textContent = 'Desactivar modo ultra-compacto';
+        }
     } else {
-        document.body.classList.remove('compact-mode');
+        body.classList.remove('compact-mode');
+        localStorage.setItem('avika_compact_mode', 'false');
+        if (document.getElementById('btn-compact-mode')) {
+            document.getElementById('btn-compact-mode').textContent = 'Activar modo ultra-compacto';
+        }
+    }
+    
+    // Actualizar tablas para reflejar el nuevo modo
+    if (typeof Avika.ui.updatePendingTable === 'function') {
+        Avika.ui.updatePendingTable();
+    }
+    if (typeof Avika.ui.updateDeliveryTable === 'function') {
+        Avika.ui.updateDeliveryTable();
     }
 };
 
-// Alternar modo oscuro
-Avika.ui.toggleDarkMode = function(enable) {
+// Alternar modo oscuro - Implementación centralizada
+Avika.ui.setDarkMode = function(enable) {
     if (enable) {
         document.body.classList.add('dark-mode');
+        localStorage.setItem('avika_dark_mode', 'true');
     } else {
         document.body.classList.remove('dark-mode');
+        localStorage.setItem('avika_dark_mode', 'false');
     }
+};
+
+// Mantener la función toggleDarkMode para compatibilidad con código existente
+Avika.ui.toggleDarkMode = function(enable) {
+    return Avika.ui.setDarkMode(enable);
 };
