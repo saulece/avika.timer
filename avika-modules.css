@@ -298,6 +298,7 @@ body.compact-mode h2 {
 }
 
 body.compact-mode .action-btn {
+    /* Estilos para el modo compacto pero con menor especificidad que los estilos móviles */
     padding: 5px 10px;
     font-size: 14px;
 }

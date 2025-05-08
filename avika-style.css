@@ -2325,11 +2325,11 @@ tr:hover td {
     }
     
     /* Mejorar botones en móviles */
-    .action-btn {
-        padding: 10px 12px;
-        font-size: 0.95rem;
+    body .action-btn, .container .action-btn {
+        padding: 10px 12px !important;
+        font-size: 0.95rem !important;
         margin: 3px;
-        min-width: 110px;
+        min-width: 110px !important;
         border-radius: 8px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         font-weight: 600;
@@ -2343,7 +2343,7 @@ tr:hover td {
     }
     
     /* Botones específicos */
-    .filter-btn {
+    body .filter-btn, .filter-panel .filter-btn, .filter-controls .filter-btn {
         color: var(--text-color);
         background-color: #f0f0f0;
         border: 1px solid #cccccc;
@@ -2371,11 +2371,11 @@ tr:hover td {
     }
     
     .filter-select, 
-    .filter-btn {
+    body .filter-btn, .filter-panel .filter-btn, .filter-controls .filter-btn {
         flex: 1 1 auto;
-        min-width: 120px;
+        min-width: 120px !important;
         margin-bottom: 5px;
-        padding: 8px 10px;
+        padding: 8px 10px !important;
         border-radius: 6px;
         border: 1px solid #cccccc;
         background-color: #f8f8f8;
@@ -2483,10 +2483,10 @@ tr:hover td {
     }
     
     /* Ajustes para elementos de UI */
-    .action-btn {
-        min-width: 80px;
-        padding: 8px 5px;
-        font-size: 0.85rem;
+    body .action-btn, .container .action-btn, .action-btns .action-btn {
+        min-width: 80px !important;
+        padding: 8px 5px !important;
+        font-size: 0.85rem !important;
     }
     
     .dish-name {
@@ -2504,8 +2504,8 @@ tr:hover td {
     
     /* Optimizar filtros para pantallas muy pequeñas */
     .filter-select, 
-    .filter-btn {
-        min-width: 100px;
-        padding: 6px 8px;
+    body .filter-btn, .filter-panel .filter-btn, .filter-controls .filter-btn {
+        min-width: 100px !important;
+        padding: 6px 8px !important;
     }
 }

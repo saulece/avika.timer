@@ -40,10 +40,23 @@ Avika.ui.filterDishes = function(searchText) {
 
 // Función para filtrar platillos en el modal de tickets
 Avika.ui.filterTicketDishes = function(searchText) {
+    // Validar entrada
+    if (typeof searchText !== 'string') {
+        console.warn('filterTicketDishes: searchText debe ser una cadena de texto');
+        searchText = searchText ? searchText.toString() : '';
+    }
+    
     searchText = searchText.toLowerCase().trim();
     
+    // Obtener el contenedor de platillos usando la función centralizada
+    var dishSelectionContainer = Avika.utils.getElement('ticket-dish-selection');
+    if (!dishSelectionContainer) {
+        console.error('filterTicketDishes: Contenedor de selección de platillos no encontrado');
+        return 0;
+    }
+    
     // Obtener todos los botones de platillos en el modal
-    var dishButtons = document.querySelectorAll('#ticket-dish-selection .dish-button');
+    var dishButtons = dishSelectionContainer.querySelectorAll('.dish-button');
     var visibleCount = 0;
     
     // Si no hay botones de platillos, crear mensaje de error
@@ -112,21 +125,33 @@ Avika.ui.filterTicketDishes = function(searchText) {
 
 // Mostrar error en la búsqueda de tickets
 Avika.ui.showTicketSearchError = function(message) {
-    var errorContainer = document.getElementById('ticket-no-search-results');
+    // Validar entrada
+    if (!message) {
+        message = 'Error en la búsqueda';
+    }
+    
+    // Usar la función centralizada para obtener el elemento
+    var errorContainer = Avika.utils.getElement('ticket-no-search-results');
+    
     if (!errorContainer) {
+        // Crear el contenedor de error si no existe
         errorContainer = document.createElement('div');
         errorContainer.id = 'ticket-no-search-results';
         errorContainer.className = 'no-search-results error';
         
-        // Buscar el contenedor donde insertarlo
-        var container = document.getElementById('ticket-dish-selection');
+        // Buscar el contenedor donde insertarlo usando la función centralizada
+        var container = Avika.utils.getElement('ticket-dish-selection');
+        
         if (container) {
             container.appendChild(errorContainer);
         } else {
             // Si no hay contenedor, insertarlo al inicio del modal
-            var modal = document.getElementById('ticket-modal');
+            var modal = Avika.utils.getElement('ticket-modal');
             if (modal && modal.querySelector('.modal-body')) {
                 modal.querySelector('.modal-body').appendChild(errorContainer);
+            } else {
+                console.error('showTicketSearchError: No se pudo encontrar un contenedor para el mensaje de error');
+                return; // No podemos mostrar el error si no hay contenedor
             }
         }
     }
@@ -369,23 +394,30 @@ Avika.ui.limpiarFiltrosReparto = function() {
 
 // Función para realizar búsqueda global de platillos en todas las categorías
 Avika.ui.performGlobalDishSearch = function(searchText) {
+    // Validar entrada
+    if (typeof searchText !== 'string') {
+        console.warn('performGlobalDishSearch: searchText debe ser una cadena de texto');
+        searchText = searchText ? searchText.toString() : '';
+    }
+    
     searchText = searchText.toLowerCase().trim();
     
-    // Obtener el contenedor de resultados
-    var resultsContainer = document.getElementById('global-search-results');
+    // Obtener el contenedor de resultados usando la función centralizada
+    var resultsContainer = Avika.utils.getElement('global-search-results');
+    
     if (!resultsContainer) {
-        console.error("Contenedor de resultados de búsqueda no encontrado");
         // Crear el contenedor si no existe
         resultsContainer = document.createElement('div');
         resultsContainer.id = 'global-search-results';
         resultsContainer.className = 'search-results-container';
         
-        // Intentar insertarlo en el DOM
-        var dishesSection = document.getElementById('dishes-section');
+        // Intentar insertarlo en el DOM usando la función centralizada
+        var dishesSection = Avika.utils.getElement('dishes-section');
+        
         if (dishesSection) {
             dishesSection.appendChild(resultsContainer);
         } else {
-            // Si no hay sección de platillos, insertarlo en el body
+            console.warn('performGlobalDishSearch: Sección de platillos no encontrada, se insertará en el body');
             document.body.appendChild(resultsContainer);
         }
     }
@@ -399,11 +431,14 @@ Avika.ui.performGlobalDishSearch = function(searchText) {
         return;
     }
     
-    // Verificar que el menú esté disponible
-    if (!Avika.config || !Avika.config.menu) {
-        this.showGlobalSearchError('El menú no está disponible para búsqueda', resultsContainer);
+    // Verificar que los datos de platillos estén disponibles
+    if (!Avika.config || (!Avika.config.dishes && !Avika.config.menu)) {
+        this.showGlobalSearchError('Los datos de platillos no están disponibles para búsqueda', resultsContainer);
         return;
     }
+    
+    // Determinar qué estructura de datos usar (menu o dishes)
+    var menuData = Avika.config.menu || Avika.config.dishes;
     
     // Buscar platillos que coincidan
     var matchingDishes = [];
@@ -413,14 +448,14 @@ Avika.ui.performGlobalDishSearch = function(searchText) {
     
     try {
         // Recorrer todas las categorías
-        for (var categoryName in Avika.config.menu) {
+        for (var categoryName in menuData) {
             // Verificar si la búsqueda está tomando demasiado tiempo
             if (performance.now() - searchStartTime > searchTimeout) {
                 timeoutOccurred = true;
                 break;
             }
             
-            var category = Avika.config.menu[categoryName];
+            var category = menuData[categoryName];
             
             // Verificar si la categoría tiene subcategorías
             if (category.subcategories) {
@@ -553,9 +588,19 @@ Avika.ui.performGlobalDishSearch = function(searchText) {
 
 // Mostrar error en la búsqueda global
 Avika.ui.showGlobalSearchError = function(message, container) {
+    // Validar entrada
+    if (!message) {
+        message = 'Error en la búsqueda global';
+    }
+    
+    // Usar la función centralizada para obtener el contenedor
     if (!container) {
-        container = document.getElementById('global-search-results');
-        if (!container) return;
+        container = Avika.utils.getElement('global-search-results');
+    }
+    
+    if (!container) {
+        console.error('showGlobalSearchError: No se pudo mostrar el error de búsqueda: ' + message);
+        return;
     }
     
     // Limpiar contenedor
@@ -574,3 +619,42 @@ Avika.ui.showGlobalSearchError = function(message, container) {
         Avika.ui.showNotification(message, 'error');
     }
 };
+
+// Función para inicializar automáticamente los campos de búsqueda
+Avika.ui.initSearchFields = function() {
+    // Inicializar campo de búsqueda global
+    var globalSearchField = Avika.utils.getElement('global-dish-search');
+    if (globalSearchField) {
+        globalSearchField.addEventListener('input', function() {
+            if (typeof Avika.ui.performGlobalDishSearch === 'function') {
+                Avika.ui.performGlobalDishSearch(this.value);
+            } else {
+                console.error('initSearchFields: La función performGlobalDishSearch no está disponible');
+            }
+        });
+        
+        // Limpiar resultados al hacer clic fuera del campo
+        document.addEventListener('click', function(event) {
+            if (event.target !== globalSearchField) {
+                var resultsContainer = Avika.utils.getElement('global-search-results');
+                if (resultsContainer) {
+                    resultsContainer.style.display = 'none';
+                }
+            }
+        });
+        
+        console.log('Campo de búsqueda global inicializado correctamente');
+    } else {
+        console.warn('initSearchFields: Campo de búsqueda global no encontrado');
+    }
+};
+
+// Inicializar campos de búsqueda cuando se cargue el DOM
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar que el módulo UI esté disponible
+    if (Avika.ui && typeof Avika.ui.initSearchFields === 'function') {
+        setTimeout(function() {
+            Avika.ui.initSearchFields();
+        }, 500); // Pequeño retraso para asegurar que todos los elementos estén disponibles
+    }
+});

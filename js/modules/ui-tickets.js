@@ -198,10 +198,18 @@ Avika.ui.showTicketItemSelection = function() {
         };
         
         // Campo de búsqueda
-        var searchInput = document.getElementById('ticket-dish-search');
-        searchInput.oninput = function() {
-            Avika.ui.filterTicketDishes(this.value);
-        };
+        var searchInput = Avika.utils.getElement('ticket-dish-search');
+        if (searchInput) {
+            searchInput.oninput = function() {
+                if (Avika.ui && typeof Avika.ui.filterTicketDishes === 'function') {
+                    Avika.ui.filterTicketDishes(this.value);
+                } else {
+                    console.error('La función filterTicketDishes no está disponible');
+                }
+            };
+        } else {
+            console.error('Campo de búsqueda de tickets no encontrado');
+        }
         
         // Botones de cantidad
         document.getElementById('ticket-decrease-quantity').onclick = function() {
@@ -235,10 +243,12 @@ Avika.ui.showTicketItemSelection = function() {
     document.getElementById('ticket-dish-customization').style.display = 'none';
     
     // Limpiar búsqueda
-    var searchInput = document.getElementById('ticket-dish-search');
+    var searchInput = Avika.utils.getElement('ticket-dish-search');
     if (searchInput) {
         searchInput.value = '';
-        this.filterTicketDishes('');
+        if (typeof this.filterTicketDishes === 'function') {
+            this.filterTicketDishes('');
+        }
     }
 };
 

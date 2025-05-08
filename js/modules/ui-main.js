@@ -249,6 +249,28 @@ Avika.ui.setupEventHandlers = function() {
         });
     }
     
+    // Inicializar campo de búsqueda global de platillos
+    var globalDishSearch = Avika.utils.getElement('global-dish-search');
+    if (globalDishSearch) {
+        globalDishSearch.addEventListener('input', function() {
+            if (Avika.ui && typeof Avika.ui.performGlobalDishSearch === 'function') {
+                Avika.ui.performGlobalDishSearch(this.value);
+            }
+        });
+        
+        // Limpiar resultados al hacer clic fuera del campo
+        document.addEventListener('click', function(event) {
+            if (event.target !== globalDishSearch) {
+                var resultsContainer = document.getElementById('global-search-results');
+                if (resultsContainer) {
+                    resultsContainer.style.display = 'none';
+                }
+            }
+        });
+    } else {
+        console.warn('Campo de búsqueda global no encontrado. Se inicializará cuando esté disponible.');
+    }
+    
     // Agregar botón para restaurar historial de órdenes completadas
     var historySection = document.querySelector('.completed-orders-section');
     if (historySection) {
