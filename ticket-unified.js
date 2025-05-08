@@ -1,16 +1,19 @@
-// Script para corregir los colores inconsistentes de los tickets
+// ticket-unified.js - Script unificado para gestión de estilos de tickets
+// Este archivo combina la funcionalidad de ticket-color-fix.js y ticket-styles.js
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("Ticket unified script loaded");
+    
     // Colores consistentes para cada tipo de servicio
     const TICKET_COLORS = {
-        'comedor': '#e6f2ff', // Azul más consistente para comedor
-        'domicilio': '#ffe6e6', // Rojo más consistente para domicilio
-        'para-llevar': '#e6ffe6', // Verde más consistente para llevar
+        'comedor': '#e6f2ff', // Azul para comedor
+        'domicilio': '#ffe6e6', // Rojo para domicilio
+        'para-llevar': '#e6ffe6', // Verde para llevar
         'ordena-y-espera': '#fff9e6', // Amarillo claro para ordena y espera
         'otro': '#f5f5f5' // Gris claro para otros
     };
 
-    // Función para aplicar colores consistentes a los tickets
-    function fixTicketColors() {
+    // Función unificada para aplicar estilos a los tickets
+    function applyTicketStyles() {
         // Buscar todas las filas de tickets
         const rows = document.querySelectorAll('tr');
         
@@ -36,10 +39,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             currentServiceType = 'comedor';
                         } else if (serviceText.includes('domicilio')) {
                             currentServiceType = 'domicilio';
-                        } else if (serviceText.includes('para llevar')) {
+                        } else if (serviceText.includes('para llevar') || serviceText.includes('ordena y espera')) {
                             currentServiceType = 'para-llevar';
-                        } else if (serviceText.includes('ordena y espera')) {
-                            currentServiceType = 'ordena-y-espera';
                         } else {
                             currentServiceType = 'otro';
                         }
@@ -68,15 +69,20 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Aplicar colores consistentes a cada grupo de ticket
+        // Aplicar estilos consistentes a cada grupo de ticket
         for (const ticketId in ticketGroups) {
             const group = ticketGroups[ticketId];
             const color = TICKET_COLORS[group.serviceType] || TICKET_COLORS.otro;
             
-            // Aplicar color a todas las filas del ticket
+            // Aplicar estilos a todas las filas del ticket
             group.rows.forEach((row, index) => {
-                // Aplicar color de fondo
-                row.style.backgroundColor = color;
+                // Aplicar clase según el tipo de servicio
+                if (group.serviceType) {
+                    row.classList.add(`ticket-${group.serviceType}`);
+                }
+                
+                // Aplicar clase ticket-row a todas las filas
+                row.classList.add('ticket-row');
                 
                 // Aplicar estilos adicionales
                 if (index === 0) {
@@ -84,36 +90,58 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 if (index === group.rows.length - 1) {
                     row.classList.add('ticket-last-row');
-                    row.style.borderBottom = '2px solid #999';
                 }
                 
-                // Añadir borde izquierdo a todas las filas del ticket
-                row.style.borderLeft = '3px solid #999';
+                // Almacenar el tipo de servicio como atributo data para referencia futura
+                row.setAttribute('data-service-type', group.serviceType || 'otro');
             });
         }
     }
     
-    // Aplicar la corrección inicialmente
-    setTimeout(fixTicketColors, 500);
+    // Aplicar estilos inicialmente con un pequeño retraso para asegurar que el DOM esté listo
+    setTimeout(applyTicketStyles, 500);
     
-    // Volver a aplicar la corrección cada vez que cambie el DOM
+    // Configurar un solo observador de mutación para optimizar el rendimiento
     const observer = new MutationObserver(function(mutations) {
-        setTimeout(fixTicketColors, 100);
+        // Usar un temporizador para evitar múltiples actualizaciones en rápida sucesión
+        clearTimeout(window.ticketStylesTimer);
+        window.ticketStylesTimer = setTimeout(applyTicketStyles, 100);
     });
     
-    // Observar cambios en las tablas
+    // Observar cambios en las tablas con una configuración optimizada
     const tables = document.querySelectorAll('table');
     tables.forEach(table => {
         observer.observe(table, { 
             childList: true, 
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['class', 'style']
+            subtree: true
         });
     });
     
-    // También observar el cuerpo del documento para detectar nuevas tablas
-    observer.observe(document.body, { 
-        childList: true
+    // Integración con Avika UI
+    window.addEventListener('load', function() {
+        if (window.Avika && Avika.ui) {
+            // Guardar referencia a las funciones originales
+            const originalUpdatePendingTable = Avika.ui.updatePendingTable;
+            const originalUpdateDeliveryTable = Avika.ui.updateDeliveryTable;
+            const originalUpdateCompletedTable = Avika.ui.updateCompletedTable;
+            
+            // Sobrescribir funciones para aplicar estilos después de actualizar tablas
+            Avika.ui.updatePendingTable = function() {
+                originalUpdatePendingTable.apply(this, arguments);
+                setTimeout(applyTicketStyles, 0);
+            };
+            
+            Avika.ui.updateDeliveryTable = function() {
+                originalUpdateDeliveryTable.apply(this, arguments);
+                setTimeout(applyTicketStyles, 0);
+            };
+            
+            Avika.ui.updateCompletedTable = function(showAll) {
+                originalUpdateCompletedTable.call(this, showAll);
+                setTimeout(applyTicketStyles, 0);
+            };
+            
+            console.log("Ticket styles integration with Avika UI completed");
+        }
     });
 });

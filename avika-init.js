@@ -1,4 +1,3 @@
-// ====== PROBLEMA 1: CORREGIR EL INIT.JS ======
 // avika-init.js - Script de inicialización para la aplicación Avika
 // Este script debe cargarse después de todos los demás scripts de Avika
 
@@ -116,13 +115,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 Avika.ui.enableTicketMode();
             });
             // Botones de filtrado
-document.getElementById('btn-apply-filter').addEventListener('click', function() {
-    Avika.ui.aplicarFiltros();
-});
-
-document.getElementById('btn-clear-filter').addEventListener('click', function() {
-    Avika.ui.limpiarFiltros();
-});
+            document.getElementById('btn-apply-filter').addEventListener('click', function() {
+                Avika.ui.aplicarFiltros();
+            });
+            
+            document.getElementById('btn-clear-filter').addEventListener('click', function() {
+                Avika.ui.limpiarFiltros();
+            });
         }
         
         // Botones de filtrado para historial
@@ -166,15 +165,15 @@ document.getElementById('btn-clear-filter').addEventListener('click', function()
             });
         }
         // Botones de filtrado para reparto
-document.getElementById('btn-apply-delivery-filter').addEventListener('click', function() {
-    var tiempoSeleccionado = document.getElementById('filter-delivery-time').value;
-    Avika.ui.filtrarReparto(tiempoSeleccionado);
-});
-
-document.getElementById('btn-clear-delivery-filter').addEventListener('click', function() {
-    document.getElementById('filter-delivery-time').value = 'todos';
-    Avika.ui.limpiarFiltrosReparto();
-});
+        document.getElementById('btn-apply-delivery-filter').addEventListener('click', function() {
+            var tiempoSeleccionado = document.getElementById('filter-delivery-time').value;
+            Avika.ui.filtrarReparto(tiempoSeleccionado);
+        });
+        
+        document.getElementById('btn-clear-delivery-filter').addEventListener('click', function() {
+            document.getElementById('filter-delivery-time').value = 'todos';
+            Avika.ui.limpiarFiltrosReparto();
+        });
 
         // Botón para limpiar historial
         var btnClearHistory = document.getElementById('btn-clear-history');
@@ -188,54 +187,53 @@ document.getElementById('btn-clear-delivery-filter').addEventListener('click', f
     }
     
     // Cargar datos guardados
-function loadSavedData() {
-    console.log("Cargando datos guardados...");
-    try {
-        // Verificar que Avika y Avika.data existen
-        if (!window.Avika) {
-            window.Avika = {};
-            console.warn('window.Avika no existía durante loadSavedData, inicializando objeto global');
+    function loadSavedData() {
+        console.log("Cargando datos guardados...");
+        try {
+            // Verificar que Avika y Avika.data existen
+            if (!window.Avika) {
+                window.Avika = {};
+                console.warn('window.Avika no existía durante loadSavedData, inicializando objeto global');
+            }
+            
+            if (!Avika.data) {
+                Avika.data = {};
+                console.warn('Avika.data no existía durante loadSavedData, inicializando objeto de datos');
         }
         
-        if (!Avika.data) {
-            Avika.data = {};
-            console.warn('Avika.data no existía durante loadSavedData, inicializando objeto de datos');
+            // Verificar que los arrays existen
+            if (!Array.isArray(Avika.data.pendingOrders)) {
+                Avika.data.pendingOrders = [];
+                console.warn('Avika.data.pendingOrders no era un array, inicializando');
+            }
+            
+            if (!Array.isArray(Avika.data.deliveryOrders)) {
+                Avika.data.deliveryOrders = [];
+                console.warn('Avika.data.deliveryOrders no era un array, inicializando');
+            }
+            
+            if (!Array.isArray(Avika.data.completedOrders)) {
+                Avika.data.completedOrders = [];
+                console.warn('Avika.data.completedOrders no era un array, inicializando');
+            }
+            
+            // Verificar que el módulo de almacenamiento esté disponible
+            if (Avika.storage && typeof Avika.storage.cargarDatosGuardados === 'function') {
+                Avika.storage.cargarDatosGuardados();
+                console.log("Datos cargados correctamente");
+            } else {
+                console.warn("Módulo de almacenamiento no disponible, no se pudieron cargar datos");
+            }
+        } catch (e) {
+            console.error("Error al cargar datos:", e);
+            // Asegurar que los arrays existen en caso de error
+            if (!Avika.data) Avika.data = {};
+            if (!Array.isArray(Avika.data.pendingOrders)) Avika.data.pendingOrders = [];
+            if (!Array.isArray(Avika.data.deliveryOrders)) Avika.data.deliveryOrders = [];
+            if (!Array.isArray(Avika.data.completedOrders)) Avika.data.completedOrders = [];
         }
-        
-        // Verificar que los arrays existen
-        if (!Array.isArray(Avika.data.pendingOrders)) {
-            Avika.data.pendingOrders = [];
-            console.warn('Avika.data.pendingOrders no era un array, inicializando');
-        }
-        
-        if (!Array.isArray(Avika.data.deliveryOrders)) {
-            Avika.data.deliveryOrders = [];
-            console.warn('Avika.data.deliveryOrders no era un array, inicializando');
-        }
-        
-        if (!Array.isArray(Avika.data.completedOrders)) {
-            Avika.data.completedOrders = [];
-            console.warn('Avika.data.completedOrders no era un array, inicializando');
-        }
-        
-        // Verificar que el módulo de almacenamiento esté disponible
-        if (Avika.storage && typeof Avika.storage.cargarDatosGuardados === 'function') {
-            Avika.storage.cargarDatosGuardados();
-            console.log("Datos cargados correctamente");
-        } else {
-            console.warn("Módulo de almacenamiento no disponible, no se pudieron cargar datos");
-        }
-    } catch (e) {
-        console.error("Error al cargar datos:", e);
-        // Asegurar que los arrays existen en caso de error
-        if (!Avika.data) Avika.data = {};
-        if (!Array.isArray(Avika.data.pendingOrders)) Avika.data.pendingOrders = [];
-        if (!Array.isArray(Avika.data.deliveryOrders)) Avika.data.deliveryOrders = [];
-        if (!Array.isArray(Avika.data.completedOrders)) Avika.data.completedOrders = [];
     }
-}
-
-// Inicialización de la aplicación
+    
     // Inicialización de la aplicación
     function initApp() {
         console.log("Inicializando aplicación...");
@@ -277,41 +275,62 @@ function loadSavedData() {
         loadSavedData();
         
         // Configurar actualizaciones periódicas (optimizadas)
-setInterval(function() {
-    // Usar la función throttled para mejor rendimiento
-    if (Avika.optimization && Avika.optimization.throttledUpdateTimers) {
-        Avika.optimization.throttledUpdateTimers();
-    } else if (Avika.orderService && typeof Avika.orderService.updateAllTimers === 'function') {
-        // Fallback a la función normal si no está disponible la optimizada
-        Avika.orderService.updateAllTimers();
-    } else if (Avika.ui && typeof Avika.ui.updateAllTimers === 'function') {
-        // Fallback a la función anterior si existe
-        Avika.ui.updateAllTimers();
-    }
-}, Avika.utils && Avika.utils.TIME_CONSTANTS ? 
-   Avika.utils.TIME_CONSTANTS.TIMER_UPDATE_INTERVAL_MS : 2000);
+        // Iniciar la primera actualización de temporizadores
+        if (Avika.optimization && Avika.optimization.throttledUpdateTimers) {
+            // Usar la función optimizada con throttle adaptativo
+            Avika.optimization.throttledUpdateTimers();
+            console.log("Utilizando actualización de temporizadores optimizada adaptativa");
+        } else if (Avika.ui && typeof Avika.ui.updateAllTimers === 'function') {
+            // Iniciar el ciclo de actualización autogestionado en UI
+            Avika.ui.updateAllTimers();
+            console.log("Utilizando actualización de temporizadores estándar");
+        } else {
+            // Fallback a un intervalo simple si no hay mejores opciones
+            console.warn("Usando método de actualización de temporizadores de respaldo");
+            setInterval(function() {
+                if (Avika.orderService && typeof Avika.orderService.updateAllTimers === 'function') {
+                    Avika.orderService.updateAllTimers();
+                }
+            }, 2000);
+        }
 
-// Configurar autoguardado
-setInterval(function() {
-    if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
-        Avika.storage.guardarDatosLocales();
-    }
-}, Avika.utils && Avika.utils.TIME_CONSTANTS ? 
-   Avika.utils.TIME_CONSTANTS.AUTO_SAVE_INTERVAL_MS : 
-   (Avika.config && Avika.config.autoSaveInterval || 30000));
+        // Configurar autoguardado con optimización
+        const autoSaveInterval = Avika.utils && Avika.utils.TIME_CONSTANTS ? 
+            Avika.utils.TIME_CONSTANTS.AUTO_SAVE_INTERVAL_MS : 
+            (Avika.config && Avika.config.autoSaveInterval || 30000);
+            
+        // Usar debounce para el autoguardado si está disponible
+        if (Avika.optimization && typeof Avika.optimization.debounce === 'function') {
+            const debouncedSave = Avika.optimization.debounce(function() {
+                if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+                    console.log("Guardando datos (debounced)...");
+                    Avika.storage.guardarDatosLocales();
+                }
+            }, 1000); // 1 segundo de debounce
+            
+            // Configurar intervalo de guardado
+            setInterval(debouncedSave, autoSaveInterval);
+            
+            // También guardar al salir de la página
+            window.addEventListener('beforeunload', function() {
+                if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+                    Avika.storage.guardarDatosLocales();
+                }
+            });
+        } else {
+            // Método tradicional si no está disponible debounce
+            setInterval(function() {
+                if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+                    Avika.storage.guardarDatosLocales();
+                }
+            }, autoSaveInterval);
+        }
         
         console.log("Inicialización completa");
     }
     
     // Iniciar la aplicación
-    try {
-        initApp();
-        // Ya no activamos automáticamente el modo de tickets al iniciar la aplicación
-        // El usuario debe hacer clic en el botón 'Nuevo Ticket/Comanda' manualmente
-    } catch (e) {
-        console.error("Error fatal durante la inicialización:", e);
-        alert("Error al inicializar la aplicación. Consulta la consola para más detalles.");
-    }
+    initApp();
     
     // Botón para modo compacto
     document.getElementById('btn-compact-mode').addEventListener('click', function() {

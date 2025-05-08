@@ -2626,43 +2626,58 @@ Avika.ui = {
         return this.padZero(hours) + ':' + this.padZero(minutes) + ':' + this.padZero(secs);
     },
     
-    // Actualizar todos los temporizadores - Versión optimizada
+    // Actualizar todos los temporizadores - Versión optimizada y mejorada
     updateAllTimers: function() {
-        // Delegar a la función optimizada en orderService si está disponible
-        if (Avika.orderService && typeof Avika.orderService.updateAllTimers === 'function') {
-            return Avika.orderService.updateAllTimers();
+        // Evitar múltiples actualizaciones simultáneas
+        if (this._timerUpdateRequested) {
+            return; // Ya hay una actualización programada
         }
         
-        // Implementación de respaldo si orderService no está disponible
-        try {
-            // Verificar que los datos existen antes de actualizar
-            if (!Avika.data) {
-                if (Avika.utils && Avika.utils.log) {
-                    Avika.utils.log.warn('Avika.data no está disponible para actualizar temporizadores');
-                } else {
-                    console.warn('Avika.data no está disponible para actualizar temporizadores');
+        this._timerUpdateRequested = true;
+        
+        // Usar RequestAnimationFrame para sincronizar con el refresco de pantalla
+        // y mejorar el rendimiento visual
+        requestAnimationFrame(() => {
+            this._timerUpdateRequested = false;
+            
+            try {
+                // Verificar si hay órdenes que actualizar antes de llamar a las funciones
+                // para evitar trabajo innecesario
+                const hasPendingOrders = Avika.data && Avika.data.pendingOrders && 
+                                        Avika.data.pendingOrders.length > 0;
+                                        
+                const hasDeliveryOrders = Avika.data && Avika.data.deliveryOrders && 
+                                         Avika.data.deliveryOrders.length > 0;
+                
+                // Solo actualizar si hay órdenes pendientes
+                if (hasPendingOrders && typeof this.updatePendingTimers === 'function') {
+                    this.updatePendingTimers();
                 }
-                return;
+                
+                // Solo actualizar si hay órdenes en reparto
+                if (hasDeliveryOrders && typeof this.updateDeliveryTimers === 'function') {
+                    this.updateDeliveryTimers();
+                }
+                
+                // Programar la próxima actualización con un intervalo adaptativo
+                // Si hay órdenes activas, actualizar más frecuentemente
+                const updateInterval = (hasPendingOrders || hasDeliveryOrders) ? 
+                    (Avika.utils && Avika.utils.TIME_CONSTANTS ? Avika.utils.TIME_CONSTANTS.TIMER_UPDATE_INTERVAL_MS : 2000) : 
+                    5000; // Intervalo más largo si no hay órdenes activas
+                
+                setTimeout(() => {
+                    this.updateAllTimers();
+                }, updateInterval);
+            } catch (e) {
+                console.error("Error al actualizar temporizadores:", e);
+                // Asegurar que se siga actualizando a pesar del error
+                setTimeout(() => {
+                    this.updateAllTimers();
+                }, 5000); // Intervalo más largo en caso de error
             }
-            
-            // Actualizar temporizadores de platillos en preparación
-            if (Array.isArray(Avika.data.pendingOrders) && Avika.data.pendingOrders.length > 0) {
-                this.updatePendingTimers();
-            }
-            
-            // Actualizar temporizadores de platillos en reparto
-            if (Array.isArray(Avika.data.deliveryOrders) && Avika.data.deliveryOrders.length > 0) {
-                this.updateDeliveryTimers();
-            }
-        } catch (error) {
-            if (Avika.utils && Avika.utils.log) {
-                Avika.utils.log.error('Error al actualizar temporizadores desde UI:', error);
-            } else {
-                console.error('Error al actualizar temporizadores desde UI:', error);
-            }
-        }
+        });
     },
-
+    
     // Función para activar/desactivar modo ultra-compacto
     toggleCompactMode: function() {
         var body = document.body;

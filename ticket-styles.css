@@ -38,6 +38,95 @@
     color: #555 !important;
 }
 
+/* Mejoras de visualización de las tablas - Integrado desde visual-fix.js */
+.mobile-optimized-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+/* Mejoras de visualización de las celdas */
+.mobile-optimized-table td {
+    border: 1px solid #e0e0e0;
+    vertical-align: top;
+    padding: 8px;
+}
+
+/* Mejoras de visualización de la información de platillos */
+.dish-name {
+    font-weight: bold;
+    margin-bottom: 2px;
+    font-size: 1.05em;
+    color: #333;
+    padding: 2px 0;
+}
+
+.dish-category {
+    font-size: 0.85em;
+    color: #666;
+    margin-bottom: 2px;
+    font-style: italic;
+}
+
+.ticket-id {
+    font-size: 0.85em;
+    color: #555;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.service-type {
+    font-weight: bold;
+    font-size: 0.95em;
+    color: #444;
+    margin-bottom: 2px;
+}
+
+.dish-customization {
+    font-size: 0.85em;
+    color: #555;
+    margin-bottom: 2px;
+}
+
+.order-notes {
+    font-size: 0.85em;
+    font-style: italic;
+    color: #666;
+    border-left: 2px solid #ddd;
+    padding-left: 4px;
+    margin-top: 2px;
+}
+
+/* Animaciones para actualizaciones de filas */
+.row-updated {
+    animation: highlight-update 1s ease-in-out;
+}
+
+.row-new {
+    animation: fade-in 0.5s ease-in-out;
+}
+
+@keyframes highlight-update {
+    0% {
+        background-color: rgba(255, 255, 0, 0.3);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Mejoras de contraste para móviles */
 @media screen and (max-width: 768px) {
     .ticket-comedor {
@@ -54,5 +143,9 @@
     
     .ticket-label {
         color: #333 !important; /* Texto más oscuro para mejor contraste */
+    }
+    
+    .mobile-optimized-table td {
+        padding: 6px;
     }
 }
