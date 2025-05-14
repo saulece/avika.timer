@@ -1133,6 +1133,34 @@ Avika.ui = {
             dishCell.appendChild(categoryDiv);
         }
         
+        // Mostrar las notas directamente en la columna del platillo con estilo destacado
+        if (order.notes && order.notes.trim() !== '') {
+            var notesDiv = document.createElement('div');
+            notesDiv.className = 'order-notes-highlight';
+            notesDiv.style.fontStyle = 'italic';
+            notesDiv.style.color = '#e67e22';
+            notesDiv.style.fontWeight = 'bold';
+            notesDiv.style.marginTop = '5px';
+            notesDiv.style.padding = '3px';
+            notesDiv.style.borderLeft = '3px solid #e67e22';
+            notesDiv.textContent = '✏️ ' + order.notes;
+            dishCell.appendChild(notesDiv);
+        }
+        
+        // Si hay notas del ticket, también mostrarlas
+        if (order.ticketNotes && order.ticketNotes.trim() !== '') {
+            var ticketNotesDiv = document.createElement('div');
+            ticketNotesDiv.className = 'ticket-notes-highlight';
+            ticketNotesDiv.style.fontStyle = 'italic';
+            ticketNotesDiv.style.color = '#3498db';
+            ticketNotesDiv.style.fontWeight = 'bold';
+            ticketNotesDiv.style.marginTop = '5px';
+            ticketNotesDiv.style.padding = '3px';
+            ticketNotesDiv.style.borderLeft = '3px solid #3498db';
+            ticketNotesDiv.textContent = '🎫 ' + order.ticketNotes;
+            dishCell.appendChild(ticketNotesDiv);
+        }
+        
         // En móviles, añadir información de servicio en la celda del platillo
         if (isMobile) {
             // Tipo de servicio
