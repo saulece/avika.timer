@@ -58,7 +58,7 @@ Avika.stats = {
                 
                 contenidoPromedio += '<tr>';
                 contenidoPromedio += '<td style="padding: 6px; border: 1px solid #ddd;">' + Avika.config.categoryNames[categoria] + '</td>';
-                contenidoPromedio += '<td style="padding: 6px; border: 1px solid #ddd; text-align: center;">' + Avika.ui.padZero(minutos) + ':' + Avika.ui.padZero(segundos) + ' min</td>';
+                contenidoPromedio += '<td style="padding: 6px; border: 1px solid #ddd; text-align: center;">' + Avika.utils.padZero(minutos) + ':' + Avika.utils.padZero(segundos) + ' min</td>';
                 contenidoPromedio += '<td style="padding: 6px; border: 1px solid #ddd; text-align: center;">' + totalPorCategoria[categoria] + '</td>';
                 contenidoPromedio += '</tr>';
             }
@@ -80,7 +80,7 @@ Avika.stats = {
             contenidoPromedio += '<tbody>';
             contenidoPromedio += '<tr>';
             contenidoPromedio += '<td style="padding: 6px; border: 1px solid #ddd;">Tiempo de Entrega</td>';
-            contenidoPromedio += '<td style="padding: 6px; border: 1px solid #ddd; text-align: center;">' + Avika.ui.padZero(minutosEntrega) + ':' + Avika.ui.padZero(segundosEntrega) + ' min</td>';
+            contenidoPromedio += '<td style="padding: 6px; border: 1px solid #ddd; text-align: center;">' + Avika.utils.padZero(minutosEntrega) + ':' + Avika.utils.padZero(segundosEntrega) + ' min</td>';
             contenidoPromedio += '<td style="padding: 6px; border: 1px solid #ddd; text-align: center;">' + totalEntregas + '</td>';
             contenidoPromedio += '</tr>';
             contenidoPromedio += '</tbody></table>';
@@ -319,7 +319,7 @@ Avika.stats = {
                     
                     var row = [
                         '"' + Avika.config.categoryNames[categoria] + '"',
-                        '"' + Avika.ui.padZero(minutos) + ':' + Avika.ui.padZero(segundos) + '"',
+                        '"' + Avika.utils.padZero(minutos) + ':' + Avika.utils.padZero(segundos) + '"',
                         totalPorCategoria[categoria]
                     ];
                     
@@ -361,7 +361,7 @@ Avika.stats = {
                     
                     var row = [
                         '"' + Avika.config.serviceNames[servicio] + '"',
-                        '"' + Avika.ui.padZero(minutos) + ':' + Avika.ui.padZero(segundos) + '"',
+                        '"' + Avika.utils.padZero(minutos) + ':' + Avika.utils.padZero(segundos) + '"',
                         totalPorServicio[servicio]
                     ];
                     
@@ -389,7 +389,7 @@ Avika.stats = {
                 var segundosEntrega = Math.floor(tiempoPromedioEntrega % 60);
                 
                 csv += '"Tiempo de Entrega",';
-                csv += '"' + Avika.ui.padZero(minutosEntrega) + ':' + Avika.ui.padZero(segundosEntrega) + '",';
+                csv += '"' + Avika.utils.padZero(minutosEntrega) + ':' + Avika.utils.padZero(segundosEntrega) + '",';
                 csv += totalEntregas + '\n';
             }
         }
@@ -401,7 +401,7 @@ Avika.stats = {
         var link = document.createElement('a');
         link.href = csvUrl;
         var hoy = new Date();
-        var fecha = hoy.getFullYear() + '-' + Avika.ui.padZero(hoy.getMonth() + 1) + '-' + Avika.ui.padZero(hoy.getDate());
+        var fecha = hoy.getFullYear() + '-' + Avika.utils.padZero(hoy.getMonth() + 1) + '-' + Avika.utils.padZero(hoy.getDate());
         
         // Incluir rango de fechas en el nombre del archivo si se especificó
         var nombreArchivo = 'avika_tiempos_' + fecha;
@@ -468,7 +468,7 @@ Avika.stats = {
                     var tiempoEnSegundos = (new Date(order.endTime) - new Date(order.startTime)) / 1000;
                     var minutos = Math.floor(tiempoEnSegundos / 60);
                     var segundos = Math.floor(tiempoEnSegundos % 60);
-                    prepTime = Avika.ui.padZero(minutos) + ':' + Avika.ui.padZero(segundos);
+                    prepTime = Avika.utils.padZero(minutos) + ':' + Avika.utils.padZero(segundos);
                 }
                 
                 // Formatear tiempos de entrega
@@ -481,7 +481,7 @@ Avika.stats = {
                     var tiempoEntregaSegundos = (new Date(order.deliveryArrivalTime) - new Date(order.deliveryDepartureTime)) / 1000;
                     var minutosEntrega = Math.floor(tiempoEntregaSegundos / 60);
                     var segundosEntrega = Math.floor(tiempoEntregaSegundos % 60);
-                    deliveryTime = Avika.ui.padZero(minutosEntrega) + ':' + Avika.ui.padZero(segundosEntrega);
+                    deliveryTime = Avika.utils.padZero(minutosEntrega) + ':' + Avika.utils.padZero(segundosEntrega);
                 }
                 
                 // Determinar si es un combo especial (tiene registros de cocina caliente y fría)
@@ -546,7 +546,7 @@ Avika.stats = {
                         
                         datosEstadisticas.push([
                             Avika.config.categoryNames[categoria],
-                            Avika.ui.padZero(minutos) + ':' + Avika.ui.padZero(segundos),
+                            Avika.utils.padZero(minutos) + ':' + Avika.utils.padZero(segundos),
                             totalPorCategoria[categoria]
                         ]);
                     }
@@ -587,7 +587,7 @@ Avika.stats = {
                         
                         datosEstadisticas.push([
                             Avika.config.serviceNames[servicio],
-                            Avika.ui.padZero(minutos) + ':' + Avika.ui.padZero(segundos),
+                            Avika.utils.padZero(minutos) + ':' + Avika.utils.padZero(segundos),
                             totalPorServicio[servicio]
                         ]);
                     }
@@ -615,7 +615,7 @@ Avika.stats = {
                     
                     datosEstadisticas.push([
                         'Tiempo de Entrega',
-                        Avika.ui.padZero(minutosEntrega) + ':' + Avika.ui.padZero(segundosEntrega),
+                        Avika.utils.padZero(minutosEntrega) + ':' + Avika.utils.padZero(segundosEntrega),
                         totalEntregas
                     ]);
                 }
@@ -627,7 +627,7 @@ Avika.stats = {
             
             // Generar archivo y descargarlo
             var hoy = new Date();
-            var fecha = hoy.getFullYear() + '-' + Avika.ui.padZero(hoy.getMonth() + 1) + '-' + Avika.ui.padZero(hoy.getDate());
+            var fecha = hoy.getFullYear() + '-' + Avika.utils.padZero(hoy.getMonth() + 1) + '-' + Avika.utils.padZero(hoy.getDate());
             var nombreArchivo = 'avika_tiempos_' + fecha + '.xlsx';
             
             XLSX.writeFile(wb, nombreArchivo);

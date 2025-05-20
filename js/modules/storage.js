@@ -290,7 +290,12 @@ cargarDatosGuardados: function() {
                         var mins = Math.floor(tiempoSecs / 60);
                         var secs = tiempoSecs % 60;
                         
-                        orden.prepTime = this.padZero(mins) + ':' + this.padZero(secs) + ' minutos';
+                        // Usar la implementación centralizada de padZero
+                        var padZero = Avika.utils && typeof Avika.utils.padZero === 'function' ? 
+                                  Avika.utils.padZero : 
+                                  function(num) { return (num < 10 ? '0' : '') + num; };
+                        
+                        orden.prepTime = padZero(mins) + ':' + padZero(secs) + ' minutos';
                         reparaciones++;
                     }
                 }
@@ -325,19 +330,9 @@ cargarDatosGuardados: function() {
         }
     },
 
-    // Función auxiliar para formatear tiempo
+    // Función auxiliar que utiliza la implementación centralizada de formatTime
     formatTime: function(date) {
-        if (!date) return '--:--:--';
-        
-        var hours = this.padZero(date.getHours());
-        var minutes = this.padZero(date.getMinutes());
-        var seconds = this.padZero(date.getSeconds());
-        return hours + ':' + minutes + ':' + seconds;
-    },
-
-    // Función auxiliar para añadir ceros a números
-    padZero: function(num) {
-        return (num < 10 ? '0' : '') + num;
+        return Avika.utils.formatTime(date);
     },
 
     // Función para limpiar historial

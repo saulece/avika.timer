@@ -1,41 +1,6 @@
 // orders.js - Implementación de funciones para manejo de órdenes
 window.Avika = window.Avika || {};
 
-// Función de respaldo para formatear tiempo transcurrido
-function formatElapsedTimeFallback(seconds) {
-    if (!seconds && seconds !== 0) return '--:--:--';
-    
-    var hours = Math.floor(seconds / 3600);
-    var minutes = Math.floor((seconds % 3600) / 60);
-    var secs = seconds % 60;
-    
-    // Función auxiliar para agregar ceros
-    function padZero(num) {
-        return (num < 10 ? '0' : '') + num;
-    }
-    
-    return padZero(hours) + ':' + padZero(minutes) + ':' + padZero(secs);
-}
-
-// Función centralizada para formatear tiempo transcurrido
-// Esta función intenta usar las implementaciones disponibles en orden de preferencia
-function getFormatElapsedTimeFunction() {
-    if (Avika.utils && typeof Avika.utils.formatElapsedTime === 'function') {
-        return function(seconds) {
-            return Avika.utils.formatElapsedTime.call(Avika.utils, seconds);
-        };
-    } else if (Avika.ui && typeof Avika.ui.formatElapsedTime === 'function') {
-        return function(seconds) {
-            return Avika.ui.formatElapsedTime.call(Avika.ui, seconds);
-        };
-    } else if (Avika.orderService && typeof Avika.orderService.formatElapsedTime === 'function') {
-        return function(seconds) {
-            return Avika.orderService.formatElapsedTime.call(Avika.orderService, seconds);
-        };
-    } else {
-        return formatElapsedTimeFallback;
-    }
-}
 
 Avika.orders = {
     // Estado interno para tracking de tickets
@@ -165,8 +130,7 @@ Avika.orders = {
         order.preparationTime = Math.floor((order.endTime - new Date(order.startTime)) / 1000);
         
         // Usar la función centralizada para formatear tiempo transcurrido
-        var formatElapsedTime = getFormatElapsedTimeFunction();
-        order.preparationTimeFormatted = formatElapsedTime(order.preparationTime);
+        order.preparationTimeFormatted = Avika.utils.formatElapsedTime(order.preparationTime);
         
         // Manejar el platillo según su tipo de servicio
         // Los tickets de ordena y espera (para-llevar) ahora se comportan como comedor
@@ -387,8 +351,7 @@ Avika.orders = {
         order.preparationTime = Math.floor((endTime - new Date(order.startTime)) / 1000);
         
         // Usar la función centralizada para formatear tiempo transcurrido
-        var formatElapsedTime = getFormatElapsedTimeFunction();
-        order.preparationTimeFormatted = formatElapsedTime(order.preparationTime);
+        order.preparationTimeFormatted = Avika.utils.formatElapsedTime(order.preparationTime);
         
         // Verificar si es un pedido a domicilio o para llevar
         if (order.serviceType === 'domicilio' || order.serviceType === 'para-llevar') {
@@ -620,8 +583,7 @@ Avika.orders = {
         order.preparationTime = Math.floor((order.endTime - new Date(order.startTime)) / 1000);
         
         // Usar la función centralizada para formatear tiempo transcurrido
-        var formatElapsedTime = getFormatElapsedTimeFunction();
-        order.preparationTimeFormatted = formatElapsedTime(order.preparationTime);
+        order.preparationTimeFormatted = Avika.utils.formatElapsedTime(order.preparationTime);
         
         // Verificar el estado completo del ticket
         var ticketStatus = this.checkTicketCompletionStatus(order.ticketId);
@@ -750,8 +712,7 @@ Avika.orders = {
         order.preparationTime = Math.floor((order.endTime - new Date(order.startTime)) / 1000);
         
         // Usar la función centralizada para formatear tiempo transcurrido
-        var formatElapsedTime = getFormatElapsedTimeFunction();
-        order.preparationTimeFormatted = formatElapsedTime(order.preparationTime);
+        order.preparationTimeFormatted = Avika.utils.formatElapsedTime(order.preparationTime);
         
         // Asegurarse de que el array de órdenes en reparto existe
         if (!Avika.data.deliveryOrders) {
@@ -1048,8 +1009,7 @@ Avika.orders = {
         order.deliveryTime = deliveryTimeInSeconds;
         
         // Usar la función centralizada para formatear tiempo transcurrido
-        var formatElapsedTime = getFormatElapsedTimeFunction();
-        order.deliveryTimeFormatted = formatElapsedTime(deliveryTimeInSeconds);
+        order.deliveryTimeFormatted = Avika.utils.formatElapsedTime(deliveryTimeInSeconds);
         
         // Asegurarse de que el array de órdenes completadas existe
         if (!Avika.data.completedOrders) {
@@ -1111,8 +1071,7 @@ Avika.orders = {
                     item.deliveryTime = itemDeliveryTime;
                     
                     // Usar la función centralizada para formatear tiempo transcurrido
-                    var formatElapsedTime = getFormatElapsedTimeFunction();
-                    item.deliveryTimeFormatted = formatElapsedTime(itemDeliveryTime);
+                    item.deliveryTimeFormatted = Avika.utils.formatElapsedTime(itemDeliveryTime);
                     
                     // Agregar a completadas
                     Avika.data.completedOrders.unshift(item);
@@ -1239,19 +1198,15 @@ Avika.orders = {
         } else {
             console.log('Historial de órdenes limpiado');
         }
-        
+                
         return true;
     },
-
-    // Función auxiliar para formatear tiempo (respaldo)
+    
+    // Función auxiliar para formatear tiempo (utiliza directamente la implementación centralizada)
     formatTime: function(date) {
-        if (!date) return '--:--:--';
-        
         try {
-            var hours = (date.getHours() < 10 ? '0' : '') + date.getHours();
-            var minutes = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
-            var seconds = (date.getSeconds() < 10 ? '0' : '') + date.getSeconds();
-            return hours + ':' + minutes + ':' + seconds;
+            // Utilizar directamente la implementación centralizada
+            return Avika.utils.formatTime(date);
         } catch (e) {
             console.warn("Error al formatear tiempo:", e);
             return '--:--:--';

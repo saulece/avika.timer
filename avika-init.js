@@ -273,6 +273,12 @@ function loadSavedData() {
         initQuantityButtons();
         initActionButtons();
         
+        // Inicializar la corrección de colores de tickets
+        if (Avika.ui && typeof Avika.ui.initTicketColorFix === 'function') {
+            console.log("Inicializando corrección de colores de tickets...");
+            Avika.ui.initTicketColorFix();
+        }
+        
         // Cargar datos guardados
         loadSavedData();
         

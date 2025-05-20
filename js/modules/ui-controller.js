@@ -13,10 +13,7 @@ Avika.utils = Avika.utils || {
         TIMER_UPDATE_INTERVAL_MS: 2000    // 2 segundos
     },
     
-    // Funciones de validación de fechas
-    isValidDate: function(date) {
-        return date instanceof Date && !isNaN(date.getTime());
-    },
+    // La función isValidDate ha sido centralizada en Avika.utils.isValidDate
     
     // Funciones de acceso al DOM seguras
     getElement: function(id) {
@@ -1247,6 +1244,14 @@ Avika.ui = {
             detailsCell.appendChild(notesDiv);
         }
         
+        // Notas del ticket en la columna de detalles
+        if (order.ticketNotes && order.ticketNotes.trim() !== '') {
+            var ticketNotesDiv = document.createElement('div');
+            ticketNotesDiv.className = 'ticket-notes';
+            ticketNotesDiv.textContent = 'Ticket: ' + order.ticketNotes;
+            detailsCell.appendChild(ticketNotesDiv);
+        }
+        
         row.appendChild(detailsCell);
 
         // Celda de acción
@@ -1395,6 +1400,14 @@ Avika.ui = {
             notesDiv.className = 'order-notes';
             notesDiv.textContent = order.notes;
             detailsCell.appendChild(notesDiv);
+        }
+        
+        // Notas del ticket en la columna de detalles
+        if (order.ticketNotes && order.ticketNotes.trim() !== '') {
+            var ticketNotesDiv = document.createElement('div');
+            ticketNotesDiv.className = 'ticket-notes';
+            ticketNotesDiv.textContent = 'Ticket: ' + order.ticketNotes;
+            detailsCell.appendChild(ticketNotesDiv);
         }
         
         row.appendChild(detailsCell);
@@ -2655,17 +2668,16 @@ Avika.ui = {
         document.body.classList.remove('loading-active');
     },
 
-    // Función para formatear tiempo transcurrido en formato HH:MM:SS
+    // Función para formatear tiempo transcurrido (utiliza directamente la implementación centralizada)
     formatElapsedTime: function(seconds) {
-        if (!seconds && seconds !== 0) return '--:--:--';
-        
-        var hours = Math.floor(seconds / 3600);
-        var minutes = Math.floor((seconds % 3600) / 60);
-        var secs = seconds % 60;
-        
-        return this.padZero(hours) + ':' + this.padZero(minutes) + ':' + this.padZero(secs);
+        return Avika.utils.formatElapsedTime(seconds);
     },
     
+    // Función para formatear fecha en formato HH:MM:SS (utiliza directamente la implementación centralizada)
+    formatTime: function(date) {
+        return Avika.utils.formatTime(date);
+    },
+
     // Actualizar todos los temporizadores - Versión optimizada
     updateAllTimers: function() {
         // Delegar a la función optimizada en orderService si está disponible
@@ -2723,11 +2735,6 @@ Avika.ui = {
             localStorage.setItem('avika_compact_mode', 'true');
             this.showNotification('Modo ultra-compacto activado');
         }
-    },
-    
-    // Función para añadir ceros a la izquierda (utilizada en stats.js)
-    padZero: function(num) {
-        return num < 10 ? '0' + num : num;
     },
     
     // Función para realizar búsqueda global de platillos en todas las categorías
@@ -2817,5 +2824,232 @@ Avika.ui = {
         document.getElementById('search-results-step').style.display = 'block';
         document.getElementById('category-selection-step').style.display = 'none';
         document.getElementById('dish-selection-step').style.display = 'none';
+    },
+    
+    // Colores consistentes para cada tipo de servicio
+    TICKET_COLORS: {
+        'comedor': '#e6f2ff', // Azul más consistente para comedor
+        'domicilio': '#ffe6e6', // Rojo más consistente para domicilio
+        'para-llevar': '#e6ffe6', // Verde más consistente para llevar
+        'ordena-y-espera': '#fff9e6', // Amarillo claro para ordena y espera
+        'otro': '#f5f5f5' // Gris claro para otros
+    },
+    
+    // Función para aplicar colores consistentes a los tickets
+    fixTicketColors: function() {
+        // Buscar todas las filas de tickets
+        const rows = document.querySelectorAll('tr');
+        
+        // Agrupar filas por tickets
+        const ticketGroups = {};
+        let currentTicketId = null;
+        let currentServiceType = null;
+        
+        rows.forEach(row => {
+            // Buscar el ID del ticket en la fila
+            const ticketLabel = row.querySelector('.ticket-label');
+            if (ticketLabel) {
+                const ticketText = ticketLabel.textContent;
+                const ticketMatch = ticketText.match(/Ticket #(\d+)/);
+                if (ticketMatch) {
+                    currentTicketId = ticketMatch[1];
+                    
+                    // Determinar el tipo de servicio
+                    const serviceTypeElements = row.querySelectorAll('.service-type');
+                    if (serviceTypeElements.length > 0) {
+                        const serviceText = serviceTypeElements[0].textContent.toLowerCase();
+                        if (serviceText.includes('comedor')) {
+                            currentServiceType = 'comedor';
+                        } else if (serviceText.includes('domicilio')) {
+                            currentServiceType = 'domicilio';
+                        } else if (serviceText.includes('para llevar')) {
+                            currentServiceType = 'para-llevar';
+                        } else if (serviceText.includes('ordena y espera')) {
+                            currentServiceType = 'ordena-y-espera';
+                        } else {
+                            currentServiceType = 'otro';
+                        }
+                    }
+                    
+                    // Inicializar grupo de ticket
+                    if (!ticketGroups[currentTicketId]) {
+                        ticketGroups[currentTicketId] = {
+                            rows: [],
+                            serviceType: currentServiceType
+                        };
+                    }
+                }
+            }
+            
+            // Si tenemos un ticket actual, agregar la fila a su grupo
+            if (currentTicketId) {
+                ticketGroups[currentTicketId].rows.push(row);
+                
+                // Verificar si es la última fila del ticket
+                const nextRow = row.nextElementSibling;
+                if (!nextRow || nextRow.querySelector('.ticket-label')) {
+                    currentTicketId = null;
+                    currentServiceType = null;
+                }
+            }
+        });
+        
+        // Aplicar colores consistentes a cada grupo de ticket
+        for (const ticketId in ticketGroups) {
+            const group = ticketGroups[ticketId];
+            const color = this.TICKET_COLORS[group.serviceType] || this.TICKET_COLORS.otro;
+            
+            // Aplicar color a todas las filas del ticket
+            group.rows.forEach((row, index) => {
+                // Aplicar color de fondo
+                row.style.backgroundColor = color;
+                
+                // Aplicar estilos adicionales
+                if (index === 0) {
+                    row.classList.add('ticket-first-row');
+                }
+                if (index === group.rows.length - 1) {
+                    row.classList.add('ticket-last-row');
+                    row.style.borderBottom = '2px solid #999';
+                }
+                
+                // Añadir borde izquierdo a todas las filas del ticket
+                row.style.borderLeft = '3px solid #999';
+            });
+        }
+    },
+    
+    // Colores de tickets por tipo de servicio
+    TICKET_COLORS: {
+        'comedor': '#f0f8ff',      // Azul claro para comedor
+        'domicilio': '#fff0f0',    // Rojo claro para domicilio
+        'para-llevar': '#f0fff0',  // Verde claro para llevar
+        'ordena-y-espera': '#f0fff0', // Verde claro para ordena y espera
+        'otro': '#f5f5f5'          // Gris claro para otros
+    },
+    
+    // Corregir los colores de los tickets en todas las tablas
+    fixTicketColors: function() {
+        // Tablas a procesar
+        const tables = [
+            document.getElementById('pending-body'),
+            document.getElementById('delivery-body'),
+            document.getElementById('completed-body')
+        ];
+        
+        tables.forEach(table => {
+            if (!table) return;
+            
+            // Agrupar filas por ticket
+            const ticketGroups = {};
+            let currentTicketId = null;
+            let currentServiceType = null;
+            
+            // Recorrer todas las filas para identificar tickets
+            Array.from(table.querySelectorAll('tr')).forEach(row => {
+                // Buscar etiqueta de ticket
+                const ticketLabel = row.querySelector('.ticket-label');
+                
+                // Si encontramos una etiqueta de ticket, es el inicio de un nuevo ticket
+                if (ticketLabel) {
+                    const ticketText = ticketLabel.textContent;
+                    const ticketMatch = ticketText.match(/Ticket #([\w\d-]+)/);
+                    if (ticketMatch) {
+                        currentTicketId = ticketMatch[1];
+                        
+                        // Determinar el tipo de servicio
+                        currentServiceType = row.getAttribute('data-service-type') || 'otro';
+                        if (!currentServiceType || currentServiceType === 'undefined') {
+                            const serviceTypeElements = row.querySelectorAll('.service-type');
+                            if (serviceTypeElements.length > 0) {
+                                const serviceText = serviceTypeElements[0].textContent.toLowerCase();
+                                if (serviceText.includes('comedor')) {
+                                    currentServiceType = 'comedor';
+                                } else if (serviceText.includes('domicilio')) {
+                                    currentServiceType = 'domicilio';
+                                } else if (serviceText.includes('para llevar')) {
+                                    currentServiceType = 'para-llevar';
+                                } else if (serviceText.includes('ordena y espera')) {
+                                    currentServiceType = 'para-llevar';
+                                } else {
+                                    currentServiceType = 'otro';
+                                }
+                            }
+                        }
+                        
+                        // Inicializar grupo de ticket
+                        if (!ticketGroups[currentTicketId]) {
+                            ticketGroups[currentTicketId] = {
+                                rows: [],
+                                serviceType: currentServiceType
+                            };
+                        }
+                    }
+                }
+                
+                // Si tenemos un ticket actual, agregar la fila a su grupo
+                if (currentTicketId) {
+                    ticketGroups[currentTicketId].rows.push(row);
+                    
+                    // Verificar si es la última fila del ticket
+                    const nextRow = row.nextElementSibling;
+                    if (!nextRow || nextRow.querySelector('.ticket-label')) {
+                        currentTicketId = null;
+                        currentServiceType = null;
+                    }
+                }
+            });
+            
+            // Aplicar colores consistentes a cada grupo de ticket
+            for (const ticketId in ticketGroups) {
+                const group = ticketGroups[ticketId];
+                const color = this.TICKET_COLORS[group.serviceType] || this.TICKET_COLORS.otro;
+                
+                // Aplicar color a todas las filas del ticket
+                group.rows.forEach((row, index) => {
+                    // Aplicar color de fondo
+                    row.style.backgroundColor = color;
+                    
+                    // Aplicar estilos adicionales
+                    if (index === 0) {
+                        row.classList.add('ticket-first-row');
+                    }
+                    if (index === group.rows.length - 1) {
+                        row.classList.add('ticket-last-row');
+                        row.style.borderBottom = '2px solid #999';
+                    }
+                    
+                    // Añadir borde izquierdo a todas las filas del ticket
+                    row.style.borderLeft = '3px solid #999';
+                });
+            }
+        });
+    },
+    
+    // Inicializar la corrección de colores de tickets
+    initTicketColorFix: function() {
+        // Aplicar la corrección inicialmente
+        setTimeout(this.fixTicketColors.bind(this), 500);
+        
+        // Volver a aplicar la corrección cada vez que cambie el DOM
+        const observer = new MutationObserver(() => {
+            setTimeout(this.fixTicketColors.bind(this), 100);
+        });
+        
+        // Observar cambios en las tablas
+        const tables = document.querySelectorAll('table');
+        tables.forEach(table => {
+            observer.observe(table, { 
+                childList: true, 
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['class', 'style']
+            });
+        });
+        
+        // También observar el cuerpo del documento para detectar nuevas tablas
+        observer.observe(document.body, { 
+            childList: true
+        });
     }
 };

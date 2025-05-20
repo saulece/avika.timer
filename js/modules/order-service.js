@@ -73,44 +73,17 @@ Avika.orderService = {
         return (num < 10 ? '0' : '') + num;
     },
     
-    // Función para validar fechas
-    isValidDate: function(date) {
-        return date instanceof Date && !isNaN(date.getTime());
-    },
+    // La función isValidDate ha sido centralizada en Avika.utils.isValidDate
+    // Usar Avika.utils.isValidDate en su lugar
 
     formatTime: function(date) {
-        // Reutilizar la función de Avika.utils para mantener consistencia
-        if (Avika.utils && typeof Avika.utils.formatTime === 'function') {
-            return Avika.utils.formatTime(date);
-        }
-        
-        // Implementación de respaldo en caso de que Avika.utils no esté disponible
-        if (!date) return '--:--:--';
-        
-        var hours = this.padZero(date.getHours());
-        var minutes = this.padZero(date.getMinutes());
-        var seconds = this.padZero(date.getSeconds());
-        return hours + ':' + minutes + ':' + seconds;
+        // Utilizar directamente la implementación centralizada
+        return Avika.utils.formatTime(date);
     },
 
-    // Función para formatear tiempo transcurrido en segundos a formato HH:MM:SS
+    // Función para formatear tiempo transcurrido (utiliza directamente la implementación centralizada)
     formatElapsedTime: function(seconds) {
-        // Reutilizar la función de Avika.utils para mantener consistencia
-        if (Avika.utils && typeof Avika.utils.formatElapsedTime === 'function') {
-            return Avika.utils.formatElapsedTime(seconds);
-        }
-        
-        // Validar entrada
-        if (seconds === undefined || seconds === null || isNaN(seconds)) {
-            return '--:--:--';
-        }
-        
-        // Implementación unificada para mayor rendimiento
-        var hours = Math.floor(seconds / 3600);
-        var minutes = Math.floor((seconds % 3600) / 60);
-        var secs = Math.floor(seconds % 60);
-        
-        return this.padZero(hours) + ':' + this.padZero(minutes) + ':' + this.padZero(secs);
+        return Avika.utils.formatElapsedTime(seconds);
     },
     
     // Función para seleccionar una categoría
@@ -535,7 +508,7 @@ Avika.orderService = {
             var now = new Date();
             
             // Usar la hora de entrada especificada si existe, de lo contrario usar la hora actual
-            var startTime = entryTime && this.isValidDate(entryTime) ? entryTime : now;
+            var startTime = entryTime && Avika.utils.isValidDate(entryTime) ? entryTime : now;
             
             // Crear órdenes para cada platillo del ticket
             for (var i = 0; i < items.length; i++) {
