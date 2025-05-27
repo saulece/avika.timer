@@ -150,6 +150,8 @@ cargarDatosGuardados: function() {
         if (savedPending) {
             try {
                 Avika.data.pendingOrders = JSON.parse(savedPending);
+                // Reparar fechas para compatibilidad con Android 10
+                this._repararFechasEnOrdenes(Avika.data.pendingOrders);
             } catch (parseError) {
                 console.error('Error al parsear pendingOrders:', parseError);
                 Avika.data.pendingOrders = [];
@@ -159,6 +161,8 @@ cargarDatosGuardados: function() {
         if (savedDelivery) {
             try {
                 Avika.data.deliveryOrders = JSON.parse(savedDelivery);
+                // Reparar fechas para compatibilidad con Android 10
+                this._repararFechasEnOrdenes(Avika.data.deliveryOrders);
             } catch (parseError) {
                 console.error('Error al parsear deliveryOrders:', parseError);
                 Avika.data.deliveryOrders = [];
@@ -168,11 +172,16 @@ cargarDatosGuardados: function() {
         if (savedCompleted) {
             try {
                 Avika.data.completedOrders = JSON.parse(savedCompleted);
+                // Reparar fechas para compatibilidad con Android 10
+                this._repararFechasEnOrdenes(Avika.data.completedOrders);
             } catch (parseError) {
                 console.error('Error al parsear completedOrders:', parseError);
                 Avika.data.completedOrders = [];
             }
         }
+        
+        // Verificar integridad de datos
+        this.verificarIntegridad();
         
         // Verificar que la UI esté inicializada antes de actualizar tablas
         if (Avika.ui) {
@@ -188,23 +197,26 @@ cargarDatosGuardados: function() {
             if (typeof Avika.ui.updateCompletedTable === 'function') {
                 Avika.ui.updateCompletedTable();
             }
-            
-            var lastSaved = localStorage.getItem('avika_lastSaved');
-            if (lastSaved && typeof Avika.ui.showNotification === 'function') {
-                Avika.ui.showNotification('Datos cargados de ' + new Date(lastSaved).toLocaleString());
-            }
         } else {
             console.warn('Avika.ui no está disponible, no se actualizaron las tablas');
         }
         
-        // Actualizar el estado guardado
-        this.lastSavedState = JSON.stringify(Avika.data.pendingOrders) + 
-                             JSON.stringify(Avika.data.deliveryOrders) + 
-                             JSON.stringify(Avika.data.completedOrders);
-                             
         console.log('Datos cargados correctamente');
+        return true;
     } catch (e) {
         console.error('Error al cargar datos guardados:', e);
+        
+        // Inicializar con datos vacíos en caso de error
+        Avika.data.pendingOrders = [];
+        Avika.data.deliveryOrders = [];
+        Avika.data.completedOrders = [];
+        
+        // Mostrar notificación
+        if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
+            Avika.ui.showNotification('Error al cargar datos: ' + e.message, 'error');
+        }
+        
+        return false;
     }
 },
 
@@ -359,5 +371,86 @@ cargarDatosGuardados: function() {
         }, intervalo);
         
         console.log('Autoguardado iniciado con intervalo de ' + intervalo + 'ms');
+    },
+    
+    // Función auxiliar para reparar fechas en órdenes
+    // Corrige problemas de compatibilidad con Android 10 en tablets Lenovo
+    _repararFechasEnOrdenes: function(ordenes) {
+        if (!Array.isArray(ordenes)) return;
+        
+        for (var i = 0; i < ordenes.length; i++) {
+            var orden = ordenes[i];
+            if (!orden) continue;
+            
+            // Reparar startTime
+            if (orden.startTime && typeof orden.startTime === 'string') {
+                try {
+                    // Asegurar formato ISO para máxima compatibilidad
+                    var fechaTemp = new Date(orden.startTime);
+                    if (isNaN(fechaTemp.getTime())) {
+                        console.warn('Fecha startTime inválida en orden ' + orden.id + ', regenerando');
+                        orden.startTime = new Date();
+                    } else {
+                        orden.startTime = fechaTemp;
+                    }
+                } catch (e) {
+                    console.error('Error al reparar startTime:', e);
+                    orden.startTime = new Date();
+                }
+            }
+            
+            // Reparar finishTime si existe
+            if (orden.finishTime && typeof orden.finishTime === 'string') {
+                try {
+                    var fechaTemp = new Date(orden.finishTime);
+                    if (isNaN(fechaTemp.getTime())) {
+                        console.warn('Fecha finishTime inválida en orden ' + orden.id + ', regenerando');
+                        orden.finishTime = new Date();
+                    } else {
+                        orden.finishTime = fechaTemp;
+                    }
+                } catch (e) {
+                    console.error('Error al reparar finishTime:', e);
+                    orden.finishTime = new Date();
+                }
+            }
+            
+            // Reparar deliveryDepartureTime si existe
+            if (orden.deliveryDepartureTime && typeof orden.deliveryDepartureTime === 'string') {
+                try {
+                    var fechaTemp = new Date(orden.deliveryDepartureTime);
+                    if (isNaN(fechaTemp.getTime())) {
+                        console.warn('Fecha deliveryDepartureTime inválida en orden ' + orden.id + ', regenerando');
+                        orden.deliveryDepartureTime = new Date();
+                    } else {
+                        orden.deliveryDepartureTime = fechaTemp;
+                    }
+                } catch (e) {
+                    console.error('Error al reparar deliveryDepartureTime:', e);
+                    orden.deliveryDepartureTime = new Date();
+                }
+            }
+            
+            // Reparar deliveryArrivalTime si existe
+            if (orden.deliveryArrivalTime && typeof orden.deliveryArrivalTime === 'string') {
+                try {
+                    var fechaTemp = new Date(orden.deliveryArrivalTime);
+                    if (isNaN(fechaTemp.getTime())) {
+                        console.warn('Fecha deliveryArrivalTime inválida en orden ' + orden.id + ', regenerando');
+                        orden.deliveryArrivalTime = new Date();
+                    } else {
+                        orden.deliveryArrivalTime = fechaTemp;
+                    }
+                } catch (e) {
+                    console.error('Error al reparar deliveryArrivalTime:', e);
+                    orden.deliveryArrivalTime = new Date();
+                }
+            }
+            
+            // Actualizar el formato de tiempo mostrado
+            if (orden.startTime instanceof Date) {
+                orden.startTimeFormatted = this.formatTime(orden.startTime);
+            }
+        }
     }
 };

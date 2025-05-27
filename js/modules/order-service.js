@@ -621,15 +621,66 @@ Avika.orderService = {
             // Validar que startTime sea una fecha válida
             var startTime;
             try {
-                startTime = new Date(order.startTime);
-                if (isNaN(startTime.getTime())) throw new Error("Fecha inválida");
+                // Asegurar que startTime sea un objeto Date válido
+                if (order.startTime instanceof Date) {
+                    startTime = order.startTime;
+                } else if (typeof order.startTime === 'string') {
+                    // Compatibilidad con Android 10: parsear la fecha correctamente
+                    startTime = new Date(order.startTime);
+                    // Si la fecha es inválida, intentar reparar el formato
+                    if (isNaN(startTime.getTime())) {
+                        console.warn("Reparando formato de fecha para la orden:", orderId);
+                        // Intentar diferentes formatos de fecha
+                        if (order.startTime.indexOf('T') > -1) {
+                            // Formato ISO
+                            var parts = order.startTime.split('T');
+                            var dateParts = parts[0].split('-');
+                            var timeParts = parts[1].split(':');
+                            startTime = new Date(dateParts[0], dateParts[1]-1, dateParts[2], 
+                                              timeParts[0], timeParts[1], timeParts[2].split('.')[0]);
+                        } else {
+                            // Crear una nueva fecha
+                            startTime = new Date();
+                            // Actualizar la orden para evitar problemas futuros
+                            order.startTime = startTime;
+                            // Guardar cambios si es posible
+                            if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+                                Avika.storage.guardarDatosLocales();
+                            }
+                        }
+                    }
+                } else {
+                    // Si no es ni Date ni string, crear una nueva fecha
+                    console.warn("Tipo de fecha inválido para la orden:", orderId, typeof order.startTime);
+                    startTime = new Date();
+                    // Actualizar la orden para evitar problemas futuros
+                    order.startTime = startTime;
+                }
+                
+                // Verificación final
+                if (isNaN(startTime.getTime())) throw new Error("Fecha inválida después de reparación");
+                
             } catch (e) {
-                console.warn("Formato de fecha inválido para la orden:", orderId);
+                console.warn("Error al procesar fecha para la orden:", orderId, e);
                 timerCell.textContent = "--:--:--";
                 continue;
             }
             
-            var elapsedMillis = now - startTime;
+            // Cálculo seguro del tiempo transcurrido
+            var elapsedMillis;
+            try {
+                elapsedMillis = now.getTime() - startTime.getTime();
+            } catch (e) {
+                console.error("Error al calcular diferencia de tiempo:", e);
+                elapsedMillis = 0;
+            }
+            
+            // Asegurar que el valor sea positivo
+            if (elapsedMillis < 0) {
+                console.warn("Tiempo negativo detectado, corrigiendo para orden:", orderId);
+                elapsedMillis = 0;
+            }
+            
             var elapsedSeconds = Math.floor(elapsedMillis / 1000);
             
             // Usar la función formatElapsedTime para mantener consistencia
@@ -682,15 +733,66 @@ Avika.orderService = {
             // Validar que deliveryDepartureTime sea una fecha válida
             var departureTime;
             try {
-                departureTime = new Date(order.deliveryDepartureTime);
-                if (isNaN(departureTime.getTime())) throw new Error("Fecha inválida");
+                // Asegurar que departureTime sea un objeto Date válido
+                if (order.deliveryDepartureTime instanceof Date) {
+                    departureTime = order.deliveryDepartureTime;
+                } else if (typeof order.deliveryDepartureTime === 'string') {
+                    // Compatibilidad con Android 10: parsear la fecha correctamente
+                    departureTime = new Date(order.deliveryDepartureTime);
+                    // Si la fecha es inválida, intentar reparar el formato
+                    if (isNaN(departureTime.getTime())) {
+                        console.warn("Reparando formato de fecha para la orden en reparto:", orderId);
+                        // Intentar diferentes formatos de fecha
+                        if (order.deliveryDepartureTime.indexOf('T') > -1) {
+                            // Formato ISO
+                            var parts = order.deliveryDepartureTime.split('T');
+                            var dateParts = parts[0].split('-');
+                            var timeParts = parts[1].split(':');
+                            departureTime = new Date(dateParts[0], dateParts[1]-1, dateParts[2], 
+                                              timeParts[0], timeParts[1], timeParts[2].split('.')[0]);
+                        } else {
+                            // Crear una nueva fecha
+                            departureTime = new Date();
+                            // Actualizar la orden para evitar problemas futuros
+                            order.deliveryDepartureTime = departureTime;
+                            // Guardar cambios si es posible
+                            if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+                                Avika.storage.guardarDatosLocales();
+                            }
+                        }
+                    }
+                } else {
+                    // Si no es ni Date ni string, crear una nueva fecha
+                    console.warn("Tipo de fecha inválido para la orden en reparto:", orderId, typeof order.deliveryDepartureTime);
+                    departureTime = new Date();
+                    // Actualizar la orden para evitar problemas futuros
+                    order.deliveryDepartureTime = departureTime;
+                }
+                
+                // Verificación final
+                if (isNaN(departureTime.getTime())) throw new Error("Fecha inválida después de reparación");
+                
             } catch (e) {
-                console.warn("Formato de fecha inválido para la orden en reparto:", orderId);
+                console.warn("Error al procesar fecha para la orden en reparto:", orderId, e);
                 timerCell.textContent = "--:--:--";
                 continue;
             }
             
-            var elapsedMillis = now - departureTime;
+            // Cálculo seguro del tiempo transcurrido
+            var elapsedMillis;
+            try {
+                elapsedMillis = now.getTime() - departureTime.getTime();
+            } catch (e) {
+                console.error("Error al calcular diferencia de tiempo en reparto:", e);
+                elapsedMillis = 0;
+            }
+            
+            // Asegurar que el valor sea positivo
+            if (elapsedMillis < 0) {
+                console.warn("Tiempo negativo detectado, corrigiendo para orden en reparto:", orderId);
+                elapsedMillis = 0;
+            }
+            
             var elapsedSeconds = Math.floor(elapsedMillis / 1000);
             
             // Usar la función formatElapsedTime para mantener consistencia
