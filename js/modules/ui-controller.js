@@ -77,6 +77,8 @@ Avika.ui = {
         
         // Actualizar contador
         document.getElementById('bar-count').textContent = count;
+
+        this.applyStylesToAllTickets();
     },
 
     // Función para crear fila de orden en barra
@@ -655,215 +657,6 @@ Avika.ui = {
             }
         }
         
-        // Función para crear una fila para un platillo completado
-        function createCompletedRow(order) {
-            var row = document.createElement('tr');
-            var isMobile = window.innerWidth <= 768;
-            
-            // Celda del platillo con información adicional en móviles
-            var dishCell = document.createElement('td');
-            if (isMobile) {
-                // En móviles, incluimos más información en la celda del platillo
-                var dishInfo = document.createElement('div');
-                dishInfo.style.fontWeight = 'bold';
-                dishInfo.textContent = order.dish + (order.quantity > 1 ? ' (' + order.quantity + ')' : '');
-                dishCell.appendChild(dishInfo);
-                
-                // Añadir información adicional en líneas separadas
-                var extraInfo = document.createElement('div');
-                extraInfo.style.fontSize = '0.8em';
-                extraInfo.style.color = '#555';
-                
-                var infoText = '';
-                
-                // Añadir información de servicio y ticket
-                if (order.serviceType) {
-                    infoText += Avika.config.serviceNames[order.serviceType] || order.serviceType;
-                }
-                
-                if (order.ticketId) {
-                    infoText += ' | #' + order.ticketId.substring(order.ticketId.length - 5);
-                }
-                
-                if (order.category) {
-                    infoText += ' | ' + (Avika.config.categoryNames[order.category] || order.category);
-                }
-                
-                extraInfo.textContent = infoText;
-                dishCell.appendChild(extraInfo);
-                
-                // Si hay personalizaciones, añadirlas en otra línea
-                if (order.customizations && order.customizations.length > 0) {
-                    var customInfo = document.createElement('div');
-                    customInfo.style.fontSize = '0.8em';
-                    customInfo.style.color = '#555';
-                    customInfo.textContent = order.customizations.map(function(code) {
-                        return Avika.config.customizationOptions[code] || code;
-                    }).join(', ');
-                    dishCell.appendChild(customInfo);
-                }
-                
-                // Si hay notas, añadirlas en otra línea
-                if (order.notes) {
-                    var notesInfo = document.createElement('div');
-                    notesInfo.style.fontSize = '0.8em';
-                    notesInfo.style.fontStyle = 'italic';
-                    notesInfo.style.color = '#555';
-                    notesInfo.textContent = 'Notas: ' + order.notes;
-                    dishCell.appendChild(notesInfo);
-                }
-            } else {
-                // En escritorio, mejor formato para el nombre del platillo
-                dishCell.className = 'dish-cell';
-                
-                // Nombre del platillo con mejor formato
-                var dishNameDiv = document.createElement('div');
-                dishNameDiv.className = 'dish-name';
-                
-                // Si hay cantidad mayor a 1, mostrarla
-                if (order.quantity > 1) {
-                    var quantitySpan = document.createElement('span');
-                    quantitySpan.className = 'dish-quantity';
-                    quantitySpan.textContent = order.quantity + 'x ';
-                    dishNameDiv.appendChild(quantitySpan);
-                }
-                
-                // Agregar el nombre del platillo
-                dishNameDiv.appendChild(document.createTextNode(order.dish));
-                dishCell.appendChild(dishNameDiv);
-                
-                // Si es parte de un ticket, mostrar el ID del ticket
-                if (order.ticketId) {
-                    var ticketIdDiv = document.createElement('div');
-                    ticketIdDiv.className = 'ticket-id';
-                    ticketIdDiv.textContent = 'Ticket #' + order.ticketId.substring(order.ticketId.length - 5);
-                    dishCell.appendChild(ticketIdDiv);
-                }
-            }
-            row.appendChild(dishCell);
-            
-            // En móviles, solo mostramos la celda de fin
-            // En escritorio, mostramos todas las celdas
-            if (!isMobile) {
-                // Celda de inicio (solo en escritorio)
-                var startCell = document.createElement('td');
-                startCell.textContent = order.startTimeFormatted || '--:--:--';
-                row.appendChild(startCell);
-            }
-            
-            // Celda de fin (siempre visible)
-            var endCell = document.createElement('td');
-            if (isMobile) {
-                // En móviles, añadir información de entrega si existe
-                var endTimeDiv = document.createElement('div');
-                endTimeDiv.style.fontWeight = 'bold';
-                endTimeDiv.textContent = order.endTimeFormatted || order.finishTimeFormatted || '--:--:--';
-                endCell.appendChild(endTimeDiv);
-                
-                if (order.deliveryDepartureTimeFormatted || order.deliveryArrivalTimeFormatted) {
-                    var deliveryInfo = document.createElement('div');
-                    deliveryInfo.style.fontSize = '0.8em';
-                    deliveryInfo.style.color = '#555';
-                    
-                    var deliveryText = '';
-                    if (order.deliveryDepartureTimeFormatted) {
-                        deliveryText += 'Salida: ' + order.deliveryDepartureTimeFormatted;
-                    }
-                    
-                    if (order.deliveryArrivalTimeFormatted) {
-                        if (deliveryText) deliveryText += ' | ';
-                        deliveryText += 'Entrega: ' + order.deliveryArrivalTimeFormatted;
-                    }
-                    
-                    deliveryInfo.textContent = deliveryText;
-                    endCell.appendChild(deliveryInfo);
-                }
-            } else {
-                // En escritorio, solo la hora de fin
-                endCell.textContent = order.endTimeFormatted || order.finishTimeFormatted || '--:--:--';
-            }
-            row.appendChild(endCell);
-            
-            if (!isMobile) {
-                // Celda de detalles (solo en escritorio)
-                var detailsCell = document.createElement('td');
-                detailsCell.className = 'details-container';
-                
-                // Tipo de servicio
-                if (order.serviceType) {
-                    var serviceDiv = document.createElement('div');
-                    serviceDiv.className = 'service-type';
-                    serviceDiv.textContent = Avika.config.serviceNames[order.serviceType] || order.serviceType;
-                    if (order.isSpecialCombo) {
-                        serviceDiv.textContent += ' (Combo Especial)';
-                    }
-                    detailsCell.appendChild(serviceDiv);
-                }
-                
-                // Categoría
-                if (order.category) {
-                    var categoryDiv = document.createElement('div');
-                    categoryDiv.className = 'dish-category';
-                    categoryDiv.textContent = Avika.config.categoryNames[order.category] || order.category;
-                    detailsCell.appendChild(categoryDiv);
-                }
-                
-                // Personalizaciones
-                if (order.customizations && order.customizations.length > 0) {
-                    var customDiv = document.createElement('div');
-                    customDiv.className = 'dish-customization';
-                    customDiv.textContent = order.customizations.map(function(code) {
-                        return Avika.config.customizationOptions[code] || code;
-                    }).join(', ');
-                    detailsCell.appendChild(customDiv);
-                }
-                
-                // Notas
-                if (order.notes && order.notes.trim() !== '') {
-                    var notesDiv = document.createElement('div');
-                    notesDiv.className = 'order-notes';
-                    notesDiv.textContent = order.notes;
-                    detailsCell.appendChild(notesDiv);
-                }
-                
-                // Información de entrega
-                if (order.deliveryDepartureTimeFormatted || order.deliveryArrivalTimeFormatted) {
-                    var deliveryDiv = document.createElement('div');
-                    deliveryDiv.className = 'dish-details';
-                    var deliveryText = '';
-                    
-                    if (order.deliveryDepartureTimeFormatted) {
-                        deliveryText += 'Salida: ' + order.deliveryDepartureTimeFormatted;
-                    }
-                    
-                    if (order.deliveryArrivalTimeFormatted) {
-                        if (deliveryText) deliveryText += ' | ';
-                        deliveryText += 'Entrega: ' + order.deliveryArrivalTimeFormatted;
-                    }
-                    
-                    if (order.deliveryTimeFormatted) {
-                        if (deliveryText) deliveryText += ' | ';
-                        deliveryText += 'Tiempo: ' + order.deliveryTimeFormatted;
-                    }
-                    
-                    deliveryDiv.textContent = deliveryText;
-                    detailsCell.appendChild(deliveryDiv);
-                }
-                
-                // Si no hay detalles, mostrar un mensaje
-                if (detailsCell.children.length === 0) {
-                    var noDetailsDiv = document.createElement('div');
-                    noDetailsDiv.className = 'dish-details';
-                    noDetailsDiv.textContent = 'Sin detalles';
-                    detailsCell.appendChild(noDetailsDiv);
-                }
-                
-                row.appendChild(detailsCell);
-            }
-            
-            return row;
-        }
-        
         // Añadir órdenes agrupadas por ticket
         for (var ticketId in ticketGroups) {
             var ticketRows = [];
@@ -872,7 +665,7 @@ Avika.ui = {
             // Crear filas para cada orden del ticket
             for (var i = 0; i < group.orders.length; i++) {
                 var order = group.orders[i];
-                var row = createCompletedRow(order);
+                var row = this.createCompletedRow(order);
                 completedBody.appendChild(row);
                 ticketRows.push(row);
             }
@@ -883,7 +676,7 @@ Avika.ui = {
         
         // Añadir órdenes individuales
         for (var i = 0; i < individualOrders.length; i++) {
-            var row = createCompletedRow(individualOrders[i]);
+            var row = this.createCompletedRow(individualOrders[i]);
             completedBody.appendChild(row);
             
             // Estilo para órdenes individuales
@@ -921,7 +714,216 @@ Avika.ui = {
             clearHistoryContainer.appendChild(clearBtn);
         }
     },
-    
+
+    // Función para crear fila para un platillo completado
+    createCompletedRow: function(order) {
+        var row = document.createElement('tr');
+        var isMobile = window.innerWidth <= 768;
+        
+        // Celda del platillo con información adicional en móviles
+        var dishCell = document.createElement('td');
+        if (isMobile) {
+            // En móviles, incluimos más información en la celda del platillo
+            var dishInfo = document.createElement('div');
+            dishInfo.style.fontWeight = 'bold';
+            dishInfo.textContent = order.dish + (order.quantity > 1 ? ' (' + order.quantity + ')' : '');
+            dishCell.appendChild(dishInfo);
+            
+            // Añadir información adicional en líneas separadas
+            var extraInfo = document.createElement('div');
+            extraInfo.style.fontSize = '0.8em';
+            extraInfo.style.color = '#555';
+            
+            var infoText = '';
+            
+            // Añadir información de servicio y ticket
+            if (order.serviceType) {
+                infoText += Avika.config.serviceNames[order.serviceType] || order.serviceType;
+            }
+            
+            if (order.ticketId) {
+                infoText += ' | #' + order.ticketId.substring(order.ticketId.length - 5);
+            }
+            
+            if (order.category) {
+                infoText += ' | ' + (Avika.config.categoryNames[order.category] || order.category);
+            }
+            
+            extraInfo.textContent = infoText;
+            dishCell.appendChild(extraInfo);
+            
+            // Si hay personalizaciones, añadirlas en otra línea
+            if (order.customizations && order.customizations.length > 0) {
+                var customInfo = document.createElement('div');
+                customInfo.style.fontSize = '0.8em';
+                customInfo.style.color = '#555';
+                customInfo.textContent = order.customizations.map(function(code) {
+                    return Avika.config.customizationOptions[code] || code;
+                }).join(', ');
+                dishCell.appendChild(customInfo);
+            }
+            
+            // Si hay notas, añadirlas en otra línea
+            if (order.notes) {
+                var notesInfo = document.createElement('div');
+                notesInfo.style.fontSize = '0.8em';
+                notesInfo.style.fontStyle = 'italic';
+                notesInfo.style.color = '#555';
+                notesInfo.textContent = 'Notas: ' + order.notes;
+                dishCell.appendChild(notesInfo);
+            }
+        } else {
+            // En escritorio, mejor formato para el nombre del platillo
+            dishCell.className = 'dish-cell';
+            
+            // Nombre del platillo con mejor formato
+            var dishNameDiv = document.createElement('div');
+            dishNameDiv.className = 'dish-name';
+            
+            // Si hay cantidad mayor a 1, mostrarla
+            if (order.quantity > 1) {
+                var quantitySpan = document.createElement('span');
+                quantitySpan.className = 'dish-quantity';
+                quantitySpan.textContent = order.quantity + 'x ';
+                dishNameDiv.appendChild(quantitySpan);
+            }
+            
+            // Agregar el nombre del platillo
+            dishNameDiv.appendChild(document.createTextNode(order.dish));
+            dishCell.appendChild(dishNameDiv);
+            
+            // Si es parte de un ticket, mostrar el ID del ticket
+            if (order.ticketId) {
+                var ticketIdDiv = document.createElement('div');
+                ticketIdDiv.className = 'ticket-id';
+                ticketIdDiv.textContent = 'Ticket #' + order.ticketId.substring(order.ticketId.length - 5);
+                dishCell.appendChild(ticketIdDiv);
+            }
+        }
+        row.appendChild(dishCell);
+        
+        // En móviles, solo mostramos la celda de fin
+        // En escritorio, mostramos todas las celdas
+        if (!isMobile) {
+            // Celda de inicio (solo en escritorio)
+            var startCell = document.createElement('td');
+            startCell.textContent = order.startTimeFormatted || '--:--:--';
+            row.appendChild(startCell);
+        }
+        
+        // Celda de fin (siempre visible)
+        var endCell = document.createElement('td');
+        if (isMobile) {
+            // En móviles, añadir información de entrega si existe
+            var endTimeDiv = document.createElement('div');
+            endTimeDiv.style.fontWeight = 'bold';
+            endTimeDiv.textContent = order.endTimeFormatted || order.finishTimeFormatted || '--:--:--';
+            endCell.appendChild(endTimeDiv);
+            
+            if (order.deliveryDepartureTimeFormatted || order.deliveryArrivalTimeFormatted) {
+                var deliveryInfo = document.createElement('div');
+                deliveryInfo.style.fontSize = '0.8em';
+                deliveryInfo.style.color = '#555';
+                
+                var deliveryText = '';
+                
+                if (order.deliveryDepartureTimeFormatted) {
+                    deliveryText += 'Salida: ' + order.deliveryDepartureTimeFormatted;
+                }
+                
+                if (order.deliveryArrivalTimeFormatted) {
+                    if (deliveryText) deliveryText += ' | ';
+                    deliveryText += 'Entrega: ' + order.deliveryArrivalTimeFormatted;
+                }
+                
+                deliveryInfo.textContent = deliveryText;
+                endCell.appendChild(deliveryInfo);
+            }
+        } else {
+            // En escritorio, solo la hora de fin
+            endCell.textContent = order.endTimeFormatted || order.finishTimeFormatted || '--:--:--';
+        }
+        row.appendChild(endCell);
+        
+        if (!isMobile) {
+            // Celda de detalles (solo en escritorio)
+            var detailsCell = document.createElement('td');
+            detailsCell.className = 'details-container';
+            
+            // Tipo de servicio
+            if (order.serviceType) {
+                var serviceDiv = document.createElement('div');
+                serviceDiv.className = 'service-type';
+                serviceDiv.textContent = Avika.config.serviceNames[order.serviceType] || order.serviceType;
+                if (order.isSpecialCombo) {
+                    serviceDiv.textContent += ' (Combo Especial)';
+                }
+                detailsCell.appendChild(serviceDiv);
+            }
+            
+            // Categoría
+            if (order.category) {
+                var categoryDiv = document.createElement('div');
+                categoryDiv.className = 'dish-category';
+                categoryDiv.textContent = Avika.config.categoryNames[order.category] || order.category;
+                detailsCell.appendChild(categoryDiv);
+            }
+            
+            // Personalizaciones
+            if (order.customizations && order.customizations.length > 0) {
+                var customDiv = document.createElement('div');
+                customDiv.className = 'dish-customization';
+                customDiv.textContent = order.customizations.map(function(code) {
+                    return Avika.config.customizationOptions[code] || code;
+                }).join(', ');
+                detailsCell.appendChild(customDiv);
+            }
+            
+            // Notas
+            if (order.notes && order.notes.trim() !== '') {
+                var notesDiv = document.createElement('div');
+                notesDiv.className = 'order-notes';
+                notesDiv.textContent = order.notes;
+                detailsCell.appendChild(notesDiv);
+            }
+            
+            // Información de entrega
+            if (order.deliveryDepartureTimeFormatted || order.deliveryArrivalTimeFormatted) {
+                var deliveryDiv = document.createElement('div');
+                deliveryDiv.className = 'dish-details';
+                var deliveryText = '';
+                
+                if (order.deliveryDepartureTimeFormatted) {
+                    deliveryText += 'Salida: ' + order.deliveryDepartureTimeFormatted;
+                }
+                
+                if (order.deliveryArrivalTimeFormatted) {
+                    if (deliveryText) deliveryText += ' | ';
+                    deliveryText += 'Entrega: ' + order.deliveryArrivalTimeFormatted;
+                }
+                
+                if (order.deliveryTimeFormatted) {
+                    if (deliveryText) deliveryText += ' | ';
+                    deliveryText += 'Tiempo: ' + order.deliveryTimeFormatted;
+                }
+                
+                deliveryDiv.textContent = deliveryText;
+                detailsCell.appendChild(deliveryDiv);
+            }
+            
+            // Si no hay detalles, mostrar un mensaje
+            if (detailsCell.children.length === 0) {
+                var noDetailsDiv = document.createElement('div');
+                noDetailsDiv.className = 'dish-details';
+                noDetailsDiv.textContent = 'Sin detalles';
+                detailsCell.appendChild(noDetailsDiv);
+            }
+            
+            row.appendChild(detailsCell);
+        }
+        
+        return row;
+    },
     // Función para filtrar platillos en el modal de tickets
     filterTicketDishes: function(searchText) {
         var buttons = document.querySelectorAll('#dishes-selection-container .dish-btn');
@@ -1066,6 +1068,8 @@ Avika.ui = {
         if (pendingCount) {
             pendingCount.textContent = Avika.data.pendingOrders.length;
         }
+
+        this.applyStylesToAllTickets();
     },
     // Actualizar tabla de órdenes en reparto
     updateDeliveryTable: function() {
@@ -1181,6 +1185,8 @@ Avika.ui = {
             // Estilo para órdenes individuales
             row.style.backgroundColor = '#ffffff'; // Blanco para órdenes individuales
         }
+
+        this.applyStylesToAllTickets();
     },
     
     // Crear fila para una orden en reparto
@@ -2922,117 +2928,21 @@ Avika.ui = {
     
     // Colores consistentes para cada tipo de servicio
     TICKET_COLORS: {
-        'comedor': '#e6f2ff', // Azul más consistente para comedor
-        'domicilio': '#ffe6e6', // Rojo más consistente para domicilio
-        'para-llevar': '#e6ffe6', // Verde más consistente para llevar
-        'ordena-y-espera': '#fff9e6', // Amarillo claro para ordena y espera
-        'otro': '#f5f5f5' // Gris claro para otros
+        'comedor': '#e6f2ff',      // Azul claro
+        'domicilio': '#ffe6e6',    // Rojo claro
+        'para-llevar': '#e6ffe6',  // Verde claro
+        'ordena-y-espera': '#fff9e6', // Amarillo claro
+        'otro': '#f5f5f5'          // Gris claro
     },
     
     // Función para aplicar colores consistentes a los tickets
-    fixTicketColors: function() {
-        // Buscar todas las filas de tickets
-        const rows = document.querySelectorAll('tr');
-        
-        // Agrupar filas por tickets
-        const ticketGroups = {};
-        let currentTicketId = null;
-        let currentServiceType = null;
-        
-        rows.forEach(row => {
-            // Buscar el ID del ticket en la fila
-            const ticketLabel = row.querySelector('.ticket-label');
-            if (ticketLabel) {
-                const ticketText = ticketLabel.textContent;
-                const ticketMatch = ticketText.match(/Ticket #(\d+)/);
-                if (ticketMatch) {
-                    currentTicketId = ticketMatch[1];
-                    
-                    // Determinar el tipo de servicio
-                    const serviceTypeElements = row.querySelectorAll('.service-type');
-                    if (serviceTypeElements.length > 0) {
-                        const serviceText = serviceTypeElements[0].textContent.toLowerCase();
-                        if (serviceText.includes('comedor')) {
-                            currentServiceType = 'comedor';
-                        } else if (serviceText.includes('domicilio')) {
-                            currentServiceType = 'domicilio';
-                        } else if (serviceText.includes('para llevar')) {
-                            currentServiceType = 'para-llevar';
-                        } else if (serviceText.includes('ordena y espera')) {
-                            currentServiceType = 'ordena-y-espera';
-                        } else {
-                            currentServiceType = 'otro';
-                        }
-                    }
-                    
-                    // Inicializar grupo de ticket
-                    if (!ticketGroups[currentTicketId]) {
-                        ticketGroups[currentTicketId] = {
-                            rows: [],
-                            serviceType: currentServiceType
-                        };
-                    }
-                }
-            }
-            
-            // Si tenemos un ticket actual, agregar la fila a su grupo
-            if (currentTicketId) {
-                ticketGroups[currentTicketId].rows.push(row);
-                
-                // Verificar si es la última fila del ticket
-                const nextRow = row.nextElementSibling;
-                if (!nextRow || nextRow.querySelector('.ticket-label')) {
-                    currentTicketId = null;
-                    currentServiceType = null;
-                }
-            }
-        });
-        
-        // Aplicar colores consistentes a cada grupo de ticket
-        for (const ticketId in ticketGroups) {
-            const group = ticketGroups[ticketId];
-            const color = this.TICKET_COLORS[group.serviceType] || this.TICKET_COLORS.otro;
-            
-            // Aplicar color a todas las filas del ticket
-            group.rows.forEach((row, index) => {
-                // Aplicar color de fondo
-                row.style.backgroundColor = color;
-                
-                // Aplicar estilos adicionales
-                if (index === 0) {
-                    row.classList.add('ticket-first-row');
-                }
-                if (index === group.rows.length - 1) {
-                    row.classList.add('ticket-last-row');
-                    row.style.borderBottom = '2px solid #999';
-                }
-                
-                // Añadir borde izquierdo a todas las filas del ticket
-                row.style.borderLeft = '3px solid #999';
-            });
-        }
-    },
-    
-    // Colores de tickets por tipo de servicio
-    TICKET_COLORS: {
-        'comedor': '#f0f8ff',      // Azul claro para comedor
-        'domicilio': '#fff0f0',    // Rojo claro para domicilio
-        'para-llevar': '#f0fff0',  // Verde claro para llevar
-        'ordena-y-espera': '#f0fff0', // Verde claro para ordena y espera
-        'otro': '#f5f5f5'          // Gris claro para otros
-    },
-    
-    // Corregir los colores de los tickets en todas las tablas
-    fixTicketColors: function() {
+    applyStylesToAllTickets: function() {
         // Tablas a procesar
-        const tables = [
-            document.getElementById('pending-body'),
-            document.getElementById('delivery-body'),
-            document.getElementById('completed-body')
-        ];
+        const tables = ['pending-body', 'delivery-body', 'completed-body'];
         
-        tables.forEach(table => {
-            if (!table) return;
+        tables.forEach(tableId => {
+            const tableBody = document.getElementById(tableId);
+            if (!tableBody) return;
             
             // Agrupar filas por ticket
             const ticketGroups = {};
@@ -3040,7 +2950,7 @@ Avika.ui = {
             let currentServiceType = null;
             
             // Recorrer todas las filas para identificar tickets
-            Array.from(table.querySelectorAll('tr')).forEach(row => {
+            Array.from(tableBody.querySelectorAll('tr')).forEach(row => {
                 // Buscar etiqueta de ticket
                 const ticketLabel = row.querySelector('.ticket-label');
                 
@@ -3073,16 +2983,13 @@ Avika.ui = {
                         
                         // Inicializar grupo de ticket
                         if (!ticketGroups[currentTicketId]) {
-                            ticketGroups[currentTicketId] = {
-                                rows: [],
-                                serviceType: currentServiceType
-                            };
+                            ticketGroups[currentTicketId] = { rows: [], serviceType: currentServiceType }; // Inicializar grupo
                         }
                     }
                 }
                 
                 // Si tenemos un ticket actual, agregar la fila a su grupo
-                if (currentTicketId) {
+                if (currentTicketId && ticketGroups[currentTicketId]) {
                     ticketGroups[currentTicketId].rows.push(row);
                     
                     // Verificar si es la última fila del ticket
@@ -3101,49 +3008,25 @@ Avika.ui = {
                 
                 // Aplicar color a todas las filas del ticket
                 group.rows.forEach((row, index) => {
-                    // Aplicar color de fondo
                     row.style.backgroundColor = color;
                     
-                    // Aplicar estilos adicionales
-                    if (index === 0) {
-                        row.classList.add('ticket-first-row');
-                    }
-                    if (index === group.rows.length - 1) {
-                        row.classList.add('ticket-last-row');
-                        row.style.borderBottom = '2px solid #999';
-                    }
+                    // Limpiar estilos de borde previos para evitar acumulaciones
+                    row.style.borderTop = '';
+                    row.style.borderBottom = '';
                     
-                    // Añadir borde izquierdo a todas las filas del ticket
-                    row.style.borderLeft = '3px solid #999';
+                    // Aplicar estilos de agrupación si el ticket tiene más de una fila
+                    if (group.rows.length > 1) {
+                         if (index === 0) {
+                            row.style.borderTop = '2px solid #777';
+                        }
+                        if (index === group.rows.length - 1) {
+                            row.style.borderBottom = '2px solid #777';
+                        } else {
+                            row.style.borderBottom = '1px dashed #bbb';
+                        }
+                    }
                 });
             }
-        });
-    },
-    
-    // Inicializar la corrección de colores de tickets
-    initTicketColorFix: function() {
-        // Aplicar la corrección inicialmente
-        setTimeout(this.fixTicketColors.bind(this), 500);
-        
-        // Volver a aplicar la corrección cada vez que cambie el DOM
-        const observer = new MutationObserver(() => {
-            setTimeout(this.fixTicketColors.bind(this), 100);
-        });
-        
-        // Observar cambios en las tablas
-        const tables = document.querySelectorAll('table');
-        tables.forEach(table => {
-            observer.observe(table, { 
-                childList: true, 
-                subtree: true,
-                attributes: true,
-                attributeFilter: ['class', 'style']
-            });
-        });
-        
-        // También observar el cuerpo del documento para detectar nuevas tablas
-        observer.observe(document.body, { 
-            childList: true
         });
     }
 };
