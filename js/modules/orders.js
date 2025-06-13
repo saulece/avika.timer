@@ -1229,35 +1229,35 @@ Avika.orders = {
         
         try {
             var orders = JSON.parse(backup);
+        }
+        
+        // Guardar cambios
+        if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+            Avika.storage.guardarDatosLocales();
+        }
+        
+        // Mostrar notificación
+        if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
+            Avika.ui.showNotification('¡' + order.dish + ' en barra!', 'success');
+        }
+    } catch (e) {
+        console.error("Error al mover a barra:", e);
+        if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
+
+            var order = Avika.data.pendingOrders[orderIndex];
+            var now = new Date();
             
-            if (!Array.isArray(orders) || orders.length === 0) {
-                if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
-                    Avika.ui.showNotification('La copia de seguridad está vacía o dañada', 'warning');
-                } else {
-                    console.warn('La copia de seguridad está vacía o dañada');
-                }
-                return false;
-            }
+            // Actualizar el tiempo de salida
+            order.exitTime = now;
+            order.preparationTime = Math.floor((now - order.startTime) / 1000);
             
-            // Solicitar confirmación mostrando información sobre la copia
-            var confirmMsg = '¿Desea restaurar ' + orders.length + ' órdenes completadas';
+            // Mover la orden a barra
+            Avika.data.barOrders.push(order);
+            Avika.data.pendingOrders.splice(orderIndex, 1);
             
-            if (timestamp) {
-                confirmMsg += ' desde la copia de seguridad creada el ' + new Date(timestamp).toLocaleString();
-            }
-            
-            confirmMsg += '?';
-            
-            if (!confirm(confirmMsg)) {
-                return false;
-            }
-            
-            // Restaurar órdenes
-            Avika.data.completedOrders = orders;
-            
-            // Actualizar tabla
-            if (Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
-                Avika.ui.updateCompletedTable();
+            // Actualizar la interfaz
+            if (Avika.ui && typeof Avika.ui.updateTables === 'function') {
+                Avika.ui.updateTables();
             }
             
             // Guardar cambios
@@ -1267,20 +1267,111 @@ Avika.orders = {
             
             // Mostrar notificación
             if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
-                Avika.ui.showNotification('Se han restaurado ' + orders.length + ' órdenes completadas', 'success');
-            } else {
-                console.log('Se han restaurado ' + orders.length + ' órdenes completadas');
+                Avika.ui.showNotification('¡' + order.dish + ' en barra!', 'success');
             }
-            
-            return true;
         } catch (e) {
-            console.error("Error al restaurar copia de seguridad:", e);
-            
+            console.error("Error al mover a barra:", e);
             if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
-                Avika.ui.showNotification('Error al restaurar copia de seguridad: ' + e.message, 'error');
+                Avika.ui.showNotification('Error al mover la orden a barra. Consulta la consola para más detalles.', 'error');
+            }
+        }
+    },
+
+    // Función para finalizar una orden desde barra
+    finishFromBar: function(orderId) {
+        console.log("Finalizando orden desde barra:", orderId);
+        
+        try {
+            // Buscar la orden en barra
+            var orderIndex = Avika.data.barOrders.findIndex(function(order) {
+                return order.id === orderId;
+            });
+
+            if (orderIndex === -1) {
+                console.error("Orden no encontrada en barra:", orderId);
+                return;
+            }
+
+            var order = Avika.data.barOrders[orderIndex];
+            var now = new Date();
+            
+            // Actualizar el tiempo total
+            order.totalTime = Math.floor((now - order.startTime) / 1000);
+            order.barTime = Math.floor((now - order.exitTime) / 1000);
+            
+            // Mover la orden a completadas
+            Avika.data.completedOrders.push(order);
+            Avika.data.barOrders.splice(orderIndex, 1);
+            
+            // Actualizar la interfaz
+            if (Avika.ui && typeof Avika.ui.updateTables === 'function') {
+                Avika.ui.updateTables();
             }
             
-            return false;
+            // Guardar cambios
+            if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+                Avika.storage.guardarDatosLocales();
+            }
+            
+            // Mostrar notificación
+            if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                Avika.ui.showNotification('¡' + order.dish + ' completado!', 'success');
+            }
+        } catch (e) {
+            console.error("Error al finalizar desde barra:", e);
+            if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                Avika.ui.showNotification('Error al finalizar la orden. Consulta la consola para más detalles.', 'error');
+            }
         }
-    }
+    },
+
+    // Función para finalizar una orden desde barra (para domicilios)
+    finishDeliveryFromBar: function(orderId) {
+        console.log("Finalizando entrega desde barra:", orderId);
+        
+        try {
+            // Buscar la orden en barra
+            var orderIndex = Avika.data.barOrders.findIndex(function(order) {
+                return order.id === orderId;
+            });
+
+            if (orderIndex === -1) {
+                console.error("Orden no encontrada en barra:", orderId);
+                return;
+            }
+
+            var order = Avika.data.barOrders[orderIndex];
+            var now = new Date();
+            
+            // Actualizar el tiempo total
+            order.totalTime = Math.floor((now - order.startTime) / 1000);
+            order.barTime = Math.floor((now - order.exitTime) / 1000);
+            
+            // Mover la orden a reparto
+            Avika.data.deliveryOrders.push(order);
+            Avika.data.barOrders.splice(orderIndex, 1);
+            
+            // Actualizar la interfaz
+            if (Avika.ui && typeof Avika.ui.updateTables === 'function') {
+                Avika.ui.updateTables();
+            }
+            
+            // Guardar cambios
+            if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
+                Avika.storage.guardarDatosLocales();
+            }
+            
+            // Mostrar notificación
+            if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                Avika.ui.showNotification('¡' + order.dish + ' en reparto!', 'success');
+            }
+        } catch (e) {
+            console.error("Error al finalizar entrega desde barra:", e);
+            if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                Avika.ui.showNotification('Error al finalizar la entrega. Consulta la consola para más detalles.', 'error');
+            }
+        }
+    },
+
+// ... (rest of the code remains the same)
 };

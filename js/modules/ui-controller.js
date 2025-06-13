@@ -53,7 +53,101 @@ Avika.ui = {
         ticketItems: [], // Añadido para almacenar elementos del ticket
         ticketService: 'comedor', // Servicio predeterminado para el ticket
         selectedTicketItem: {}, // Item seleccionado actualmente
-        expandedTickets: {}
+        expandedTickets: {},
+        currentBarFilter: 'todos' // Filtro de tiempo para órdenes en barra
+    },
+
+    // Función para actualizar la tabla de órdenes en barra
+    updateBarTable: function() {
+        console.log("Actualizando tabla de órdenes en barra");
+        
+        var tbody = document.getElementById('bar-body');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '';
+        var count = 0;
+        
+        Avika.data.barOrders.forEach(function(order) {
+            var row = this.createBarRow(order);
+            if (row) {
+                tbody.appendChild(row);
+                count++;
+            }
+        }.bind(this));
+        
+        // Actualizar contador
+        document.getElementById('bar-count').textContent = count;
+    },
+
+    // Función para crear fila de orden en barra
+    createBarRow: function(order) {
+        if (!order) return null;
+        
+        var row = document.createElement('tr');
+        row.className = 'order-row';
+        
+        // Obtener el tiempo transcurrido en barra
+        var now = new Date();
+        var barTime = Math.floor((now - order.exitTime) / 1000);
+        var barTimeStr = Avika.utils.formatElapsedTime(barTime);
+        
+        // Obtener el tiempo total
+        var totalTimeStr = Avika.utils.formatElapsedTime(order.totalTime);
+        
+        // Crear celdas
+        row.innerHTML = `
+            <td>${order.dish}</td>
+            <td>${Avika.utils.formatTime(order.exitTime)}</td>
+            <td>${barTimeStr}</td>
+            <td class="mobile-hide-sm">${order.notes || ''}</td>
+            <td>
+                <button class="action-btn" onclick="Avika.orders.finishFromBar('${order.id}')">Listo</button>
+                ${order.serviceType === 'domicilio' ? 
+                    `<button class="action-btn" onclick="Avika.orders.finishDeliveryFromBar('${order.id}')">Reparto</button>` : 
+                    ''}
+            </td>
+        `;
+        
+        // Aplicar color según servicio
+        if (order.serviceType) {
+            row.style.backgroundColor = this.TICKET_COLORS[order.serviceType] || '#fff';
+        }
+        
+        return row;
+    },
+
+    // Función para aplicar filtros a órdenes en barra
+    applyBarFilters: function() {
+        var filterTime = document.getElementById('filter-bar-time').value;
+        this.state.currentBarFilter = filterTime;
+        
+        var tbody = document.getElementById('bar-body');
+        if (!tbody) return;
+        
+        var now = new Date();
+        
+        Array.from(tbody.children).forEach(function(row) {
+            var order = this.obtenerDatosOrdenDeFila(row);
+            if (!order) return;
+            
+            var barTime = Math.floor((now - order.exitTime) / 1000);
+            
+            if (filterTime === 'todos' || 
+                (filterTime === '5' && barTime >= 300) ||
+                (filterTime === '10' && barTime >= 600) ||
+                (filterTime === '15' && barTime >= 900)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }.bind(this));
+    },
+
+    // Función para limpiar filtros de órdenes en barra
+    clearBarFilters: function() {
+        this.state.currentBarFilter = 'todos';
+        document.getElementById('filter-bar-time').value = 'todos';
+        this.applyBarFilters();
     },
     
     // Funciones básicas de UI

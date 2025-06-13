@@ -10,10 +10,11 @@ guardarDatosLocales: function() {
     try {
         // Solo guardar si hay cambios - Crear "huellas digitales" de los datos actuales
         var currentPendingHash = JSON.stringify(Avika.data.pendingOrders).length;
+        var currentBarHash = JSON.stringify(Avika.data.barOrders).length;
         var currentDeliveryHash = JSON.stringify(Avika.data.deliveryOrders).length;
         var currentCompletedHash = JSON.stringify(Avika.data.completedOrders).length;
         
-        var currentState = `p${currentPendingHash}.d${currentDeliveryHash}.c${currentCompletedHash}`;
+        var currentState = `p${currentPendingHash}.b${currentBarHash}.d${currentDeliveryHash}.c${currentCompletedHash}`;
         
         // Verificar si ha cambiado algo desde la última vez
         if (currentState !== this.lastSavedState) {
@@ -60,6 +61,25 @@ guardarDatosLocales: function() {
                 hasInvalidData = true;
             }
             
+            // Verificar órdenes en barra
+            if (Array.isArray(Avika.data.barOrders)) {
+                for (var i = 0; i < Avika.data.barOrders.length; i++) {
+                    var order = Avika.data.barOrders[i];
+                    if (!order || !order.id || !order.dish || !order.exitTime) {
+                        console.warn("Detectada orden inválida en barOrders:", order);
+                        hasInvalidData = true;
+                        // Reparar datos inválidos
+                        Avika.data.barOrders = Avika.data.barOrders.filter(function(o) {
+                            return o && o.id && o.dish && o.exitTime;
+                        });
+                        break;
+                    }
+                }
+            } else {
+                Avika.data.barOrders = [];
+                hasInvalidData = true;
+            }
+
             // Verificar órdenes completadas - similar a pendientes
             if (Array.isArray(Avika.data.completedOrders)) {
                 for (var i = 0; i < Avika.data.completedOrders.length; i++) {

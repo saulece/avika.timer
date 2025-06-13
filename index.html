@@ -96,6 +96,35 @@
         </tbody>
     </table>
 </div>
+            <!-- Órdenes en barra -->
+            <div class="pending-orders-section bar-section">
+                <h2>Platillos en Barra <span id="bar-count">0</span></h2>
+                <div class="filter-panel">
+                    <select id="filter-bar-time" class="filter-select">
+                        <option value="todos">Todos los tiempos</option>
+                        <option value="5">+5 minutos</option>
+                        <option value="10">+10 minutos</option>
+                        <option value="15">+15 minutos</option>
+                    </select>
+                    <button id="btn-apply-bar-filter" class="filter-btn">Aplicar filtro</button>
+                    <button id="btn-clear-bar-filter" class="filter-btn">Limpiar filtro</button>
+                </div>
+                <table class="mobile-optimized-table">
+                    <thead>
+                        <tr>
+                            <th>Platillo</th>
+                            <th class="mobile-hide-sm">Salida</th>
+                            <th>Tiempo</th>
+                            <th class="mobile-hide-sm">Detalles</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bar-body">
+                        <!-- Se llenará con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
             <!-- Órdenes completadas -->
             <div class="pending-orders-section">
                 <h2>Platillos completados</h2>
