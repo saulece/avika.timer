@@ -1217,7 +1217,7 @@ Avika.orders = {
     restoreCompletedOrdersBackup: function() {
         var backup = localStorage.getItem('avika_completedOrders_backup');
         var timestamp = localStorage.getItem('avika_backup_timestamp');
-        
+
         if (!backup) {
             if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
                 Avika.ui.showNotification('No hay copia de seguridad disponible', 'warning');
@@ -1226,54 +1226,36 @@ Avika.orders = {
             }
             return false;
         }
-        
+
         try {
             var orders = JSON.parse(backup);
-        }
-        
-        // Guardar cambios
-        if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
-            Avika.storage.guardarDatosLocales();
-        }
-        
-        // Mostrar notificación
-        if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
-            Avika.ui.showNotification('¡' + order.dish + ' en barra!', 'success');
-        }
-    } catch (e) {
-        console.error("Error al mover a barra:", e);
-        if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
-
-            var order = Avika.data.pendingOrders[orderIndex];
-            var now = new Date();
-            
-            // Actualizar el tiempo de salida
-            order.exitTime = now;
-            order.preparationTime = Math.floor((now - order.startTime) / 1000);
-            
-            // Mover la orden a barra
-            Avika.data.barOrders.push(order);
-            Avika.data.pendingOrders.splice(orderIndex, 1);
-            
-            // Actualizar la interfaz
-            if (Avika.ui && typeof Avika.ui.updateTables === 'function') {
-                Avika.ui.updateTables();
+            if (!Array.isArray(orders)) {
+                throw new Error("La copia de seguridad no tiene un formato válido.");
             }
-            
-            // Guardar cambios
+
+            Avika.data.completedOrders = orders;
+
+            if (Avika.ui) {
+                if (typeof Avika.ui.updateCompletedTable === 'function') {
+                    Avika.ui.updateCompletedTable();
+                }
+                if (typeof Avika.ui.showNotification === 'function') {
+                    Avika.ui.showNotification('Historial restaurado desde la copia del ' + new Date(timestamp).toLocaleString(), 'success');
+                }
+            }
+
             if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
                 Avika.storage.guardarDatosLocales();
             }
-            
-            // Mostrar notificación
-            if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
-                Avika.ui.showNotification('¡' + order.dish + ' en barra!', 'success');
-            }
+
+            return true;
+
         } catch (e) {
-            console.error("Error al mover a barra:", e);
+            console.error('Error al restaurar la copia de seguridad:', e);
             if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
-                Avika.ui.showNotification('Error al mover la orden a barra. Consulta la consola para más detalles.', 'error');
+                Avika.ui.showNotification('Error al restaurar: ' + e.message, 'error');
             }
+            return false;
         }
     },
 
