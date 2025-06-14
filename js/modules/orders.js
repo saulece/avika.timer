@@ -359,43 +359,7 @@ Avika.orders = {
         // Usar la función centralizada para formatear tiempo transcurrido
         order.preparationTimeFormatted = Avika.utils.formatElapsedTime(order.preparationTime);
         
-        // Verificar si es un pedido a domicilio o para llevar
-        if (order.serviceType === 'domicilio' || order.serviceType === 'para-llevar') {
-            // Marcar como listo para reparto
-            order.finishTime = endTime;
-            order.finishTimeFormatted = this.formatTime(endTime);
-            order.kitchenFinished = true;
-            
-            // Asegurarse de que el array de órdenes en reparto existe
-            if (!Avika.data.deliveryOrders) {
-                Avika.data.deliveryOrders = [];
-            }
-            
-            // Mover a reparto en lugar de a completadas
-            Avika.data.deliveryOrders.unshift(order);
-            Avika.data.pendingOrders.splice(orderIndex, 1);
-            
-            // Actualizar las tablas
-            if (Avika.ui) {
-                if (typeof Avika.ui.updatePendingTable === 'function') {
-                    Avika.ui.updatePendingTable();
-                }
-                
-                if (typeof Avika.ui.updateDeliveryTable === 'function') {
-                    Avika.ui.updateDeliveryTable();
-                }
-                
-                // Mostrar notificación
-                if (typeof Avika.ui.showNotification === 'function') {
-                    Avika.ui.showNotification('¡' + order.dish + ' listo para reparto! Tiempo de preparación: ' + 
-                                        order.preparationTimeFormatted, 'success');
-                }
-            } else {
-                console.log('¡' + order.dish + ' listo para reparto! Tiempo de preparación: ' + 
-                        order.preparationTimeFormatted);
-            }
-        } else { // Esto aplica a 'comedor'
-        // Para pedidos de comedor, mover a la barra
+        // Para todos los tipos de servicio (comedor, para-llevar, domicilio), mover a la barra.
         if (!Avika.data.barOrders) {
             Avika.data.barOrders = [];
         }
@@ -419,7 +383,6 @@ Avika.orders = {
             console.log('¡' + order.dish + ' listo en barra! Tiempo: ' + 
                     order.preparationTimeFormatted);
         }
-    }
         
         // Guardar cambios
         if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
@@ -1281,9 +1244,14 @@ Avika.orders = {
         console.log("Finalizando orden desde barra:", orderId);
         
         try {
-            // Convertimos el orderId a número para asegurar que la comparación estricta (===) funcione,
-            // ya que el ID viene como string desde el atributo onclick.
-            var numericOrderId = Number(orderId);
+        // --- INICIO DE DIAGNÓSTICO ---
+        console.log('Buscando ID:', orderId, '(tipo:', typeof orderId, ')');
+        console.log('Contenido de barOrders antes de buscar:', JSON.parse(JSON.stringify(Avika.data.barOrders)));
+        // --- FIN DE DIAGNÓSTICO ---
+
+        // Convertimos el orderId a número para asegurar que la comparación estricta (===) funcione,
+        // ya que el ID viene como string desde el atributo onclick.
+        var numericOrderId = Number(orderId);
             var orderIndex = Avika.data.barOrders.findIndex(function(order) {
                 return order.id === numericOrderId;
             });
