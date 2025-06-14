@@ -88,48 +88,77 @@ Avika.ui = {
         this.applyStylesToAllTickets();
     },
 
-    // Función para crear fila de orden en barra
-    createBarRow: function(order, isFirstItemOfTicket) { // Se añade el parámetro isFirstItemOfTicket
+    // Función para crear fila de orden en barra (refactorizada)
+    createBarRow: function(order, isFirstItemOfTicket) {
         if (!order) return null;
-        
+
         var row = document.createElement('tr');
         row.className = 'order-row';
-        
-        // Obtener el tiempo transcurrido en barra
-        var now = new Date();
-        var barTime = Math.floor((now - new Date(order.exitTime)) / 1000); // Asegurar que exitTime es un objeto Date
-        var barTimeStr = Avika.utils.formatElapsedTime(barTime);
-        
-        // Obtener el tiempo total (si existe)
-        var totalTimeStr = order.totalTime ? Avika.utils.formatElapsedTime(order.totalTime) : '';
-        
-        // Añadir atributo de datos para el tipo de servicio
         row.setAttribute('data-service-type', order.serviceType);
 
-        // Crear celdas, incluyendo el ID del ticket si es el primer platillo
-        let ticketInfo = '';
-        if (order.ticketId && isFirstItemOfTicket) {
-            ticketInfo = `<div class="ticket-label" data-ticket-id="${order.ticketId}">Ticket #${order.ticketId}</div>`;
-        }
+        // Tiempos
+        var now = new Date();
+        var barTime = Math.floor((now - new Date(order.exitTime)) / 1000);
+        var barTimeStr = Avika.utils.formatElapsedTime(barTime);
 
-        row.innerHTML = `
-            <td>${ticketInfo}${order.dish}</td>
-            <td>${Avika.utils.formatTime(order.exitTime)}</td>
-            <td>${barTimeStr}</td>
-            <td class="mobile-hide-sm">${order.notes || ''}</td>
-            <td>
-                <button class="action-btn" onclick="Avika.orders.finishFromBar('${order.id}')">Listo</button>
-                ${order.serviceType === 'domicilio' ? 
-                    `<button class="action-btn" onclick="Avika.orders.finishDeliveryFromBar('${order.id}')">Reparto</button>` : 
-                    ''}
-            </td>
-        `;
-        
+        // Celda Platillo
+        const dishCell = document.createElement('td');
+        if (order.ticketId && isFirstItemOfTicket) {
+            const ticketInfo = document.createElement('div');
+            ticketInfo.className = 'ticket-label';
+            ticketInfo.setAttribute('data-ticket-id', order.ticketId);
+            // Usamos slice para mostrar solo una parte del ID y que no sea tan largo
+            ticketInfo.textContent = `Ticket #${order.ticketId.slice(-6)}`;
+            dishCell.appendChild(ticketInfo);
+        }
+        dishCell.appendChild(document.createTextNode(order.dish));
+        row.appendChild(dishCell);
+
+        // Celda Salida
+        const exitCell = document.createElement('td');
+        exitCell.textContent = Avika.utils.formatTime(new Date(order.exitTime));
+        row.appendChild(exitCell);
+
+        // Celda Tiempo en Barra
+        const timeCell = document.createElement('td');
+        timeCell.textContent = barTimeStr;
+        row.appendChild(timeCell);
+
+        // Celda Detalles (Notas)
+        const detailsCell = document.createElement('td');
+        detailsCell.className = 'mobile-hide-sm';
+        detailsCell.textContent = order.notes || '';
+        row.appendChild(detailsCell);
+
+        // Celda Acciones
+        const actionsCell = document.createElement('td');
+        const listoBtn = document.createElement('button');
+        listoBtn.className = 'action-btn';
+        listoBtn.textContent = 'Listo';
+
+        // ASIGNACIÓN CONDICIONAL DEL ONCLICK
+        if (order.ticketId) {
+            listoBtn.onclick = function() { Avika.orders.finishTicketFromBar(order.ticketId); };
+        } else {
+            listoBtn.onclick = function() { Avika.orders.finishFromBar(order.id); };
+        }
+        actionsCell.appendChild(listoBtn);
+
+        // Botón de reparto (si aplica)
+        if (order.serviceType === 'domicilio') {
+            const repartoBtn = document.createElement('button');
+            repartoBtn.className = 'action-btn';
+            repartoBtn.textContent = 'Reparto';
+            repartoBtn.onclick = function() { Avika.orders.finishDeliveryFromBar(order.id); };
+            actionsCell.appendChild(repartoBtn);
+        }
+        row.appendChild(actionsCell);
+
         // Aplicar color según servicio
         if (order.serviceType) {
             row.style.backgroundColor = this.TICKET_COLORS[order.serviceType] || '#fff';
         }
-        
+
         return row;
     },
 

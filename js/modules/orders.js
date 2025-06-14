@@ -1271,7 +1271,51 @@ Avika.orders = {
             if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
                 Avika.ui.showNotification('Error al restaurar: ' + e.message, 'error');
             }
-            return false;
+        }
+    },
+
+    // Función para finalizar todos los platillos de un ticket desde la barra
+    finishTicketFromBar: function(ticketId) {
+        console.log("Finalizando ticket completo desde barra:", ticketId);
+
+        try {
+            const itemsToMove = Avika.data.barOrders.filter(order => order.ticketId === ticketId);
+
+            if (itemsToMove.length === 0) {
+                console.error("No se encontraron platillos para el ticket en barra:", ticketId);
+                return;
+            }
+
+            const now = new Date();
+            itemsToMove.forEach(order => {
+                // Actualizar tiempos
+                order.totalTime = Math.floor((now - new Date(order.startTime)) / 1000);
+                order.barTime = Math.floor((now - new Date(order.exitTime)) / 1000);
+                
+                // Mover a completados
+                Avika.data.completedOrders.unshift(order);
+            });
+
+            // Eliminar de barOrders
+            Avika.data.barOrders = Avika.data.barOrders.filter(order => order.ticketId !== ticketId);
+
+            // Actualizar UI
+            if (Avika.ui) {
+                Avika.ui.updateBarTable();
+                Avika.ui.updateCompletedTable();
+                Avika.ui.showNotification('¡Ticket #' + ticketId.slice(-4) + ' completado!', 'success');
+            }
+
+            // Guardar cambios
+            if (Avika.storage) {
+                Avika.storage.guardarDatosLocales();
+            }
+
+        } catch (e) {
+            console.error("Error al finalizar ticket desde barra:", e);
+            if (Avika.ui) {
+                Avika.ui.showNotification('Error al finalizar el ticket. Consulta la consola.', 'error');
+            }
         }
     },
 
