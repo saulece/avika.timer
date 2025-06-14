@@ -607,26 +607,29 @@ Avika.orders = {
             
             // Procesar los items según el tipo de servicio
             if (serviceType === 'comedor' || serviceType === 'para-llevar') {
-                console.log("Ticket de comedor u ordena y espera listo, moviendo a completados");
-                
-                // Mover todos los items a la sección de completados
-                if (!Avika.data.completedOrders) {
-                    Avika.data.completedOrders = [];
+                console.log("Ticket de comedor listo, moviendo todos los platillos a la barra");
+
+                // Mover todos los items a la sección de barra
+                if (!Avika.data.barOrders) {
+                    Avika.data.barOrders = [];
                 }
-                
+
                 // Procesar los items en orden inverso para evitar problemas con los índices
                 for (var i = itemsToMove.length - 1; i >= 0; i--) {
                     var itemIndex = itemsToMove[i];
                     var item = Avika.data.pendingOrders[itemIndex];
                     
-                    // Mover a completados
-                    Avika.data.completedOrders.unshift(item);
+                    // Establecer el tiempo de salida de cocina (exitTime)
+                    item.exitTime = new Date();
+
+                    // Mover a la barra
+                    Avika.data.barOrders.unshift(item);
                     Avika.data.pendingOrders.splice(itemIndex, 1);
                 }
-                
-                // Actualizar la tabla de completados
-                if (Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
-                    Avika.ui.updateCompletedTable();
+
+                // Actualizar la tabla de la barra
+                if (Avika.ui && typeof Avika.ui.updateBarTable === 'function') {
+                    Avika.ui.updateBarTable();
                 }
             } else if (serviceType === 'domicilio') {
                 console.log("Ticket a domicilio listo para reparto");
