@@ -144,18 +144,8 @@ Avika.ui = {
         if (order.serviceType === 'domicilio') {
             const repartoBtn = document.createElement('button');
             repartoBtn.className = 'action-btn';
-
-            // Si el platillo ya está marcado como listo en barra, deshabilitar el botón
-            if (order.barFinished) {
-                repartoBtn.textContent = 'Listo ✓';
-                repartoBtn.disabled = true;
-                repartoBtn.style.backgroundColor = '#cccccc'; // Color gris para indicar inactividad
-                repartoBtn.style.cursor = 'not-allowed';
-            } else {
-                repartoBtn.textContent = 'Reparto';
-                repartoBtn.onclick = function() { Avika.orders.finishDeliveryFromBar(order.id); };
-            }
-
+            repartoBtn.textContent = 'Reparto';
+            repartoBtn.onclick = function() { Avika.orders.finishDeliveryFromBar(order.id); };
             actionsCell.appendChild(repartoBtn);
         }
         row.appendChild(actionsCell);
