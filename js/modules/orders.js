@@ -1281,13 +1281,19 @@ Avika.orders = {
         console.log("Finalizando orden desde barra:", orderId);
         
         try {
-            // Buscar la orden en barra
+            // Convertimos el orderId a número para asegurar que la comparación estricta (===) funcione,
+            // ya que el ID viene como string desde el atributo onclick.
+            var numericOrderId = Number(orderId);
             var orderIndex = Avika.data.barOrders.findIndex(function(order) {
-                return order.id === orderId;
+                return order.id === numericOrderId;
             });
 
             if (orderIndex === -1) {
                 console.error("Orden no encontrada en barra:", orderId);
+                // Mostrar notificación de error en la UI
+                if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                    Avika.ui.showNotification('Error: Orden no encontrada en la barra.', 'error');
+                }
                 return;
             }
 
@@ -1295,16 +1301,22 @@ Avika.orders = {
             var now = new Date();
             
             // Actualizar el tiempo total
-            order.totalTime = Math.floor((now - order.startTime) / 1000);
-            order.barTime = Math.floor((now - order.exitTime) / 1000);
+            // Asegurarse de que los tiempos de inicio y salida son objetos Date
+            order.totalTime = Math.floor((now - new Date(order.startTime)) / 1000);
+            order.barTime = Math.floor((now - new Date(order.exitTime)) / 1000);
             
             // Mover la orden a completadas
-            Avika.data.completedOrders.push(order);
+            Avika.data.completedOrders.unshift(order); // Usamos unshift para que aparezca al principio
             Avika.data.barOrders.splice(orderIndex, 1);
             
-            // Actualizar la interfaz
-            if (Avika.ui && typeof Avika.ui.updateTables === 'function') {
-                Avika.ui.updateTables();
+            // Actualizar la interfaz llamando a las funciones específicas
+            if (Avika.ui) {
+                if (typeof Avika.ui.updateBarTable === 'function') {
+                    Avika.ui.updateBarTable();
+                }
+                if (typeof Avika.ui.updateCompletedTable === 'function') {
+                    Avika.ui.updateCompletedTable();
+                }
             }
             
             // Guardar cambios
