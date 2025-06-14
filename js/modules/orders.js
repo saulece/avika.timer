@@ -1243,10 +1243,10 @@ Avika.orders = {
     finishFromBar: function(orderId) {
         console.log("Finalizando orden desde barra:", orderId);
         try {
-            var numericOrderId = Number(orderId);
+            // CORRECCIÓN FINAL: El ID en el array es un string, por lo que comparamos string con string.
+            // Eliminamos la conversión a Número que estaba causando el error.
             var orderIndex = Avika.data.barOrders.findIndex(function(order) {
-                console.log(`Comparando (Listo): ${order.id} (tipo: ${typeof order.id}) vs ${numericOrderId} (tipo: ${typeof numericOrderId})`);
-                return order.id === numericOrderId;
+                return order.id === orderId;
             });
 
             if (orderIndex === -1) {
@@ -1290,10 +1290,10 @@ Avika.orders = {
     finishDeliveryFromBar: function(orderId) {
         console.log("Finalizando entrega desde barra:", orderId);
         try {
-            var numericOrderId = Number(orderId);
+            // CORRECIÓN FINAL: El ID en el array es un string, por lo que comparamos string con string.
+            // Eliminamos la conversión a Número que estaba causando el error.
             var orderIndex = Avika.data.barOrders.findIndex(function(order) {
-                console.log(`Comparando (Reparto): ${order.id} (tipo: ${typeof order.id}) vs ${numericOrderId} (tipo: ${typeof numericOrderId})`);
-                return order.id === numericOrderId;
+                return order.id === orderId;
             });
 
             if (orderIndex === -1) {
