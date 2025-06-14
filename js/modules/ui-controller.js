@@ -136,12 +136,8 @@ Avika.ui = {
         listoBtn.className = 'action-btn';
         listoBtn.textContent = 'Listo';
 
-        // ASIGNACIÓN CONDICIONAL DEL ONCLICK
-        if (order.ticketId) {
-            listoBtn.onclick = function() { Avika.orders.finishTicketFromBar(order.ticketId); };
-        } else {
-            listoBtn.onclick = function() { Avika.orders.finishFromBar(order.id); };
-        }
+        // El botón "Listo" siempre finaliza un platillo individualmente desde la barra.
+        listoBtn.onclick = function() { Avika.orders.finishFromBar(order.id); };
         actionsCell.appendChild(listoBtn);
 
         // Botón de reparto (si aplica)
