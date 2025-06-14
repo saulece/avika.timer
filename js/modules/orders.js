@@ -141,42 +141,48 @@ Avika.orders = {
                 // Verificar el estado completo del ticket
                 var ticketStatus = this.checkTicketCompletionStatus(order.ticketId);
                 
-                // Si todos los platillos están terminados, mover todos juntos a completados
+                // Si todos los platillos del ticket están terminados, moverlos a la barra
                 if (ticketStatus.isComplete) {
-                    console.log("Todos los platillos del ticket", order.ticketId, "están terminados");
-                    
-                    // Marcar todas las órdenes con el estado completado
+                    console.log("Todos los platillos del ticket", order.ticketId, "están terminados y se moverán a la barra");
+
+                    // Recopilar los índices de los items a mover
                     var itemsToMove = [];
-                    
-                    // Recopilar todos los items del ticket
                     for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-                        var item = Avika.data.pendingOrders[i];
-                        if (item.ticketId === order.ticketId) {
-                            item.allTicketItemsFinished = true;
+                        if (Avika.data.pendingOrders[i].ticketId === order.ticketId) {
                             itemsToMove.push(i);
                         }
                     }
-                    
-                    console.log("Ticket de comedor listo, moviendo todos los platillos a completados");
-                    
-                    // Mover todos los items a la sección de completados
-                    if (!Avika.data.completedOrders) {
-                        Avika.data.completedOrders = [];
+
+                    // Mover los items a la sección de barra
+                    if (!Avika.data.barOrders) {
+                        Avika.data.barOrders = [];
                     }
-                    
-                    // Procesar los items en orden inverso para evitar problemas con los índices
+
+                    // Procesar los items en orden inverso para no afectar los índices
                     for (var i = itemsToMove.length - 1; i >= 0; i--) {
                         var itemIndex = itemsToMove[i];
                         var item = Avika.data.pendingOrders[itemIndex];
-                        
-                        // Mover a completados
-                        Avika.data.completedOrders.unshift(item);
+
+                        // Asignar el tiempo de salida de cocina y marcar como listos
+                        item.exitTime = new Date();
+                        item.allTicketItemsFinished = true;
+
+                        // Mover a la barra
+                        Avika.data.barOrders.unshift(item);
                         Avika.data.pendingOrders.splice(itemIndex, 1);
                     }
-                    
-                    // Actualizar la tabla de completados
-                    if (Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
-                        Avika.ui.updateCompletedTable();
+
+                    // Notificar y actualizar las tablas de la UI
+                    if (Avika.ui) {
+                        if (typeof Avika.ui.updatePendingTable === 'function') {
+                            Avika.ui.updatePendingTable();
+                        }
+                        if (typeof Avika.ui.updateBarTable === 'function') {
+                            Avika.ui.updateBarTable();
+                        }
+                        if (typeof Avika.ui.showNotification === 'function') {
+                            Avika.ui.showNotification('Ticket #' + order.ticketId + ' listo en barra', 'success');
+                        }
                     }
                 }
             } else {
@@ -388,31 +394,32 @@ Avika.orders = {
                 console.log('¡' + order.dish + ' listo para reparto! Tiempo de preparación: ' + 
                         order.preparationTimeFormatted);
             }
-        } else {
-            // Para pedidos en comedor, mover directamente a completadas
-            Avika.data.completedOrders.unshift(order);
-            Avika.data.pendingOrders.splice(orderIndex, 1);
-            
-            // Actualizar las tablas
-            if (Avika.ui) {
-                if (typeof Avika.ui.updatePendingTable === 'function') {
-                    Avika.ui.updatePendingTable();
-                }
-                
-                if (typeof Avika.ui.updateCompletedTable === 'function') {
-                    Avika.ui.updateCompletedTable();
-                }
-                
-                // Mostrar notificación
-                if (typeof Avika.ui.showNotification === 'function') {
-                    Avika.ui.showNotification('¡' + order.dish + ' terminado! Tiempo: ' + 
-                                        order.preparationTimeFormatted, 'success');
-                }
-            } else {
-                console.log('¡' + order.dish + ' terminado! Tiempo: ' + 
-                        order.preparationTimeFormatted);
-            }
+        } else { // Esto aplica a 'comedor'
+        // Para pedidos de comedor, mover a la barra
+        if (!Avika.data.barOrders) {
+            Avika.data.barOrders = [];
         }
+        order.exitTime = new Date(); // Asignar tiempo de salida de cocina
+        Avika.data.barOrders.unshift(order);
+        Avika.data.pendingOrders.splice(orderIndex, 1);
+
+        // Actualizar las tablas de UI
+        if (Avika.ui) {
+            if (typeof Avika.ui.updatePendingTable === 'function') {
+                Avika.ui.updatePendingTable();
+            }
+            if (typeof Avika.ui.updateBarTable === 'function') {
+                Avika.ui.updateBarTable();
+            }
+            if (typeof Avika.ui.showNotification === 'function') {
+                Avika.ui.showNotification('¡' + order.dish + ' listo en barra! Tiempo: ' + 
+                                    order.preparationTimeFormatted, 'success');
+            }
+        } else {
+            console.log('¡' + order.dish + ' listo en barra! Tiempo: ' + 
+                    order.preparationTimeFormatted);
+        }
+    }
         
         // Guardar cambios
         if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
@@ -543,18 +550,24 @@ Avika.orders = {
             
             if (orderIndex !== -1) {
                 if (order.serviceType === 'comedor' || order.serviceType === 'para-llevar') {
-                    // Para comedor y ordena y espera, mover a completados
-                    if (!Avika.data.completedOrders) {
-                        Avika.data.completedOrders = [];
+                // Para comedor y para llevar, mover a la barra
+                if (!Avika.data.barOrders) {
+                    Avika.data.barOrders = [];
+                }
+                order.exitTime = new Date(); // Asignar tiempo de salida
+                Avika.data.barOrders.unshift(order);
+                Avika.data.pendingOrders.splice(orderIndex, 1);
+                
+                // Actualizar la tabla de la barra y pendientes
+                if (Avika.ui) {
+                    if(typeof Avika.ui.updateBarTable === 'function') {
+                        Avika.ui.updateBarTable();
                     }
-                    Avika.data.completedOrders.unshift(order);
-                    Avika.data.pendingOrders.splice(orderIndex, 1);
-                    
-                    // Actualizar la tabla de completados
-                    if (Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {
-                        Avika.ui.updateCompletedTable();
+                    if(typeof Avika.ui.updatePendingTable === 'function') {
+                        Avika.ui.updatePendingTable();
                     }
-                } else if (order.serviceType === 'domicilio') {
+                }
+            } else if (order.serviceType === 'domicilio') {
                     // Para domicilio, mover a reparto
                     order.readyForDelivery = true;
                     order.kitchenFinished = true;

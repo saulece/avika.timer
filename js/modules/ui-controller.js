@@ -66,9 +66,16 @@ Avika.ui = {
         
         tbody.innerHTML = '';
         var count = 0;
+        var renderedTickets = new Set(); // Para rastrear los tickets ya mostrados
         
         Avika.data.barOrders.forEach(function(order) {
-            var row = this.createBarRow(order);
+            var isFirstItem = false;
+            if (order.ticketId && !renderedTickets.has(order.ticketId)) {
+                isFirstItem = true;
+                renderedTickets.add(order.ticketId);
+            }
+            
+            var row = this.createBarRow(order, isFirstItem); // Pasar el flag a createBarRow
             if (row) {
                 tbody.appendChild(row);
                 count++;
@@ -82,7 +89,7 @@ Avika.ui = {
     },
 
     // Función para crear fila de orden en barra
-    createBarRow: function(order) {
+    createBarRow: function(order, isFirstItemOfTicket) { // Se añade el parámetro isFirstItemOfTicket
         if (!order) return null;
         
         var row = document.createElement('tr');
@@ -90,15 +97,23 @@ Avika.ui = {
         
         // Obtener el tiempo transcurrido en barra
         var now = new Date();
-        var barTime = Math.floor((now - order.exitTime) / 1000);
+        var barTime = Math.floor((now - new Date(order.exitTime)) / 1000); // Asegurar que exitTime es un objeto Date
         var barTimeStr = Avika.utils.formatElapsedTime(barTime);
         
-        // Obtener el tiempo total
-        var totalTimeStr = Avika.utils.formatElapsedTime(order.totalTime);
+        // Obtener el tiempo total (si existe)
+        var totalTimeStr = order.totalTime ? Avika.utils.formatElapsedTime(order.totalTime) : '';
         
-        // Crear celdas
+        // Añadir atributo de datos para el tipo de servicio
+        row.setAttribute('data-service-type', order.serviceType);
+
+        // Crear celdas, incluyendo el ID del ticket si es el primer platillo
+        let ticketInfo = '';
+        if (order.ticketId && isFirstItemOfTicket) {
+            ticketInfo = `<div class="ticket-label" data-ticket-id="${order.ticketId}">Ticket #${order.ticketId}</div>`;
+        }
+
         row.innerHTML = `
-            <td>${order.dish}</td>
+            <td>${ticketInfo}${order.dish}</td>
             <td>${Avika.utils.formatTime(order.exitTime)}</td>
             <td>${barTimeStr}</td>
             <td class="mobile-hide-sm">${order.notes || ''}</td>
@@ -2938,7 +2953,7 @@ Avika.ui = {
     // Función para aplicar colores consistentes a los tickets
     applyStylesToAllTickets: function() {
         // Tablas a procesar
-        const tables = ['pending-body', 'delivery-body', 'completed-body'];
+        const tables = ['pending-body', 'delivery-body', 'completed-body', 'bar-body'];
         
         tables.forEach(tableId => {
             const tableBody = document.getElementById(tableId);
