@@ -1071,28 +1071,58 @@ Avika.orders = {
             console.error("Error al finalizar desde barra:", e);
             if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
                 Avika.ui.showNotification('Error al finalizar la orden. Consulta la consola.', 'error');
-            }
-        }
-    },
 
     // Función para finalizar una orden desde barra (para domicilios)
     finishDeliveryFromBar: function(orderId) {
-        console.log("Finalizando entrega desde barra:", orderId);
         try {
-            // CORRECIÓN FINAL: El ID en el array es un string, por lo que comparamos string con string.
-            // Eliminamos la conversión a Número que estaba causando el error.
-            var orderIndex = Avika.data.barOrders.findIndex(function(order) {
-                return order.id === orderId;
-            });
+            console.log("Intentando finalizar entrega desde barra para la orden:", orderId);
+
+            var orderIndex = Avika.data.barOrders.findIndex(order => order.id === orderId);
 
             if (orderIndex === -1) {
                 console.error("Orden de entrega no encontrada en barra:", orderId);
-                 if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
-                    Avika.ui.showNotification('Error: Orden de entrega no encontrada.', 'error');
-                }
+                if (Avika.ui) Avika.ui.showNotification('Error: Orden de entrega no encontrada.', 'error');
                 return;
             }
 
+            var order = Avika.data.barOrders[orderIndex];
+            order.barFinished = true; // Marcar el platillo individual como listo en barra
+            console.log(`Platillo ${order.dish} (ID: ${order.id}) marcado como listo en barra.`);
+
+            // Si la orden no pertenece a un ticket, moverla directamente
+            if (!order.ticketId) {
+                console.log("La orden no tiene ticketId, moviendo a reparto directamente.");
+                this.moveOrderToDelivery(orderIndex);
+            } else {
+                // Si es parte de un ticket, verificar si todos los platillos del ticket están listos
+                console.log(`La orden pertenece al ticket ${order.ticketId}. Verificando estado del ticket.`);
+                var ticketItemsInBar = Avika.data.barOrders.filter(o => o.ticketId === order.ticketId);
+                var allTicketItemsReady = ticketItemsInBar.every(item => item.barFinished);
+
+                if (allTicketItemsReady) {
+                    console.log(`Todos los platillos del ticket ${order.ticketId} están listos. Moviendo el ticket completo a reparto.`);
+                    var itemsToMove = Avika.data.barOrders.filter(o => o.ticketId === order.ticketId);
+                    for (let i = itemsToMove.length - 1; i >= 0; i--) {
+                        let itemIndex = Avika.data.barOrders.findIndex(o => o.id === itemsToMove[i].id);
+                        this.moveOrderToDelivery(itemIndex);
+                    }
+                    if (Avika.ui) Avika.ui.showNotification(`Ticket #${order.ticketId.slice(-6)} completo en reparto.`, 'success');
+                } else {
+                    console.log(`Aún hay platillos pendientes para el ticket ${order.ticketId}. El ticket permanece en barra.`);
+                    if (Avika.ui) Avika.ui.updateBarTable();
+                }
+            }
+
+            if (Avika.storage) Avika.storage.guardarDatosLocales();
+        } catch (e) {
+            console.error("Error al finalizar entrega desde barra:", e);
+            if (Avika.ui) Avika.ui.showNotification('Error al finalizar la entrega. Consulta la consola.', 'error');
+        }
+    },
+
+    // Nueva función auxiliar para mover una orden a reparto
+    moveOrderToDelivery: function(orderIndex) {
+        try {
             var order = Avika.data.barOrders[orderIndex];
             var now = new Date();
 
@@ -1106,24 +1136,14 @@ Avika.orders = {
             Avika.data.barOrders.splice(orderIndex, 1);
 
             if (Avika.ui) {
-                if (typeof Avika.ui.updateBarTable === 'function') Avika.ui.updateBarTable();
-                if (typeof Avika.ui.updateDeliveryTable === 'function') Avika.ui.updateDeliveryTable();
-            }
-
-            if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
-                Avika.storage.guardarDatosLocales();
-            }
-
-            if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
-                Avika.ui.showNotification('¡' + order.dish + ' en reparto!', 'success');
+                Avika.ui.updateBarTable();
+                Avika.ui.updateDeliveryTable();
             }
         } catch (e) {
-            console.error("Error al finalizar entrega desde barra:", e);
-            if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
-                Avika.ui.showNotification('Error al finalizar la entrega. Consulta la consola.', 'error');
-            }
+            console.error("Error al mover orden a reparto:", e);
+            if (Avika.ui) Avika.ui.showNotification('Error al mover la orden. Consulta la consola.', 'error');
         }
-    },
+    }
 
 // ... (rest of the code remains the same)
 };
