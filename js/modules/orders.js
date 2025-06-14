@@ -1242,23 +1242,15 @@ Avika.orders = {
     // Función para finalizar una orden desde barra
     finishFromBar: function(orderId) {
         console.log("Finalizando orden desde barra:", orderId);
-        
         try {
-        // --- INICIO DE DIAGNÓSTICO ---
-        console.log('Buscando ID:', orderId, '(tipo:', typeof orderId, ')');
-        console.log('Contenido de barOrders antes de buscar:', JSON.parse(JSON.stringify(Avika.data.barOrders)));
-        // --- FIN DE DIAGNÓSTICO ---
-
-        // Convertimos el orderId a número para asegurar que la comparación estricta (===) funcione,
-        // ya que el ID viene como string desde el atributo onclick.
-        var numericOrderId = Number(orderId);
+            var numericOrderId = Number(orderId);
             var orderIndex = Avika.data.barOrders.findIndex(function(order) {
+                console.log(`Comparando (Listo): ${order.id} (tipo: ${typeof order.id}) vs ${numericOrderId} (tipo: ${typeof numericOrderId})`);
                 return order.id === numericOrderId;
             });
 
             if (orderIndex === -1) {
                 console.error("Orden no encontrada en barra:", orderId);
-                // Mostrar notificación de error en la UI
                 if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
                     Avika.ui.showNotification('Error: Orden no encontrada en la barra.', 'error');
                 }
@@ -1268,38 +1260,28 @@ Avika.orders = {
             var order = Avika.data.barOrders[orderIndex];
             var now = new Date();
             
-            // Actualizar el tiempo total
-            // Asegurarse de que los tiempos de inicio y salida son objetos Date
             order.totalTime = Math.floor((now - new Date(order.startTime)) / 1000);
             order.barTime = Math.floor((now - new Date(order.exitTime)) / 1000);
             
-            // Mover la orden a completadas
-            Avika.data.completedOrders.unshift(order); // Usamos unshift para que aparezca al principio
+            Avika.data.completedOrders.unshift(order);
             Avika.data.barOrders.splice(orderIndex, 1);
             
-            // Actualizar la interfaz llamando a las funciones específicas
             if (Avika.ui) {
-                if (typeof Avika.ui.updateBarTable === 'function') {
-                    Avika.ui.updateBarTable();
-                }
-                if (typeof Avika.ui.updateCompletedTable === 'function') {
-                    Avika.ui.updateCompletedTable();
-                }
+                if (typeof Avika.ui.updateBarTable === 'function') Avika.ui.updateBarTable();
+                if (typeof Avika.ui.updateCompletedTable === 'function') Avika.ui.updateCompletedTable();
             }
             
-            // Guardar cambios
             if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
                 Avika.storage.guardarDatosLocales();
             }
             
-            // Mostrar notificación
             if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
                 Avika.ui.showNotification('¡' + order.dish + ' completado!', 'success');
             }
         } catch (e) {
             console.error("Error al finalizar desde barra:", e);
             if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
-                Avika.ui.showNotification('Error al finalizar la orden. Consulta la consola para más detalles.', 'error');
+                Avika.ui.showNotification('Error al finalizar la orden. Consulta la consola.', 'error');
             }
         }
     },
@@ -1307,47 +1289,49 @@ Avika.orders = {
     // Función para finalizar una orden desde barra (para domicilios)
     finishDeliveryFromBar: function(orderId) {
         console.log("Finalizando entrega desde barra:", orderId);
-        
         try {
-            // Buscar la orden en barra
+            var numericOrderId = Number(orderId);
             var orderIndex = Avika.data.barOrders.findIndex(function(order) {
-                return order.id === orderId;
+                console.log(`Comparando (Reparto): ${order.id} (tipo: ${typeof order.id}) vs ${numericOrderId} (tipo: ${typeof numericOrderId})`);
+                return order.id === numericOrderId;
             });
 
             if (orderIndex === -1) {
-                console.error("Orden no encontrada en barra:", orderId);
+                console.error("Orden de entrega no encontrada en barra:", orderId);
+                 if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
+                    Avika.ui.showNotification('Error: Orden de entrega no encontrada.', 'error');
+                }
                 return;
             }
 
             var order = Avika.data.barOrders[orderIndex];
             var now = new Date();
-            
-            // Actualizar el tiempo total
-            order.totalTime = Math.floor((now - order.startTime) / 1000);
-            order.barTime = Math.floor((now - order.exitTime) / 1000);
-            
-            // Mover la orden a reparto
-            Avika.data.deliveryOrders.push(order);
-            Avika.data.barOrders.splice(orderIndex, 1);
-            
-            // Actualizar la interfaz
-            if (Avika.ui && typeof Avika.ui.updateTables === 'function') {
-                Avika.ui.updateTables();
+
+            order.totalTime = Math.floor((now - new Date(order.startTime)) / 1000);
+            order.barTime = Math.floor((now - new Date(order.exitTime)) / 1000);
+
+            if (!Avika.data.deliveryOrders) {
+                Avika.data.deliveryOrders = [];
             }
-            
-            // Guardar cambios
+            Avika.data.deliveryOrders.unshift(order);
+            Avika.data.barOrders.splice(orderIndex, 1);
+
+            if (Avika.ui) {
+                if (typeof Avika.ui.updateBarTable === 'function') Avika.ui.updateBarTable();
+                if (typeof Avika.ui.updateDeliveryTable === 'function') Avika.ui.updateDeliveryTable();
+            }
+
             if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
                 Avika.storage.guardarDatosLocales();
             }
-            
-            // Mostrar notificación
+
             if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
                 Avika.ui.showNotification('¡' + order.dish + ' en reparto!', 'success');
             }
         } catch (e) {
             console.error("Error al finalizar entrega desde barra:", e);
             if (Avika.ui && typeof Avika.ui.showNotification === 'function') {
-                Avika.ui.showNotification('Error al finalizar la entrega. Consulta la consola para más detalles.', 'error');
+                Avika.ui.showNotification('Error al finalizar la entrega. Consulta la consola.', 'error');
             }
         }
     },
