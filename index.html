@@ -12,6 +12,9 @@
     <div class="loading-indicator"></div>
     <header>
         <h1>Avika - Temporizador de Sushi</h1>
+        <div class="header-controls">
+            <select id="menu-switcher" class="filter-select"></select>
+        </div>
     </header>
     
     <div class="container">
@@ -237,5 +240,30 @@
     <!-- Finalmente, inicialización -->
     <script src="avika-mobile-init.js"></script>
     <script src="avika-init.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuSwitcher = document.getElementById('menu-switcher');
+            const menuData = window.Avika.menuData;
+            const activeMenuKey = localStorage.getItem('activeMenuKey') || Avika.config.activeMenuKey;
+
+            // Populate the dropdown
+            for (const key in menuData) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+                if (key === activeMenuKey) {
+                    option.selected = true;
+                }
+                menuSwitcher.appendChild(option);
+            }
+
+            // Handle menu change
+            menuSwitcher.addEventListener('change', function() {
+                const selectedMenu = this.value;
+                Avika.config.setActiveMenu(selectedMenu);
+            });
+        });
+    </script>
 </body>
 </html>

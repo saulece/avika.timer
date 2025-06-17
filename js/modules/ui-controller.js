@@ -5,6 +5,7 @@ window.Avika = window.Avika || {};
 Avika.utils = Avika.utils || {
     // Constantes de tiempo para toda la aplicación
     TIME_CONSTANTS: {
+        FIVE_MINUTES_IN_SECONDS: 300,     // 5 minutos
         TEN_MINUTES_IN_SECONDS: 600,      // 10 minutos
         FIFTEEN_MINUTES_IN_SECONDS: 900,  // 15 minutos
         THIRTY_MINUTES_IN_SECONDS: 1800,  // 30 minutos
@@ -100,6 +101,13 @@ Avika.ui = {
         var now = new Date();
         var barTime = Math.floor((now - new Date(order.exitTime)) / 1000);
         var barTimeStr = Avika.utils.formatElapsedTime(barTime);
+
+        // Alerta visual por tiempo de espera en barra
+        if (barTime > Avika.utils.TIME_CONSTANTS.TEN_MINUTES_IN_SECONDS) { // Más de 10 minutos
+            row.classList.add('warning-danger');
+        } else if (barTime > Avika.utils.TIME_CONSTANTS.FIVE_MINUTES_IN_SECONDS) { // Más de 5 minutos
+            row.classList.add('warning');
+        }
 
         // Celda Platillo
         const dishCell = document.createElement('td');
@@ -292,14 +300,15 @@ Avika.ui = {
         console.log("Seleccionando categoría:", category);
         
         Avika.data.currentCategory = category;
-        document.getElementById('selected-category-title').textContent = Avika.config.categoryNames[category];
+        document.getElementById('selected-category-title').textContent = Avika.config.getActiveMenu().categoryNames[category];
         
         var dishesContainer = document.getElementById('dishes-container');
         // Limpiar el contenedor completamente
         dishesContainer.innerHTML = '';
         
         // Verificar si hay datos de platillos
-        if (!Avika.config.dishes[category] || Avika.config.dishes[category].length === 0) {
+        const activeMenu = Avika.config.getActiveMenu();
+        if (!activeMenu.dishes[category] || activeMenu.dishes[category].length === 0) {
             dishesContainer.innerHTML = '<p>No hay platillos en esta categoría</p>';
             this.showSection('dishes-section');
             return;
@@ -328,9 +337,9 @@ Avika.ui = {
         dishesContainer.appendChild(gridContainer);
         
         // Verificar si hay subcategorías configuradas para esta categoría
-        if (Avika.config.subCategories && 
-            Avika.config.subCategories[category] && 
-            Avika.config.subCategories[category].length > 0) {
+        if (activeMenu.subCategories && 
+            activeMenu.subCategories[category] && 
+            activeMenu.subCategories[category].length > 0) {
             
             console.log("Procesando subcategorías para:", category);
             
@@ -359,7 +368,7 @@ Avika.ui = {
             subCategoriesContainer.appendChild(allButton);
             
             // Añadir un botón para cada subcategoría
-            Avika.config.subCategories[category].forEach(function(subcat) {
+            activeMenu.subCategories[category].forEach(function(subcat) {
                 var button = document.createElement('button');
                 button.className = 'subcategory-btn';
                 button.textContent = subcat.name;
@@ -389,8 +398,8 @@ Avika.ui = {
             console.log("Mostrando todos los platillos para:", category);
             
             // Añadir todos los platillos como botones
-            for (var i = 0; i < Avika.config.dishes[category].length; i++) {
-                var dish = Avika.config.dishes[category][i];
+            for (var i = 0; i < activeMenu.dishes[category].length; i++) {
+                var dish = activeMenu.dishes[category][i];
                 var button = this.createCompactDishButton(dish, category);
                 gridContainer.appendChild(button);
             }
@@ -402,6 +411,7 @@ Avika.ui = {
     },
     // Función auxiliar para crear botones de platillos más compactos
     createCompactDishButton: function(dish, category) {
+        const activeMenu = Avika.config.getActiveMenu();
         var button = document.createElement('button');
         button.className = 'dish-btn';
         button.setAttribute('data-dish', dish.toLowerCase());
@@ -418,7 +428,7 @@ Avika.ui = {
         button.style.borderRadius = '6px';
         button.style.wordBreak = 'break-word';
         
-        if (category === 'combos' && Avika.config.specialCombos.indexOf(dish) !== -1) {
+        if (category === 'combos' && activeMenu.specialCombos.indexOf(dish) !== -1) {
             button.className += ' special-combo';
         }
         
@@ -459,13 +469,14 @@ Avika.ui = {
             console.log("Mostrando todos los platillos de la categoría:", category);
             
             // Si se seleccionó "Todos", mostrar todos los platillos de la categoría
-            if (!Avika.config.dishes[category]) {
+            const activeMenu = Avika.config.getActiveMenu();
+            if (!activeMenu.dishes[category]) {
                 console.error("No se encontraron platillos para la categoría:", category);
                 return;
             }
             
-            for (var i = 0; i < Avika.config.dishes[category].length; i++) {
-                var dish = Avika.config.dishes[category][i];
+            for (var i = 0; i < activeMenu.dishes[category].length; i++) {
+                var dish = activeMenu.dishes[category][i];
                 var button = Avika.ui.createCompactDishButton(dish, category);
                 dishesContainer.appendChild(button);
             }
@@ -513,7 +524,8 @@ Avika.ui = {
         Avika.data.currentDish = dish;
         document.getElementById('selected-dish-title').textContent = dish;
         
-        Avika.data.isSpecialCombo = (Avika.config.specialCombos.indexOf(dish) !== -1);
+        const activeMenu = Avika.config.getActiveMenu();
+        Avika.data.isSpecialCombo = (activeMenu.specialCombos.indexOf(dish) !== -1);
         
         this.resetOptions();
         this.updatePersonalizationOptions();
@@ -786,7 +798,7 @@ Avika.ui = {
             }
             
             if (order.category) {
-                infoText += ' | ' + (Avika.config.categoryNames[order.category] || order.category);
+                infoText += ' | ' + (Avika.config.getActiveMenu().categoryNames[order.category] || order.category);
             }
             
             extraInfo.textContent = infoText;
@@ -905,7 +917,7 @@ Avika.ui = {
             if (order.category) {
                 var categoryDiv = document.createElement('div');
                 categoryDiv.className = 'dish-category';
-                categoryDiv.textContent = Avika.config.categoryNames[order.category] || order.category;
+                categoryDiv.textContent = Avika.config.getActiveMenu().categoryNames[order.category] || order.category;
                 detailsCell.appendChild(categoryDiv);
             }
             
@@ -1266,7 +1278,7 @@ Avika.ui = {
         if (order.category) {
             var categoryDiv = document.createElement('div');
             categoryDiv.className = 'dish-category';
-            categoryDiv.textContent = Avika.config.categoryNames[order.category] || order.category;
+            categoryDiv.textContent = Avika.config.getActiveMenu().categoryNames[order.category] || order.category;
             dishCell.appendChild(categoryDiv);
         }
         
@@ -2292,20 +2304,21 @@ Avika.ui = {
 
     selectTicketCategory: function(category) {
         this.state.selectedTicketItem.category = category;
-        document.getElementById('selected-category-name').textContent = Avika.config.categoryNames[category];
+        document.getElementById('selected-category-name').textContent = Avika.config.getActiveMenu().categoryNames[category];
         
         var container = document.getElementById('dishes-selection-container');
         container.innerHTML = '';
         
         // Mostrar platillos de la categoría
-        if (Avika.config.dishes[category]) {
-            for (var i = 0; i < Avika.config.dishes[category].length; i++) {
-                var dish = Avika.config.dishes[category][i];
+        const activeMenu = Avika.config.getActiveMenu();
+        if (activeMenu.dishes[category]) {
+            for (var i = 0; i < activeMenu.dishes[category].length; i++) {
+                var dish = activeMenu.dishes[category][i];
                 var button = document.createElement('button');
                 button.className = 'dish-btn';
                 button.setAttribute('data-dish', dish.toLowerCase()); // Añadir para búsqueda
                 
-                if (category === 'combos' && Avika.config.specialCombos.indexOf(dish) !== -1) {
+                if (category === 'combos' && activeMenu.specialCombos.indexOf(dish) !== -1) {
                     button.className += ' special-combo';
                 }
                 
@@ -2352,7 +2365,7 @@ Avika.ui = {
             quantity: this.state.selectedTicketItem.quantity,
             notes: this.state.selectedTicketItem.notes,
             isSpecialCombo: (this.state.selectedTicketItem.category === 'combos' && 
-                           Avika.config.specialCombos.indexOf(this.state.selectedTicketItem.dish) !== -1)
+                           Avika.config.getActiveMenu().specialCombos.indexOf(this.state.selectedTicketItem.dish) !== -1)
         });
         
         // Actualizar lista de items
@@ -2375,7 +2388,7 @@ Avika.ui = {
             itemElement.innerHTML = `
                 <div class="ticket-item-info">
                     <span class="ticket-item-name">${item.dish} ${item.quantity > 1 ? '(' + item.quantity + ')' : ''}</span>
-                    <span class="ticket-item-category">${Avika.config.categoryNames[item.category]}</span>
+                    <span class="ticket-item-category">${Avika.config.getActiveMenu().categoryNames[item.category]}</span>
                     ${item.notes ? '<span class="ticket-item-notes">Notas: ' + item.notes + '</span>' : ''}
                 </div>
                 <button class="ticket-item-remove" data-index="${index}">×</button>
@@ -2894,8 +2907,9 @@ Avika.ui = {
         var searchResults = [];
         
         // Buscar en todas las categorías
-        for (var category in Avika.config.dishes) {
-            var dishes = Avika.config.dishes[category];
+        const activeMenu = Avika.config.getActiveMenu();
+        for (var category in activeMenu.dishes) {
+            var dishes = activeMenu.dishes[category];
             
             dishes.forEach(function(dishName) {
                 // En este caso, dishName es una cadena, no un objeto
@@ -2924,7 +2938,7 @@ Avika.ui = {
                 
                 var categoryLabel = document.createElement('span');
                 categoryLabel.className = 'category-label';
-                categoryLabel.textContent = Avika.config.categoryNames[result.category];
+                categoryLabel.textContent = Avika.config.getActiveMenu().categoryNames[result.category];
                 
                 var dishName = document.createElement('span');
                 dishName.className = 'dish-name';

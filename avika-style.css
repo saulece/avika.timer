@@ -453,6 +453,17 @@ section {
     background-color: var(--highlight-bg);
 }
 
+/* Estilos para resaltar filas de pedidos en la barra */
+.table-orders tr.warning {
+    background-color: #fcf8e3 !important; /* Amarillo claro */
+    color: #8a6d3b !important;
+}
+
+.table-orders tr.warning-danger {
+    background-color: #f2dede !important; /* Rojo claro */
+    color: #a94442 !important;
+}
+
 /* Estilos específicos para la columna de Acción (última columna) */
 .pending-orders-section th:last-child,
 .pending-orders-section td:last-child {
