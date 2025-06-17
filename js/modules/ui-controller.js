@@ -555,7 +555,7 @@ Avika.ui = {
         const categoryName = activeMenu.categoryNames[categoryKey];
 
         let dishesHTML = dishes.map(dish => 
-            `<button class="dish-btn" data-dish-name="${dish.name}">${dish.name}</button>`
+            `<button class="dish-btn" data-dish-name="${dish.nombre}">${dish.nombre}</button>`
         ).join('');
 
         const content = `
