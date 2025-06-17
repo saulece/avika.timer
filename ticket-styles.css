@@ -171,3 +171,18 @@
         color: #333 !important; /* Texto más oscuro para mejor contraste */
     }
 }
+
+/* Estilo para platillos finalizados que esperan al resto del ticket */
+.item-finished {
+    background-color: #f0f0f0 !important; /* Un gris claro para indicar que está listo */
+    opacity: 0.7; /* Ligeramente atenuado */
+}
+
+/* Estilo para el texto 'Listo' en la columna de acción */
+.status-finished {
+    font-weight: bold;
+    color: #28a745; /* Un color verde para indicar éxito */
+    padding: 5px 10px;
+    border-radius: 4px;
+    background-color: #e9f7eb;
+}
