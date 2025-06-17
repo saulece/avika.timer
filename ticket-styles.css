@@ -78,6 +78,12 @@
     margin-right: 0;
 }
 
+.ticket-service-select {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .ticket-service-select label, .ticket-time-select label {
     display: block;
     font-weight: bold;
@@ -88,6 +94,13 @@
 
 .ticket-service-select .radio-group input[type="radio"] {
     margin-right: 10px;
+}
+
+.ticket-time-select select {
+    padding: 10px;
+    font-size: 1.2em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 
 .ticket-time-select input[type="number"] {
