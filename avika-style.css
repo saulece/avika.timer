@@ -18,6 +18,7 @@
     --notification-bg: #2ecc71;
     --highlight-bg: #f9f9f9;
     --shadow-color: rgba(0,0,0,0.1);
+    --bg-modal: #ffffff;
     --btn-hover: #2980b9;
     
     /* Nuevas variables para tiempos */
@@ -52,6 +53,7 @@
     --notification-bg: #27ae60;
     --highlight-bg: #2a2a2a;
     --shadow-color: rgba(0,0,0,0.3);
+    --bg-modal: #2c2c2c;
     --btn-hover: #3498db;
     
     /* Colores de tiempos en modo oscuro */
@@ -77,6 +79,7 @@
     --table-header-text: #1a1a1a;
     --highlight-bg: #3c3c3c;
     --shadow-color: rgba(0,0,0,0.4);
+    --bg-modal: #2c2c2c;
     --btn-hover: #c5b358; /* Dorado más oscuro */
 
     /* Tiempos con la paleta Ishinoka */
@@ -1251,7 +1254,7 @@ h2 {
         padding: 8px 10px;
         border-radius: 6px;
         border: 1px solid #cccccc; /* Borde más visible */
-        background-color: #f8f8f8;
+        background-color: var(--bg-modal);
         color: #333333 !important; /* Texto oscuro para mejor contraste */
         font-weight: 500; /* Texto semi-negrita para mejor legibilidad */
     }
@@ -1526,16 +1529,17 @@ h2 {
 }
 
 .modal-content {
-    background-color: #f8f8f8;
+    background-color: var(--bg-modal);
     margin: 5% auto;
     padding: 20px;
-    border: 1px solid #888;
+    border: 1px solid var(--border-color);
     width: 80%;
     max-width: 600px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     max-height: 90vh;
     overflow-y: auto;
+    animation: slideDown 0.4s ease-out forwards;
 }
 
 .close-modal {
