@@ -871,7 +871,7 @@ Avika.ui = {
             
             if (success) {
                 // Actualizar la UI
-                this.updatePendingTable();
+                Avika.orderService.updatePendingTable();
                 
                 // Mostrar notificación
                 this.showNotification('Ticket agregado con ' + this.state.ticketItems.length + ' platillos');
