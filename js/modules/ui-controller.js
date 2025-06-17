@@ -458,13 +458,14 @@ Avika.ui = {
             document.getElementById('btn-add-ticket-item').onclick = () => this.showTicketItemSelection();
             document.getElementById('btn-save-ticket').onclick = () => this.saveTicket();
 
-            document.getElementById('ticket-btn-comedor').onclick = (e) => this.selectTicketService(e.target, 'comedor');
-            document.getElementById('ticket-btn-domicilio').onclick = (e) => this.selectTicketService(e.target, 'domicilio');
-            document.getElementById('ticket-btn-para-llevar').onclick = (e) => this.selectTicketService(e.target, 'para-llevar');
-
             document.getElementById('ticket-hour').innerHTML = this.generateHourOptions();
             document.getElementById('ticket-minute').innerHTML = this.generateMinuteOptions();
         }
+
+        // Asignar eventos de clic fuera del bloque if para que se registren siempre
+        document.getElementById('ticket-btn-comedor').onclick = (e) => this.selectTicketService(e.target, 'comedor');
+        document.getElementById('ticket-btn-domicilio').onclick = (e) => this.selectTicketService(e.target, 'domicilio');
+        document.getElementById('ticket-btn-para-llevar').onclick = (e) => this.selectTicketService(e.target, 'para-llevar');
 
         // --- Resetear y mostrar modal ---
         var now = new Date();

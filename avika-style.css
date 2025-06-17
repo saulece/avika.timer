@@ -372,9 +372,9 @@ section {
 /* En modales, usar modal-action-btns para tener un orden específico */
 .modal-action-btns {
     display: flex;
-    justify-content: flex-end;
-    margin-top: 15px;
+    justify-content: center; /* Centra los botones */
     gap: 10px;
+    margin-top: 20px;
     position: static; /* Anular posición sticky para botones en modales */
     padding: 0;
 }
