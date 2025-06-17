@@ -208,24 +208,39 @@ Avika.config = {
     // Clave del menú activo. Se podrá cambiar desde la UI.
     activeMenuKey: 'avika',
 
-    // Función para obtener los datos del menú activo
+    // Método para obtener el menú activo
     getActiveMenu: function() {
-        // Primero, intentar cargar desde localStorage
+        // Primero, intentar obtener la clave del menú desde localStorage
         const savedMenuKey = localStorage.getItem('activeMenuKey');
+        // Usar la clave guardada o la clave por defecto
         const keyToUse = savedMenuKey || this.activeMenuKey;
         return window.Avika.menuData[keyToUse];
     },
 
-    // Función para establecer y guardar el menú activo
+    // Método para cambiar el menú activo y guardar en localStorage
     setActiveMenu: function(menuKey) {
-        if (window.Avika.menuData[menuKey]) {
-            this.activeMenuKey = menuKey;
-            localStorage.setItem('activeMenuKey', menuKey);
-            console.log(`Menú activo cambiado a: ${menuKey}`);
-            // Recargar la página para aplicar los cambios en toda la UI
-            window.location.reload();
+        this.activeMenuKey = menuKey;
+        localStorage.setItem('activeMenuKey', menuKey);
+        this.applyTheme(); // Aplicar el tema inmediatamente
+        // Opcional: recargar la página para que todos los componentes se actualicen con el nuevo menú
+        window.location.reload();
+    },
+
+    // Método para aplicar el tema visual según el menú activo
+    applyTheme: function() {
+        const activeMenuKey = localStorage.getItem('activeMenuKey') || this.activeMenuKey;
+        if (activeMenuKey === 'ishinoka') {
+            document.body.classList.add('theme-ishinoka');
         } else {
-            console.error(`Error: El menú con la clave "${menuKey}" no existe.`);
+            document.body.classList.remove('theme-ishinoka');
         }
+    },
+
+    // Inicializador del menú y del tema
+    init: function() {
+        this.applyTheme();
+        // Podríamos agregar aquí más lógica de inicialización
     }
 };
+
+Avika.config.init();

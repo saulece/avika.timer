@@ -61,6 +61,31 @@
     --time-bad: #c0392b;
 }
 
+.theme-ishinoka {
+    /* Paleta Ishinoka: Negro, Dorado, Blanco */
+    --bg-color: #1a1a1a;
+    --container-bg: #2a2a2a;
+    --text-color: #f0f0f0;
+    --header-bg: #d4af37; /* Dorado */
+    --header-text: #1a1a1a; /* Negro para contraste */
+    --primary-btn: #d4af37;
+    --primary-btn-text: #1a1a1a;
+    --success-btn: #2ecc71; /* Mantener verde para éxito */
+    --danger-btn: #e74c3c; /* Mantener rojo para peligro */
+    --border-color: #444;
+    --table-header-bg: #d4af37;
+    --table-header-text: #1a1a1a;
+    --highlight-bg: #3c3c3c;
+    --shadow-color: rgba(0,0,0,0.4);
+    --btn-hover: #c5b358; /* Dorado más oscuro */
+
+    /* Tiempos con la paleta Ishinoka */
+    --time-excellent: #2ecc71;
+    --time-good: #7fdbff;
+    --time-warning: #f39c12;
+    --time-bad: #e74c3c;
+}
+
 /* Estilos generales */
 * {
     box-sizing: border-box;
