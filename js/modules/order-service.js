@@ -520,7 +520,7 @@ Avika.orderService = {
                     ticketId: ticketId,
                     dish: item.dish,
                     category: item.category,
-                    categoryDisplay: item.categoryDisplay || Avika.config.categoryNames[item.category],
+                    categoryDisplay: item.categoryDisplay || Avika.config.getActiveMenu().categoryNames[item.category],
                     quantity: item.quantity || 1,
                     customizations: item.customizations || [],
                     serviceType: serviceType || 'comedor',
