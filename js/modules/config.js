@@ -160,34 +160,38 @@ window.Avika.menuData = {
     'ishinoka': {
         customizationOptions: {},
         dishes: {
-            'entremeses-frios': ['Tuna Tataki', 'Tako Kiri', 'Salmón Tataki', 'Hamachi Serranito', 'White Fish Dry Miso', 'Gyu Tataki', 'Sommer', 'Hotate Kiri', 'Ostiones'],
+            'arroz': ['Gohan', 'Midori', 'Wok', 'Thai', 'Yakimeshi'],
+            'donburi': ['Poket de Atún', 'Poket de Salmón', 'Teka Don', 'Unagui Don'],
             'ensaladas': ['Ensalada Dry Miso', 'Chuka Sarada', 'Sunomono Especial', 'Tuna Salad'],
-            'nigiri': ['Camarón', 'Anguila', 'Hamachi', 'Robalo', 'Salmón', 'Akami', 'Pulpo', 'Ikura', 'Masago', 'Tamago', 'Selección del chef (Nigiri)', 'Pesca del día', 'Callo de Hacha', 'Ika', 'Toro', 'Chutoro', 'Shimesaba', 'Uni', 'Amaebi', 'Kampachi', 'Lobina'],
+            'entremeses-calientes': ['Harumaki Unagui', 'Tempura Mix', 'Tempura de Camarón', 'Soft Shell Crab', 'Gyozas', 'Karikari', 'Edamames Spicy', 'Edamames', 'Dumpling de Camarón'],
+            'entremeses-frios': ['Tuna Tataki', 'Tako Kiri', 'Salmón Tataki', 'Hamachi Serranito', 'White Fish Dry Miso', 'Gyu Tataki', 'Sommer', 'Hotate Kiri', 'Ostiones'],
+            'makis': ['Ishinoka', 'California', 'Tempura', 'Kiury', 'Ebi', 'Tanuki', 'Spicy Hamachi', 'Spicy Tuna', 'Shrimp', 'Shake', 'Blue Fin', 'Fumi', 'Spider', 'Crab', 'Doble Tuna', 'Kawa Shake', 'Hamachi Maki', 'Kani'],
+            'nigiri': ['Camarón', 'Anguila', 'Hamachi', 'Robalo', 'Salmón', 'Akami', 'Pulpo', 'Ikura', 'Masago', 'Tamago', 'Selección del chef (Nigiri Dinner)'],
+            'pesca-del-dia': ['Callo de Hacha', 'Ika', 'Toro', 'Chutoro', 'Shimesaba', 'Uni (Erizo)', 'Amaebi', 'Kampachi', 'Lobina'],
+            'platos-fuertes': ['Camarón Midori', 'Camarón Roca', 'Camarón Macha', 'Posta Dry Miso', 'Black Cod en Salsa Miso', 'Yakisoba Ebi', 'Yakisoba Rib Eye', 'Sakana Karague', 'Esparrayaki', 'Tonkatsu (pollo o cerdo)', 'Oishi Shake', 'Akami Tataki'],
+            'postres': ['Helado de Temporada', 'Crème Brûlée de Frutos Rojos', 'Manjar de Chocolate y Miso', 'Suspiro de Matcha', 'Panna Cotta de Maracuyá', 'Kamelado', 'Carlota Yuzu', 'Pastel de Nube', 'Red Velvet'],
             'sashimis': ['Atún', 'Salmón', 'Hamachi', 'Selección del Chef (Sashimi)'],
-            'entremeses-calientes': ['Harumaki Unagui', 'Tempura Mix', 'Tempura de Camarón', 'Soft Shell Crab', 'Gyozas', 'Karikari', 'Edamames Spicy', 'Dumpling de Camarón', 'Edamames simples'],
             'sopas': ['Miso Shiru', 'Miso Ramen', 'Tonkotsu Ramen', 'Spicy Ramen'],
-            'arroces': ['Gohan', 'Midori', 'Wok', 'Thai', 'Yakimeshi'],
-            'makis': ['Ishinoka', 'California', 'Tempura', 'Kiury', 'Ebi', 'Tanuki', 'Spicy Hamachi', 'Spicy Tuna', 'Shrimp', 'Shake', 'Blue Fin', 'Fumi', 'Spider', 'Crab', 'Doble Tuna'],
-            'domburi': ['Poket de Atún / Salmón', 'Teka Don', 'Unagui Don'],
-            'platos-fuertes': ['Camarón Midori', 'Camarón Roca', 'Camarón Macha', 'Posta Dry Miso', 'Black Cod en Salsa Miso', 'Yakisoba Ebi', 'Tobanyaki', 'Sakana Karague', 'Esparrayaki', 'Tonkatsu'],
-            'postres': ['Helado de temporada', 'Crème Brûlée', 'Manjar de Chocolate y Miso', 'Suspiro de Matcha', 'Panna Cotta de Maracuyá', 'Kamelado', 'Carlota Yuzu', 'Pastel de Nube']
+            'teppanyaki': ['Rib Eye', 'Filete de Res', 'Camarón', 'Salmón', 'Mixto', 'Pollo']
         },
         specialCombos: [],
         categoryNames: {
-            'entremeses-frios': 'Entremeses fríos',
+            'arroz': 'Arroz',
+            'donburi': 'Donburi',
             'ensaladas': 'Ensaladas',
-            'nigiri': 'Nigiri',
-            'sashimis': 'Sashimis',
             'entremeses-calientes': 'Entremeses calientes',
-            'sopas': 'Sopas',
-            'arroces': 'Arroces',
+            'entremeses-frios': 'Entremeses fríos',
             'makis': 'Makis',
-            'domburi': 'Domburi',
-            'platos-fuertes': 'Platos fuertes',
-            'postres': 'Postres'
+            'nigiri': 'Nigiri',
+            'pesca-del-dia': 'Pesca del día',
+            'platos-fuertes': 'Plato Fuerte',
+            'postres': 'Postres',
+            'sashimis': 'Sashimis',
+            'sopas': 'Sopas',
+            'teppanyaki': 'Teppanyaki'
         },
         subCategories: {
-            'entremeses-frios': [], 'ensaladas': [], 'nigiri': [], 'sashimis': [], 'entremeses-calientes': [], 'sopas': [], 'arroces': [], 'makis': [], 'domburi': [], 'platos-fuertes': [], 'postres': []
+            'arroz': [], 'donburi': [], 'ensaladas': [], 'entremeses-calientes': [], 'entremeses-frios': [], 'makis': [], 'nigiri': [], 'pesca-del-dia': [], 'platos-fuertes': [], 'postres': [], 'sashimis': [], 'sopas': [], 'teppanyaki': []
         },
         serviceNames: {
             'comedor': 'Comedor',
