@@ -427,9 +427,12 @@ Avika.ui = {
                     <h2>Nuevo Ticket/Comanda</h2>
                     <div class="ticket-main-controls">
                         <div class="ticket-service-select">
-                            <button id="ticket-btn-comedor" class="service-btn selected">Comedor</button>
-                            <button id="ticket-btn-domicilio" class="service-btn">Domicilio</button>
-                            <button id="ticket-btn-para-llevar" class="service-btn">Para llevar</button>
+                            <input type="radio" id="ticket-btn-comedor" name="service-type" value="comedor" checked>
+                            <label for="ticket-btn-comedor" class="service-btn">Comedor</label>
+                            <input type="radio" id="ticket-btn-domicilio" name="service-type" value="domicilio">
+                            <label for="ticket-btn-domicilio" class="service-btn">Domicilio</label>
+                            <input type="radio" id="ticket-btn-para-llevar" name="service-type" value="para-llevar">
+                            <label for="ticket-btn-para-llevar" class="service-btn">Para llevar</label>
                         </div>
                         <div class="ticket-time-select">
                             <select id="ticket-hour"></select> : <select id="ticket-minute"></select>
@@ -462,10 +465,12 @@ Avika.ui = {
             document.getElementById('ticket-minute').innerHTML = this.generateMinuteOptions();
         }
 
-        // Asignar eventos de clic fuera del bloque if para que se registren siempre
-        document.getElementById('ticket-btn-comedor').onclick = (e) => this.selectTicketService(e.target, 'comedor');
-        document.getElementById('ticket-btn-domicilio').onclick = (e) => this.selectTicketService(e.target, 'domicilio');
-        document.getElementById('ticket-btn-para-llevar').onclick = (e) => this.selectTicketService(e.target, 'para-llevar');
+        // Asignar evento de cambio al contenedor de los radio buttons
+        modal.querySelector('.ticket-service-select').onchange = (e) => {
+            if (e.target.name === 'service-type') {
+                this.selectTicketService(e.target.value);
+            }
+        };
 
         // --- Resetear y mostrar modal ---
         var now = new Date();
@@ -474,14 +479,16 @@ Avika.ui = {
         this.state.ticketItems = [];
         this.updateTicketItemsList(); // Limpia y actualiza el contador
         document.getElementById('ticket-notes-input').value = '';
-        this.selectTicketService(document.getElementById('ticket-btn-comedor'), 'comedor');
+        // Seleccionar 'comedor' por defecto
+        document.getElementById('ticket-btn-comedor').checked = true;
+        this.selectTicketService('comedor'); 
         modal.style.display = 'block';
     },
 
-    selectTicketService: function(button, service) {
-        document.querySelectorAll('.ticket-service-select .service-btn').forEach(btn => btn.classList.remove('selected'));
-        button.classList.add('selected');
+    selectTicketService: function(service) {
+        // Guarda el tipo de servicio seleccionado. El estado visual es manejado por el radio button.
         this.state.ticketService = service;
+        console.log("Servicio seleccionado:", service);
     },
 
     generateHourOptions: function() {
