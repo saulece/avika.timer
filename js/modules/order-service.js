@@ -158,10 +158,8 @@ Avika.orderService = {
         }
 
         // Actualizar UI
-        if (Avika.ui) {
-            Avika.ui.updatePendingTable();
-            Avika.ui.updateBarTable();
-        }
+        this.updatePendingTable();
+        this.updateBarTable();
 
         // Guardar datos
         Avika.storage.guardarDatosLocales();
