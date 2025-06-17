@@ -386,8 +386,8 @@ section {
 
 /* Estilos específicos para botones */
 .action-btn {
-    background-color: #6495ED;
-    color: white;
+    background-color: var(--primary-btn);
+    color: var(--primary-btn-text);
     border: none;
     padding: 10px 15px;
     border-radius: 5px;
@@ -2500,6 +2500,19 @@ tr:hover td {
 }
 
 /* Mejora para encabezado de sección de búsqueda */
+#search-results-step .modal-content h2,
+.modal-content h3,
+.modal-content label {
+    color: var(--text-color);
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
 #search-results-step .step-header {
     padding: 10px 0;
     border-bottom: 1px solid var(--border-color);
