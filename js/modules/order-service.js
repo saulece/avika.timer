@@ -621,48 +621,35 @@ Avika.orderService = {
             // Validar que startTime sea una fecha válida
             var startTime;
             try {
-                // Asegurar que startTime sea un objeto Date válido
                 if (order.startTime instanceof Date) {
                     startTime = order.startTime;
                 } else if (typeof order.startTime === 'string') {
-                    // Compatibilidad con Android 10: parsear la fecha correctamente
-                    startTime = new Date(order.startTime);
-                    // Si la fecha es inválida, intentar reparar el formato
+                    // Corrección para compatibilidad con iOS/Safari que es estricto con los formatos de fecha.
+                    // Se normaliza el string de fecha para que sea compatible con `new Date()`.
+                    // Ej: '2023-01-01 12:30:00' -> '2023-01-01T12:30:00'
+                    const normalizedTime = order.startTime.replace(' ', 'T');
+                    startTime = new Date(normalizedTime);
+
+                    // Si la normalización falla, puede ser un formato inesperado.
                     if (isNaN(startTime.getTime())) {
-                        console.warn("Reparando formato de fecha para la orden:", orderId);
-                        // Intentar diferentes formatos de fecha
-                        if (order.startTime.indexOf('T') > -1) {
-                            // Formato ISO
-                            var parts = order.startTime.split('T');
-                            var dateParts = parts[0].split('-');
-                            var timeParts = parts[1].split(':');
-                            startTime = new Date(dateParts[0], dateParts[1]-1, dateParts[2], 
-                                              timeParts[0], timeParts[1], timeParts[2].split('.')[0]);
-                        } else {
-                            // Crear una nueva fecha
-                            startTime = new Date();
-                            // Actualizar la orden para evitar problemas futuros
-                            order.startTime = startTime;
-                            // Guardar cambios si es posible
-                            if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
-                                Avika.storage.guardarDatosLocales();
-                            }
-                        }
+                        console.warn("No se pudo parsear la fecha para la orden pendiente:", orderId, "Valor:", order.startTime);
+                        // Como fallback, usamos la hora actual para evitar que el temporizador se rompa.
+                        startTime = new Date();
+                        order.startTime = startTime; // Corregimos en la orden para futuros usos.
                     }
                 } else {
-                    // Si no es ni Date ni string, crear una nueva fecha
-                    console.warn("Tipo de fecha inválido para la orden:", orderId, typeof order.startTime);
+                    console.warn("Tipo de fecha inválido para la orden pendiente:", orderId, typeof order.startTime);
                     startTime = new Date();
-                    // Actualizar la orden para evitar problemas futuros
                     order.startTime = startTime;
                 }
-                
-                // Verificación final
-                if (isNaN(startTime.getTime())) throw new Error("Fecha inválida después de reparación");
-                
+
+                if (isNaN(startTime.getTime())) {
+                    throw new Error("Fecha inválida después de todos los intentos de parseo");
+                }
+
             } catch (e) {
-                console.warn("Error al procesar fecha para la orden:", orderId, e);
-                timerCell.textContent = "--:--:--";
+                console.error("Error crítico al procesar fecha para la orden pendiente:", orderId, e);
+                timerCell.textContent = "Error";
                 continue;
             }
             
@@ -677,7 +664,7 @@ Avika.orderService = {
             
             // Asegurar que el valor sea positivo
             if (elapsedMillis < 0) {
-                console.warn("Tiempo negativo detectado, corrigiendo para orden:", orderId);
+                console.warn("Tiempo negativo detectado, corrigiendo para orden pendiente:", orderId);
                 elapsedMillis = 0;
             }
             
@@ -733,48 +720,31 @@ Avika.orderService = {
             // Validar que deliveryDepartureTime sea una fecha válida
             var departureTime;
             try {
-                // Asegurar que departureTime sea un objeto Date válido
                 if (order.deliveryDepartureTime instanceof Date) {
                     departureTime = order.deliveryDepartureTime;
                 } else if (typeof order.deliveryDepartureTime === 'string') {
-                    // Compatibilidad con Android 10: parsear la fecha correctamente
-                    departureTime = new Date(order.deliveryDepartureTime);
-                    // Si la fecha es inválida, intentar reparar el formato
+                    // Corrección para compatibilidad con iOS/Safari
+                    const normalizedTime = order.deliveryDepartureTime.replace(' ', 'T');
+                    departureTime = new Date(normalizedTime);
+
                     if (isNaN(departureTime.getTime())) {
-                        console.warn("Reparando formato de fecha para la orden en reparto:", orderId);
-                        // Intentar diferentes formatos de fecha
-                        if (order.deliveryDepartureTime.indexOf('T') > -1) {
-                            // Formato ISO
-                            var parts = order.deliveryDepartureTime.split('T');
-                            var dateParts = parts[0].split('-');
-                            var timeParts = parts[1].split(':');
-                            departureTime = new Date(dateParts[0], dateParts[1]-1, dateParts[2], 
-                                              timeParts[0], timeParts[1], timeParts[2].split('.')[0]);
-                        } else {
-                            // Crear una nueva fecha
-                            departureTime = new Date();
-                            // Actualizar la orden para evitar problemas futuros
-                            order.deliveryDepartureTime = departureTime;
-                            // Guardar cambios si es posible
-                            if (Avika.storage && typeof Avika.storage.guardarDatosLocales === 'function') {
-                                Avika.storage.guardarDatosLocales();
-                            }
-                        }
+                        console.warn("No se pudo parsear la fecha para la orden en reparto:", orderId, "Valor:", order.deliveryDepartureTime);
+                        departureTime = new Date();
+                        order.deliveryDepartureTime = departureTime;
                     }
                 } else {
-                    // Si no es ni Date ni string, crear una nueva fecha
                     console.warn("Tipo de fecha inválido para la orden en reparto:", orderId, typeof order.deliveryDepartureTime);
                     departureTime = new Date();
-                    // Actualizar la orden para evitar problemas futuros
                     order.deliveryDepartureTime = departureTime;
                 }
-                
-                // Verificación final
-                if (isNaN(departureTime.getTime())) throw new Error("Fecha inválida después de reparación");
-                
+
+                if (isNaN(departureTime.getTime())) {
+                    throw new Error("Fecha inválida después de todos los intentos de parseo");
+                }
+
             } catch (e) {
-                console.warn("Error al procesar fecha para la orden en reparto:", orderId, e);
-                timerCell.textContent = "--:--:--";
+                console.error("Error crítico al procesar fecha para la orden en reparto:", orderId, e);
+                timerCell.textContent = "Error";
                 continue;
             }
             
