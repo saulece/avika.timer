@@ -6,21 +6,13 @@ window.Avika = Object.assign({
     // Información de versión y metadatos básicos
     VERSION: '1.0.0',
     APP_NAME: 'Avika - Temporizador de Sushi',
+    config: {}, // Objeto vacío para configuración
     
     // Inicialización de estructuras de datos principales
     data: {
         pendingOrders: [],
-        barOrders: [],
         deliveryOrders: [],
         completedOrders: []
-    },
-    
-    // Constantes para estados de órdenes
-    ORDER_STATES: {
-        PENDING: 'pending',
-        BAR: 'bar',
-        DELIVERY: 'delivery',
-        COMPLETED: 'completed'
     },
     
     // Objeto para utilidades compartidas

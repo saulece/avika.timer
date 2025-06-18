@@ -5,16 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Avika - Temporizador de Sushi</title>
     <link rel="stylesheet" href="avika-style.css">
-    <link rel="stylesheet" href="ticket-styles.css">
     <link rel="stylesheet" href="avika-mobile.css">
+    <link rel="stylesheet" href="ticket-styles.css">
 </head>
 <body>
+    <!-- Pantalla de Selección de Restaurante -->
+    <div id="restaurant-selector-overlay">
+        <div id="restaurant-selector-modal">
+            <h2>Seleccionar Restaurante</h2>
+            <div class="button-container">
+                <button class="restaurant-btn" data-restaurant="avika">Avika</button>
+                <button class="restaurant-btn" data-restaurant="ishinoka">Ishinoka</button>
+            </div>
+        </div>
+    </div>
     <div class="loading-indicator"></div>
     <header>
         <h1>Avika - Temporizador de Sushi</h1>
-        <div class="header-controls">
-            <select id="menu-switcher" class="filter-select"></select>
-        </div>
     </header>
     
     <div class="container">
@@ -29,7 +36,8 @@
                 <h2>Platillos en preparación <span id="pending-count">0</span></h2>
                 <div class="action-btns" style="margin-bottom: 10px;">
                     <button class="action-btn" id="btn-new-ticket">Nuevo Ticket/Comanda</button>
-                    <button class="action-btn" id="btn-force-complete" style="background-color: #ff9800;" title="Solo usar en casos excepcionales cuando un ticket quedó atorado y no se puede completar normalmente">Emergencia: Desbloquear</button>
+                                        <button class="action-btn" id="btn-force-complete" style="background-color: #ff9800;" title="Solo usar en casos excepcionales cuando un ticket quedó atorado y no se puede completar normalmente">Emergencia: Desbloquear</button>
+
                 </div>
                 <div class="filter-panel">
                     <select id="filter-category" class="filter-select">
@@ -71,64 +79,34 @@
                 </table>
             </div>
             
-            <!-- Órdenes en barra -->
-            <div class="pending-orders-section bar-section">
-                <h2>Platillos en Barra <span id="bar-count">0</span></h2>
-                <div class="filter-panel">
-                    <select id="filter-bar-time" class="filter-select">
-                        <option value="todos">Todos los tiempos</option>
-                        <option value="2">+2 minutos</option>
-                        <option value="5">+5 minutos</option>
-                        <option value="10">+10 minutos</option>
-                    </select>
-                    <button id="btn-apply-bar-filter" class="filter-btn">Aplicar filtro</button>
-                    <button id="btn-clear-bar-filter" class="filter-btn">Limpiar filtro</button>
-                </div>
-                <table class="mobile-optimized-table">
-                    <thead>
-                        <tr>
-                            <th>Platillo</th>
-                            <th>Salida</th>
-                            <th>Tiempo</th>
-                            <th class="mobile-hide-sm">Detalles</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="bar-body">
-                        <!-- Se llenará con JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-
             <!-- NUEVA SECCIÓN: Órdenes en reparto -->
-            <div class="pending-orders-section delivery-section">
-                <h2>Platillos en reparto <span id="delivery-count">0</span></h2>
-                <div class="filter-panel">
-                    <select id="filter-delivery-time" class="filter-select">
-                        <option value="todos">Todos los tiempos</option>
-                        <option value="15">+15 minutos</option>
-                        <option value="30">+30 minutos</option>
-                        <option value="45">+45 minutos</option>
-                    </select>
-                    <button id="btn-apply-delivery-filter" class="filter-btn">Aplicar filtro</button>
-                    <button id="btn-clear-delivery-filter" class="filter-btn">Limpiar filtro</button>
-                </div>
-                <table class="mobile-optimized-table">
-                    <thead>
-                        <tr>
-                            <th>Platillo</th>
-                            <th>Salida</th>
-                            <th>Tiempo</th>
-                            <th class="mobile-hide-sm">Detalles</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="delivery-body">
-                        <!-- Se llenará con JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-
+<div class="pending-orders-section delivery-section">
+    <h2>Platillos en reparto <span id="delivery-count">0</span></h2>
+    <div class="filter-panel">
+        <select id="filter-delivery-time" class="filter-select">
+            <option value="todos">Todos los tiempos</option>
+            <option value="15">+15 minutos</option>
+            <option value="30">+30 minutos</option>
+            <option value="45">+45 minutos</option>
+        </select>
+        <button id="btn-apply-delivery-filter" class="filter-btn">Aplicar filtro</button>
+        <button id="btn-clear-delivery-filter" class="filter-btn">Limpiar filtro</button>
+    </div>
+    <table class="mobile-optimized-table">
+        <thead>
+            <tr>
+                <th>Platillo</th>
+                <th class="mobile-hide-sm">Salida</th>
+                <th>Tiempo</th>
+                <th class="mobile-hide-sm">Detalles</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody id="delivery-body">
+            <!-- Se llenará con JavaScript -->
+        </tbody>
+    </table>
+</div>
             <!-- Órdenes completadas -->
             <div class="pending-orders-section">
                 <h2>Platillos completados</h2>
@@ -176,10 +154,7 @@
             <div class="compact-form-container">
                 <div id="personalization-section">
                     <div class="option-group">
-                        <div class="option-title">Personalización</div>
-                        <div class="option-btns" id="personalization-options">
-                            <!-- Se llenará dinámicamente con JS -->
-                        </div>
+                        
                     </div>
                 </div>
                 
@@ -227,43 +202,18 @@
     
     <!-- Primero cargar el núcleo y utilidades -->
     <script src="avika-core.js"></script>
-    <script src="js/modules/config.js"></script>
+    <script src="menu-config.js"></script>
     <script src="js/modules/optimization.js"></script>
     
     <!-- Luego cargar módulos funcionales -->
-    <script src="js/modules/orders.js"></script>
     <script src="js/modules/ui-controller.js"></script>
     <script src="js/modules/order-service.js"></script>
+    <script src="js/modules/orders.js"></script>
     <script src="js/modules/storage.js"></script>
     <script src="js/modules/stats.js"></script>
     
     <!-- Finalmente, inicialización -->
     <script src="avika-mobile-init.js"></script>
     <script src="avika-init.js"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuSwitcher = document.getElementById('menu-switcher');
-            const menuData = window.Avika.menuData;
-            const activeMenuKey = localStorage.getItem('activeMenuKey') || Avika.config.activeMenuKey;
-
-            // Populate the dropdown
-            for (const key in menuData) {
-                const option = document.createElement('option');
-                option.value = key;
-                option.textContent = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
-                if (key === activeMenuKey) {
-                    option.selected = true;
-                }
-                menuSwitcher.appendChild(option);
-            }
-
-            // Handle menu change
-            menuSwitcher.addEventListener('change', function() {
-                const selectedMenu = this.value;
-                Avika.config.setActiveMenu(selectedMenu);
-            });
-        });
-    </script>
 </body>
 </html>

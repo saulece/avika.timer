@@ -439,54 +439,50 @@ Avika.stats = {
             
             // Preparar datos para la hoja principal
             var datosOrdenes = [];
-            
+
             // Agregar encabezados
             datosOrdenes.push([
-                'Platillo', 'Categoría', 'Cantidad', 'Tipo de Servicio', 
-                'Inicio', 'Fin', 'Fin Cocina Caliente', 'Fin Cocina Fría', 'Tiempo Total', 'Salida Repartidor', 
-                'Llegada Repartidor', 'Tiempo de Entrega', 'Fecha', 'Combo Especial'
+                'Platillo', 'Categoría', 'Cantidad', 'Tipo de Servicio',
+                'Inicio', 'Fin', 'Fin Cocina Caliente', 'Fin Cocina Fría', 'Tiempo Total', 'Salida Repartidor',
+                'Llegada Repartidor', 'Tiempo de Entrega', 'Tiempo Espera Domicilio (min)', 'Fecha', 'Combo Especial'
             ]);
-            
+
             // Agregar cada orden completada
             ordenesAExportar.forEach(function(order) {
                 // Formatear fechas de manera segura
                 var fechaInicio = order.startTime ? new Date(order.startTime) : null;
                 var fechaFin = order.endTime ? new Date(order.endTime) : null;
                 var fechaFormateada = fechaFin ? fechaFin.getDate() + '/' + (fechaFin.getMonth() + 1) + '/' + fechaFin.getFullYear() : '-';
-                
+
                 // Formatear tiempos de inicio y fin
                 var startTimeFormatted = fechaInicio ? Avika.orders.formatTime(fechaInicio) : '-';
                 var endTimeFormatted = fechaFin ? Avika.orders.formatTime(fechaFin) : '-';
-                
+
                 // Formatear tiempos de cocina caliente y fría
                 var hotKitchenEndTimeFormatted = order.hotKitchenEndTime ? Avika.orders.formatTime(new Date(order.hotKitchenEndTime)) : '-';
                 var coldKitchenEndTimeFormatted = order.coldKitchenEndTime ? Avika.orders.formatTime(new Date(order.coldKitchenEndTime)) : '-';
-                
+
                 // Calcular tiempo de preparación
                 var prepTime = '-';
                 if (order.startTime && order.endTime) {
                     var tiempoEnSegundos = (new Date(order.endTime) - new Date(order.startTime)) / 1000;
-                    var minutos = Math.floor(tiempoEnSegundos / 60);
-                    var segundos = Math.floor(tiempoEnSegundos % 60);
-                    prepTime = Avika.utils.padZero(minutos) + ':' + Avika.utils.padZero(segundos);
+                    prepTime = Avika.utils.formatElapsedTime(tiempoEnSegundos);
                 }
-                
+
                 // Formatear tiempos de entrega
                 var deliveryDepartureTimeFormatted = order.deliveryDepartureTime ? Avika.orders.formatTime(new Date(order.deliveryDepartureTime)) : '-';
                 var deliveryArrivalTimeFormatted = order.deliveryArrivalTime ? Avika.orders.formatTime(new Date(order.deliveryArrivalTime)) : '-';
-                
+
                 // Calcular tiempo de entrega
                 var deliveryTime = '-';
                 if (order.deliveryDepartureTime && order.deliveryArrivalTime) {
                     var tiempoEntregaSegundos = (new Date(order.deliveryArrivalTime) - new Date(order.deliveryDepartureTime)) / 1000;
-                    var minutosEntrega = Math.floor(tiempoEntregaSegundos / 60);
-                    var segundosEntrega = Math.floor(tiempoEntregaSegundos % 60);
-                    deliveryTime = Avika.utils.padZero(minutosEntrega) + ':' + Avika.utils.padZero(segundosEntrega);
+                    deliveryTime = Avika.utils.formatElapsedTime(tiempoEntregaSegundos);
                 }
-                
+
                 // Determinar si es un combo especial (tiene registros de cocina caliente y fría)
                 var esComboEspecial = order.hotKitchenFinished && order.coldKitchenFinished ? 'Sí' : 'No';
-                
+
                 datosOrdenes.push([
                     order.dish,
                     Avika.config.categoryNames[order.category],
@@ -500,11 +496,12 @@ Avika.stats = {
                     deliveryDepartureTimeFormatted,
                     deliveryArrivalTimeFormatted,
                     deliveryTime,
+                    order.deliveryWaitTime ? Avika.utils.formatElapsedTime(order.deliveryWaitTime) : '-',
                     fechaFormateada,
                     esComboEspecial
                 ]);
             });
-            
+
             // Crear hoja de datos principales
             var ws = XLSX.utils.aoa_to_sheet(datosOrdenes);
             XLSX.utils.book_append_sheet(wb, ws, "Datos");

@@ -18,7 +18,6 @@
     --notification-bg: #2ecc71;
     --highlight-bg: #f9f9f9;
     --shadow-color: rgba(0,0,0,0.1);
-    --bg-modal: #ffffff;
     --btn-hover: #2980b9;
     
     /* Nuevas variables para tiempos */
@@ -53,7 +52,6 @@
     --notification-bg: #27ae60;
     --highlight-bg: #2a2a2a;
     --shadow-color: rgba(0,0,0,0.3);
-    --bg-modal: #2c2c2c;
     --btn-hover: #3498db;
     
     /* Colores de tiempos en modo oscuro */
@@ -61,32 +59,6 @@
     --time-good: #2980b9;
     --time-warning: #d35400;
     --time-bad: #c0392b;
-}
-
-.theme-ishinoka {
-    /* Paleta Ishinoka: Negro, Dorado, Blanco */
-    --bg-color: #1a1a1a;
-    --container-bg: #2a2a2a;
-    --text-color: #f0f0f0;
-    --header-bg: #d4af37; /* Dorado */
-    --header-text: #1a1a1a; /* Negro para contraste */
-    --primary-btn: #d4af37;
-    --primary-btn-text: #1a1a1a;
-    --success-btn: #2ecc71; /* Mantener verde para éxito */
-    --danger-btn: #e74c3c; /* Mantener rojo para peligro */
-    --border-color: #444;
-    --table-header-bg: #d4af37;
-    --table-header-text: #1a1a1a;
-    --highlight-bg: #3c3c3c;
-    --shadow-color: rgba(0,0,0,0.4);
-    --bg-modal: #2c2c2c;
-    --btn-hover: #c5b358; /* Dorado más oscuro */
-
-    /* Tiempos con la paleta Ishinoka */
-    --time-excellent: #2ecc71;
-    --time-good: #7fdbff;
-    --time-warning: #f39c12;
-    --time-bad: #e74c3c;
 }
 
 /* Estilos generales */
@@ -372,9 +344,9 @@ section {
 /* En modales, usar modal-action-btns para tener un orden específico */
 .modal-action-btns {
     display: flex;
-    justify-content: center; /* Centra los botones */
+    justify-content: flex-end;
+    margin-top: 15px;
     gap: 10px;
-    margin-top: 20px;
     position: static; /* Anular posición sticky para botones en modales */
     padding: 0;
 }
@@ -389,8 +361,8 @@ section {
 
 /* Estilos específicos para botones */
 .action-btn {
-    background-color: var(--primary-btn);
-    color: var(--primary-btn-text);
+    background-color: #6495ED;
+    color: white;
     border: none;
     padding: 10px 15px;
     border-radius: 5px;
@@ -479,17 +451,6 @@ section {
 /* Efecto hover para filas */
 .pending-orders-section tr:hover td {
     background-color: var(--highlight-bg);
-}
-
-/* Estilos para resaltar filas de pedidos en la barra */
-.table-orders tr.warning {
-    background-color: #fcf8e3 !important; /* Amarillo claro */
-    color: #8a6d3b !important;
-}
-
-.table-orders tr.warning-danger {
-    background-color: #f2dede !important; /* Rojo claro */
-    color: #a94442 !important;
 }
 
 /* Estilos específicos para la columna de Acción (última columna) */
@@ -1254,7 +1215,7 @@ h2 {
         padding: 8px 10px;
         border-radius: 6px;
         border: 1px solid #cccccc; /* Borde más visible */
-        background-color: var(--bg-modal);
+        background-color: #f8f8f8;
         color: #333333 !important; /* Texto oscuro para mejor contraste */
         font-weight: 500; /* Texto semi-negrita para mejor legibilidad */
     }
@@ -1529,17 +1490,16 @@ h2 {
 }
 
 .modal-content {
-    background-color: var(--bg-modal);
+    background-color: #f8f8f8;
     margin: 5% auto;
     padding: 20px;
-    border: 1px solid var(--border-color);
+    border: 1px solid #888;
     width: 80%;
     max-width: 600px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     max-height: 90vh;
     overflow-y: auto;
-    animation: slideDown 0.4s ease-out forwards;
 }
 
 .close-modal {
@@ -2504,19 +2464,6 @@ tr:hover td {
 }
 
 /* Mejora para encabezado de sección de búsqueda */
-#search-results-step .modal-content h2,
-.modal-content h3,
-.modal-content label {
-    color: var(--text-color);
-}
-
-.modal-content h2 {
-    margin-top: 0;
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-}
-
 #search-results-step .step-header {
     padding: 10px 0;
     border-bottom: 1px solid var(--border-color);
@@ -2910,4 +2857,58 @@ tr.ticket-para-llevar {
     .mobile-optimized-table td {
         padding: 6px;
     }
+}
+
+/* --- Estilos para el Selector de Restaurante --- */
+#restaurant-selector-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    backdrop-filter: blur(5px);
+}
+
+#restaurant-selector-modal {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+#restaurant-selector-modal h2 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 1.8em;
+    color: #333;
+}
+
+#restaurant-selector-modal .button-container {
+    display: flex;
+    gap: 25px;
+}
+
+#restaurant-selector-modal .restaurant-btn {
+    padding: 15px 35px;
+    font-size: 1.3em;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    background-color: #f0f0f0;
+    color: #333;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+}
+
+#restaurant-selector-modal .restaurant-btn:hover {
+    background-color: #007bff;
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
 }
