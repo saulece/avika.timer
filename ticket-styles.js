@@ -8,17 +8,24 @@ document.addEventListener('DOMContentLoaded', function() {
         // Recorrer todas las filas y aplicar estilos consistentes
         ticketRows.forEach(function(row) {
             // Obtener el tipo de servicio desde el atributo data
-            const serviceType = row.getAttribute('data-service-type');
-            
-            // Aplicar la clase correspondiente según el tipo de servicio
+            const serviceTypeAttr = row.getAttribute('data-service-type');
+            const serviceType = serviceTypeAttr ? serviceTypeAttr.toLowerCase() : '';
+
+            // Definir la clase a aplicar
+            let serviceClass = '';
             if (serviceType === 'comedor') {
-                row.classList.add('ticket-comedor');
+                serviceClass = 'ticket-comedor';
             } else if (serviceType === 'domicilio') {
-                row.classList.add('ticket-domicilio');
-            } else if (serviceType === 'para-llevar') {
-                row.classList.add('ticket-para-llevar');
+                serviceClass = 'ticket-domicilio';
+            } else if (serviceType === 'ordena y espera') {
+                serviceClass = 'ticket-para-llevar'; // Reutilizamos la clase para el color verde
             } else {
-                row.classList.add('ticket-otro');
+                serviceClass = 'ticket-otro';
+            }
+
+            // Aplicar la clase a la fila actual
+            if (serviceClass) {
+                row.classList.add(serviceClass);
             }
             
             // Asegurarse de que todas las filas del ticket tengan la clase ticket-row
@@ -27,15 +34,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Si hay filas hermanas (del mismo ticket), aplicar los mismos estilos
             let sibling = row.nextElementSibling;
             while (sibling && !sibling.classList.contains('ticket-first-row')) {
-                // Aplicar la misma clase de servicio
-                if (serviceType === 'comedor') {
-                    sibling.classList.add('ticket-comedor');
-                } else if (serviceType === 'domicilio') {
-                    sibling.classList.add('ticket-domicilio');
-                } else if (serviceType === 'para-llevar') {
-                    sibling.classList.add('ticket-para-llevar');
-                } else {
-                    sibling.classList.add('ticket-otro');
+                // Aplicar la misma clase de servicio que la fila principal
+                if (serviceClass) {
+                    sibling.classList.add(serviceClass);
                 }
                 
                 // Asegurarse de que todas las filas del ticket tengan la clase ticket-row

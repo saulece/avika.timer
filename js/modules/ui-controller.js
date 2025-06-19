@@ -1312,14 +1312,16 @@ Avika.ui = {
         row.appendChild(actionCell);
         return row;
     },
+
     createOrderRow: function(order) {
         var row = document.createElement('tr');
+        row.setAttribute('data-service-type', order.serviceType);
         var isMobile = window.innerWidth <= 768;
         
         // Celda del platillo
         var dishCell = document.createElement('td');
         dishCell.className = 'dish-cell';
-        
+
         // Nombre del platillo con mejor formato
         var dishNameDiv = document.createElement('div');
         dishNameDiv.className = 'dish-name';
