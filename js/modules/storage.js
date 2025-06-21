@@ -27,11 +27,14 @@ guardarDatosLocales: function() {
                 for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
                     var order = Avika.data.pendingOrders[i];
                     if (!order || !order.id || !order.dish) {
-                        console.warn("Detectada orden inválida en pendingOrders:", order);
                         hasInvalidData = true;
                         // Reparar datos inválidos
                         Avika.data.pendingOrders = Avika.data.pendingOrders.filter(function(o) {
-                            return o && o.id && o.dish;
+                            const isValid = o && o.id && o.dish;
+                            if (!isValid) {
+                                console.warn('Orden pendiente inválida detectada y eliminada:', JSON.stringify(o));
+                            }
+                            return isValid;
                         });
                         break;
                     }
@@ -46,7 +49,6 @@ guardarDatosLocales: function() {
                 for (var i = 0; i < Avika.data.deliveryOrders.length; i++) {
                     var order = Avika.data.deliveryOrders[i];
                     if (!order || !order.id || !order.dish) {
-                        console.warn("Detectada orden inválida en deliveryOrders:", order);
                         hasInvalidData = true;
                         // Reparar datos inválidos
                         Avika.data.deliveryOrders = Avika.data.deliveryOrders.filter(function(o) {
@@ -65,11 +67,14 @@ guardarDatosLocales: function() {
                 for (var i = 0; i < Avika.data.completedOrders.length; i++) {
                     var order = Avika.data.completedOrders[i];
                     if (!order || !order.id || !order.dish) {
-                        console.warn("Detectada orden inválida en completedOrders:", order);
                         hasInvalidData = true;
                         // Reparar datos inválidos
                         Avika.data.completedOrders = Avika.data.completedOrders.filter(function(o) {
-                            return o && o.id && o.dish;
+                            const isValid = o && o.id && o.dish;
+                            if (!isValid) {
+                                console.warn('Orden completada inválida detectada y eliminada:', JSON.stringify(o));
+                            }
+                            return isValid;
                         });
                         break;
                     }
@@ -224,121 +229,57 @@ cargarDatosGuardados: function() {
     verificarIntegridad: function() {
         console.log("Verificando integridad de datos...");
         try {
-            // Asegurar que Avika.data existe
             if (!Avika.data) {
-                Avika.data = {};
-                console.warn('Avika.data no existe, inicializando objeto vacío');
+                Avika.data = { pendingOrders: [], deliveryOrders: [], completedOrders: [] };
+                return false;
             }
-            
+
             var reparaciones = 0;
-            
-            // Verificar órdenes pendientes
-            if (Avika.data.pendingOrders && Array.isArray(Avika.data.pendingOrders)) {
-                var indicesInvalidos = [];
-                
-                // Detectar entradas inválidas
-                for (var i = 0; i < Avika.data.pendingOrders.length; i++) {
-                    var orden = Avika.data.pendingOrders[i];
-                    
-                    // Verificar campos obligatorios
-                    if (!orden || !orden.id || !orden.dish || !orden.startTime) {
-                        indicesInvalidos.push(i);
-                        continue;
-                    }
-                    
-                    // Reparar timestamps si son inválidos
-                    if (orden.startTime && isNaN(new Date(orden.startTime).getTime())) {
-                        orden.startTime = new Date().toISOString();
-                        orden.startTimeFormatted = this.formatTime(new Date());
-                        reparaciones++;
-                    }
-                    
-                    // Verificar campos específicos para combos especiales
-                    if (orden.isSpecialCombo === true) {
-                        if (orden.hotKitchenFinished === undefined) {
-                            orden.hotKitchenFinished = false;
-                            reparaciones++;
-                        }
-                        if (orden.coldKitchenFinished === undefined) {
-                            orden.coldKitchenFinished = false;
-                            reparaciones++;
-                        }
-                    }
-                    
-                    // Verificar campos de servicio
-                    if (!orden.serviceType) {
-                        orden.serviceType = 'comedor'; // Valor predeterminado
-                        reparaciones++;
-                    }
+            var hasInvalidData = false;
+
+            // --- Función auxiliar para filtrar listas de forma segura ---
+            const filterList = (list) => {
+                if (!list || !Array.isArray(list)) {
+                    hasInvalidData = true;
+                    return []; // Devuelve un array vacío si no es válido
                 }
                 
-                // Eliminar entradas inválidas (de atrás hacia adelante)
-                for (var j = indicesInvalidos.length - 1; j >= 0; j--) {
-                    Avika.data.pendingOrders.splice(indicesInvalidos[j], 1);
-                    reparaciones++;
+                const originalCount = list.length;
+                // Una orden es válida si es un objeto con al menos un 'id' y un 'dish'
+                const filteredList = list.filter(order => order && order.id && order.dish);
+                const newCount = filteredList.length;
+
+                if (originalCount > newCount) {
+                    reparaciones += (originalCount - newCount);
+                    hasInvalidData = true;
                 }
-            } else {
-                // Si no existe o no es un array, inicializarlo
-                Avika.data.pendingOrders = [];
-                reparaciones++;
-            }
-            
-            // Verificar órdenes completadas (similar a pendientes)
-            if (Avika.data.completedOrders && Array.isArray(Avika.data.completedOrders)) {
-                var indicesInvalidos = [];
-                
-                for (var i = 0; i < Avika.data.completedOrders.length; i++) {
-                    var orden = Avika.data.completedOrders[i];
-                    
-                    if (!orden || !orden.id || !orden.dish || !orden.startTime || !orden.finishTime) {
-                        indicesInvalidos.push(i);
-                        continue;
-                    }
-                    
-                    // Reparar campos específicos
-                    if (!orden.prepTime) {
-                        var tiempoMillis = new Date(orden.finishTime) - new Date(orden.startTime);
-                        var tiempoSecs = Math.floor(tiempoMillis / 1000);
-                        var mins = Math.floor(tiempoSecs / 60);
-                        var secs = tiempoSecs % 60;
-                        
-                        // Usar la implementación centralizada de padZero
-                        var padZero = Avika.utils && typeof Avika.utils.padZero === 'function' ? 
-                                  Avika.utils.padZero : 
-                                  function(num) { return (num < 10 ? '0' : '') + num; };
-                        
-                        orden.prepTime = padZero(mins) + ':' + padZero(secs) + ' minutos';
-                        reparaciones++;
-                    }
-                }
-                
-                // Eliminar entradas inválidas
-                for (var j = indicesInvalidos.length - 1; j >= 0; j--) {
-                    Avika.data.completedOrders.splice(indicesInvalidos[j], 1);
-                    reparaciones++;
-                }
-            } else {
-                Avika.data.completedOrders = [];
-                reparaciones++;
-            }
-            
-            // Guardar datos reparados
-            if (reparaciones > 0) {
-                this.guardarDatosLocales();
+                return filteredList;
+            };
+
+            // --- Verificar y reparar cada lista usando la función auxiliar ---
+            Avika.data.pendingOrders = filterList(Avika.data.pendingOrders);
+            // La lista de deliveryOrders también debe ser verificada
+            Avika.data.deliveryOrders = filterList(Avika.data.deliveryOrders);
+            Avika.data.completedOrders = filterList(Avika.data.completedOrders);
+
+            // --- Guardar y reportar si se hicieron cambios ---
+            if (hasInvalidData) {
                 console.log("Se realizaron " + reparaciones + " reparaciones en los datos.");
+                this.guardarDatosLocales(); // Guardar los datos solo si se repararon
                 return true;
             }
-            
+
             console.log("Verificación completada. No se encontraron inconsistencias.");
             return false;
-            
+
         } catch (e) {
-            console.error("Error al verificar integridad:", e);
-            // En caso de error grave, reiniciar datos
+            console.error("Error grave al verificar integridad:", e);
+            // En caso de error catastrófico, reiniciar datos para evitar bucles de error
             Avika.data.pendingOrders = [];
+            Avika.data.deliveryOrders = [];
             Avika.data.completedOrders = [];
             this.guardarDatosLocales();
-            return true;
+            return true; // Indica que se "reparó" reiniciando
         }
     },
 

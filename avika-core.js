@@ -9,7 +9,8 @@ window.Avika = Object.assign({
     config: {}, // Objeto vacío para configuración
     
     // Inicialización de estructuras de datos principales
-    data: {
+    // Inicialización de la estructura de datos, preservando los datos existentes si los hay
+    data: (window.Avika && window.Avika.data) ? window.Avika.data : {
         pendingOrders: [],
         deliveryOrders: [],
         completedOrders: []

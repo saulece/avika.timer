@@ -1,4 +1,4 @@
-// orders.js - Implementación de funciones para manejo de órdenes
+    // orders.js - Implementación de funciones para manejo de órdenes
 window.Avika = window.Avika || {};
 
 
@@ -615,20 +615,54 @@ Avika.orders = {
             if (serviceType === 'comedor' || serviceType === 'para-llevar') {
                 console.log("Ticket de comedor u ordena y espera listo, moviendo a completados");
                 
-                // Mover todos los items a la sección de completados
+                // Crear un único objeto de ticket para mover a completados
+                var ticketItems = [];
+                var ticketNotes = [];
+
+                // Recopilar copias limpias de los items del ticket y sus notas
+                for (var i = itemsToMove.length - 1; i >= 0; i--) {
+                    var itemIndex = itemsToMove[i];
+                    var originalItem = Avika.data.pendingOrders[itemIndex];
+                    
+                    // Crear una copia limpia para evitar referencias circulares
+                    var cleanItem = {
+                        id: originalItem.id,
+                        dish: originalItem.dish,
+                        quantity: originalItem.quantity,
+                        notes: originalItem.notes,
+                        startTime: originalItem.startTime,
+                        endTime: originalItem.endTime,
+                        customizations: originalItem.customizations,
+                        category: originalItem.category,
+                        serviceType: originalItem.serviceType
+                    };
+
+                    ticketItems.push(cleanItem);
+                    if(originalItem.notes) ticketNotes.push(originalItem.notes);
+                }
+
+                // Crear el objeto de ticket unificado
+                var completedTicket = {
+                    id: order.ticketId, // Usar el ID del ticket
+                    dish: 'Ticket #' + order.ticketId, // Nombre representativo
+                    serviceType: order.serviceType,
+                    startTime: ticketItems[ticketItems.length - 1].startTime, // El del primer item
+                    endTime: new Date(),
+                    notes: ticketNotes.join('; '),
+                    items: ticketItems, // Anidar los platillos
+                    isTicket: true // Marcar como un ticket
+                };
+
+                // Añadir el ticket unificado a completados
                 if (!Avika.data.completedOrders) {
                     Avika.data.completedOrders = [];
                 }
-                
-                // Procesar los items en orden inverso para evitar problemas con los índices
-                for (var i = itemsToMove.length - 1; i >= 0; i--) {
-                    var itemIndex = itemsToMove[i];
-                    var item = Avika.data.pendingOrders[itemIndex];
-                    
-                    // Mover a completados
-                    Avika.data.completedOrders.unshift(item);
-                    Avika.data.pendingOrders.splice(itemIndex, 1);
-                }
+                Avika.data.completedOrders.unshift(completedTicket);
+
+                // Ahora, eliminar los items originales de pendingOrders
+                // Se hace en un bucle separado para mayor seguridad con los índices
+                var idsToRemove = new Set(ticketItems.map(item => item.id));
+                Avika.data.pendingOrders = Avika.data.pendingOrders.filter(item => !idsToRemove.has(item.id));
                 
                 // Actualizar la tabla de completados
                 if (Avika.ui && typeof Avika.ui.updateCompletedTable === 'function') {

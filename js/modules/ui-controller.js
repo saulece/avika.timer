@@ -467,6 +467,18 @@ Avika.ui = {
         document.getElementById('quantity-display').textContent = Avika.data.currentQuantity;
     },
     // MODIFICADO: Actualizar tabla de órdenes completadas para mostrar detalles correctamente en móviles
+    updateAllTables: function() {
+        if (typeof this.updatePendingTable === 'function') {
+            this.updatePendingTable();
+        }
+        if (typeof this.updateDeliveryTable === 'function') {
+            this.updateDeliveryTable();
+        }
+        if (typeof this.updateCompletedTable === 'function') {
+            this.updateCompletedTable();
+        }
+    },
+
     updateCompletedTable: function(showAll) {
         var completedBody = document.getElementById('completed-body');
         completedBody.innerHTML = '';
